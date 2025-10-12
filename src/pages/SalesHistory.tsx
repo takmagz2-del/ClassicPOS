@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay, endOfDay, isWithinInterval } from "date-fns"; // Import isWithinInterval
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Sale, SaleItem } from "@/types/sale";
@@ -56,22 +56,23 @@ const SalesHistory = () => {
     }
 
     // 2. Filter by date range
-    if (dateRange.from) {
+    if (dateRange.from && dateRange.to) {
       filteredSales = filteredSales.filter((sale) => {
         const saleDate = new Date(sale.date);
-        saleDate.setHours(0, 0, 0, 0); // Normalize to start of day
-        const fromDate = new Date(dateRange.from!);
-        fromDate.setHours(0, 0, 0, 0);
-        return saleDate >= fromDate;
+        return isWithinInterval(saleDate, {
+          start: startOfDay(dateRange.from!),
+          end: endOfDay(dateRange.to!),
+        });
       });
-    }
-    if (dateRange.to) {
+    } else if (dateRange.from) {
       filteredSales = filteredSales.filter((sale) => {
         const saleDate = new Date(sale.date);
-        saleDate.setHours(0, 0, 0, 0); // Normalize to start of day
-        const toDate = new Date(dateRange.to!);
-        toDate.setHours(0, 0, 0, 0);
-        return saleDate <= toDate;
+        return saleDate >= startOfDay(dateRange.from!);
+      });
+    } else if (dateRange.to) {
+      filteredSales = filteredSales.filter((sale) => {
+        const saleDate = new Date(sale.date);
+        return saleDate <= endOfDay(dateRange.to!);
       });
     }
 
