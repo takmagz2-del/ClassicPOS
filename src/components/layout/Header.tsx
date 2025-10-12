@@ -31,18 +31,21 @@ const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
 
   useEffect(() => {
-    // Calculate Total Revenue
-    const revenue = salesHistory.reduce((sum, sale) => sum + sale.total, 0);
+    // Calculate Total Revenue (subtract refunds)
+    const revenue = salesHistory.reduce((sum, sale) => {
+      // Refunds have negative total, so just add them to sum
+      return sum + sale.total;
+    }, 0);
     setTotalRevenue(revenue);
 
-    // Calculate Sales Today
+    // Calculate Sales Today (subtract refunds)
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day
     const salesForToday = salesHistory.filter(sale => {
       const saleDate = new Date(sale.date);
       saleDate.setHours(0, 0, 0, 0);
       return saleDate.getTime() === today.getTime();
-    }).reduce((sum, sale) => sum + sale.total, 0);
+    }).reduce((sum, sale) => sum + sale.total, 0); // Refunds have negative total
     setSalesToday(salesForToday);
 
     // Calculate Products in Stock
