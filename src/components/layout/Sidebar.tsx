@@ -15,9 +15,9 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
   const navItems = [
     { to: "/", icon: Home, label: "Dashboard" },
-    { to: "/products", icon: Boxes, label: "Products" },
+    { to: "/products", icon: Boxes, label: "Products" }, // Added Products link
+    { to: "/customers", icon: Users, label: "Customers" }, // Added Customers link
     { to: "/sales", icon: ShoppingCart, label: "Sales" },
-    { to: "/customers", icon: Users, label: "Customers" },
     { to: "/stores", icon: Store, label: "Multi-Store" },
     { to: "/accounting", icon: DollarSign, label: "Accounting" },
     { to: "/reports", icon: LineChart, label: "Reports" },
