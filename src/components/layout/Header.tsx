@@ -4,9 +4,10 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Package2 } from "lucide-react"; // Added Package2 for mobile branding
+import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
 
 const Header = () => {
   const isMobile = useIsMobile();
@@ -19,30 +20,10 @@ const Header = () => {
     }
   };
 
-  // Function to get page title based on path
+  // Function to get page title based on path from routesConfig
   const getPageTitle = (pathname: string) => {
-    switch (pathname) {
-      case "/":
-        return "Dashboard";
-      case "/products":
-        return "Products";
-      case "/customers":
-        return "Customers";
-      case "/sales":
-        return "Sales Terminal";
-      case "/sales-history":
-        return "Sales History";
-      case "/stores":
-        return "Multi-Store";
-      case "/accounting":
-        return "Accounting";
-      case "/reports":
-        return "Reports";
-      case "/settings":
-        return "Settings";
-      default:
-        return "ClassicPOS";
-    }
+    const route = routesConfig.find(r => r.path === pathname);
+    return route ? route.title : "ClassicPOS"; // Default title if route not found
   };
 
   return (
@@ -56,7 +37,6 @@ const Header = () => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="sm:max-w-xs p-0">
-            {/* Sidebar is rendered here without its own branding */}
             <Sidebar onLinkClick={handleLinkClick} />
           </SheetContent>
         </Sheet>

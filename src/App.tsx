@@ -1,7 +1,6 @@
 "use client";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-// Removed Toaster import as it's now in main.tsx
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { SaleProvider } from "@/context/SaleContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -15,32 +14,40 @@ import SalesHistory from "@/pages/SalesHistory";
 import Stores from "@/pages/Stores";
 import Accounting from "@/pages/Accounting";
 import Index from "@/pages/Index";
+import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
 
 function App() {
   return (
     <BrowserRouter>
-      {/* Toaster is now rendered in main.tsx */}
       <AuthProvider>
         <SaleProvider>
           <Routes>
+            {/* Public route for login */}
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  {/* MainLayout is now rendered inside ProtectedRoute */}
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Index />} />
-              <Route path="products" element={<Products />} />
-              <Route path="customers" element={<Customers />} />
-              <Route path="sales" element={<Sales />} />
-              <Route path="sales-history" element={<SalesHistory />} />
-              <Route path="stores" element={<Stores />} />
-              <Route path="accounting" element={<Accounting />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="settings" element={<Settings />} />
+
+            {/* Protected routes */}
+            <Route path="/" element={<ProtectedRoute />}>
+              {/* Dynamically render routes from config */}
+              {routesConfig.map((route) => {
+                // Special handling for the index route
+                if (route.path === "/") {
+                  return <Route key={route.path} index element={<Index />} />;
+                }
+                // Map other routes to their respective components
+                let element;
+                switch (route.path) {
+                  case "/products": element = <Products />; break;
+                  case "/customers": element = <Customers />; break;
+                  case "/sales": element = <Sales />; break;
+                  case "/sales-history": element = <SalesHistory />; break;
+                  case "/stores": element = <Stores />; break;
+                  case "/accounting": element = <Accounting />; break;
+                  case "/reports": element = <Reports />; break;
+                  case "/settings": element = <Settings />; break;
+                  default: element = null;
+                }
+                return element ? <Route key={route.path} path={route.path.substring(1)} element={element} /> : null;
+              })}
             </Route>
           </Routes>
         </SaleProvider>
