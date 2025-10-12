@@ -7,7 +7,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
-import Customers from "./pages/Customers"; // Import the new Customers page
+import Customers from "./pages/Customers";
+import Sales from "./pages/Sales"; // Import the new Sales page
 import { AuthProvider, useAuth } from "./components/auth/AuthContext";
 import { ReactNode } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -53,6 +54,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Customers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales"
+              element={
+                <ProtectedRoute>
+                  <Sales />
                 </ProtectedRoute>
               }
             />
