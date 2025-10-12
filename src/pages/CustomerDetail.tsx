@@ -6,7 +6,7 @@ import { useCustomers } from "@/context/CustomerContext";
 import { useSales } from "@/context/SaleContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2, Mail, Phone, Home, Award } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Mail, Phone, Home, Award, DollarSign, ShoppingCart, BarChart } from "lucide-react";
 import SalesTable from "@/components/sales/SalesTable";
 import { Sale } from "@/types/sale";
 import { Customer } from "@/types/customer";
@@ -45,6 +45,24 @@ const CustomerDetail = () => {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [salesHistory, id]
   );
+
+  const customerStats = useMemo(() => {
+    const sales = customerSalesHistory.filter(s => s.type === 'sale');
+    const refunds = customerSalesHistory.filter(s => s.type === 'refund');
+
+    const totalSpending = sales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalRefunded = refunds.reduce((sum, refund) => sum + Math.abs(refund.total), 0);
+    
+    const netSpending = totalSpending - totalRefunded;
+    const totalOrders = sales.length;
+    const averageOrderValue = totalOrders > 0 ? netSpending / totalOrders : 0;
+
+    return {
+      netSpending,
+      totalOrders,
+      averageOrderValue,
+    };
+  }, [customerSalesHistory]);
 
   if (!customer) {
     return (
@@ -156,6 +174,39 @@ const CustomerDetail = () => {
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Spending</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(customerStats.netSpending, currentCurrency)}</div>
+            <p className="text-xs text-muted-foreground">Net spending after refunds</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{customerStats.totalOrders}</div>
+            <p className="text-xs text-muted-foreground">Total number of purchases</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Order Value</CardTitle>
+            <BarChart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(customerStats.averageOrderValue, currentCurrency)}</div>
+            <p className="text-xs text-muted-foreground">Average net spending per order</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>
