@@ -24,10 +24,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 import { useProducts } from "@/context/ProductContext"; // New import for products
+import { useCategories } from "@/context/CategoryContext"; // New import for categories
 
 const Reports = () => {
   const { salesHistory } = useSales();
   const { products } = useProducts(); // Use products context
+  const { getCategoryName } = useCategories(); // Use getCategoryName from categories context
   const { currentCurrency } = useCurrency();
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
@@ -96,7 +98,7 @@ const Reports = () => {
         const productDetails = products.find(p => p.id === item.productId);
         if (productDetails) {
           // Category sales
-          const category = productDetails.category || "Uncategorized";
+          const category = getCategoryName(productDetails.categoryId) || "Uncategorized"; // Use getCategoryName
           categorySalesMap.set(category, (categorySalesMap.get(category) || 0) + (item.price * item.quantity));
 
           // Product sales count
@@ -121,7 +123,7 @@ const Reports = () => {
       productCategorySales,
       topSellingProducts,
     };
-  }, [salesHistory, dateRange, typeFilter, products]); // Added products to dependencies
+  }, [salesHistory, dateRange, typeFilter, products, getCategoryName]); // Added getCategoryName to dependencies
 
   return (
     <div className="flex flex-col gap-4">

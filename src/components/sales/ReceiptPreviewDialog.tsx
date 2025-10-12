@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { useProducts } from "@/context/ProductContext";
 import { sendPrintJobToBackend } from "@/services/printService";
 import { usePrinterSettings } from "@/context/PrinterSettingsContext";
+import { useCategories } from "@/context/CategoryContext"; // New import
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   const { receiptSettings } = useReceiptSettings();
   const { printerSettings } = usePrinterSettings();
   const { products } = useProducts();
+  const { getCategoryName } = useCategories(); // Use getCategoryName
 
   const handlePrint = async () => {
     await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
@@ -111,8 +113,8 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
                 {receiptSettings.showSku && product?.sku && (
                   <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2 block">SKU: {product.sku}</span>
                 )}
-                {receiptSettings.showCategory && product?.category && (
-                  <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2 block">Category: {product.category}</span>
+                {receiptSettings.showCategory && product?.categoryId && (
+                  <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2 block">Category: {getCategoryName(product.categoryId)}</span>
                 )}
               </React.Fragment>
             );

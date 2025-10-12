@@ -62,7 +62,7 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
     const newProduct: Product = {
       id: crypto.randomUUID(), // Generate a unique ID
       ...values,
-    };
+    } as Product; // Explicitly cast to Product
     onProductAdd(newProduct);
     toast.success("Product added successfully!");
     onClose();

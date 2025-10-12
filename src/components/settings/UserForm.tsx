@@ -59,7 +59,8 @@ const UserForm = ({ initialUser, onUserSubmit, onClose }: UserFormProps) => {
   }, [initialUser, form]);
 
   const onSubmit = async (values: UserFormValues) => {
-    const success = await onUserSubmit(values);
+    // Explicitly cast values to the expected type for onUserSubmit
+    const success = await onUserSubmit(values as { email: string; password?: string; role: UserRole });
     if (success) {
       onClose();
       form.reset();
