@@ -67,7 +67,7 @@ const Reports = () => {
         return transactionDate >= startOfDay(dateRange.from!);
       });
     } else if (dateRange.to) {
-      filteredTransactions = filteredTransactions.filter((transaction) => {
+      filteredTransactions = salesHistory.filter((transaction) => {
         const transactionDate = new Date(transaction.date);
         return transactionDate <= endOfDay(dateRange.to!);
       });
