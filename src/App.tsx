@@ -30,8 +30,8 @@ function App() {
                 <ReceiptSettingsProvider>
                   <Toaster richColors position="top-right" />
                   <Routes>
-                    <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
-                    <Route path="/signup" element={SignupComponent ? <SignupComponent /> : null} />
+                    <Route path="/login" element={LoginComponent && <LoginComponent />} />
+                    <Route path="/signup" element={SignupComponent && <SignupComponent />} />
 
                     <Route path="/" element={<ProtectedRoute />}>
                       {routesConfig.map((route) => {
@@ -42,7 +42,7 @@ function App() {
                         return (
                           <Route
                             key={route.path}
-                            path={route.path === "/" ? undefined : route.path.substring(1)} // Use substring(1) for relative paths, undefined for index
+                            path={route.path === "/" ? "" : route.path.substring(1)} // Use "" for index route, substring(1) for relative paths
                             index={route.path === "/"} // Mark the root path as the index route
                             element={<Component />}
                           />
