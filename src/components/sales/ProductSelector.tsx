@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Plus } from "lucide-react"; // Import Plus icon
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // New import
-import { useCategories } from "@/context/CategoryContext"; // New import
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories } from "@/context/CategoryContext";
+import { toast } from "sonner"; // Import toast for feedback
 
 interface ProductSelectorProps {
   products: Product[];
@@ -19,10 +20,10 @@ interface ProductSelectorProps {
 
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("all"); // New state for category filter
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("all");
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
   const { currentCurrency } = useCurrency();
-  const { categories, getCategoryName } = useCategories(); // Use categories context
+  const { categories, getCategoryName } = useCategories();
 
   const filteredProducts = products.filter((product) => {
     const matchesSearchTerm =
@@ -43,17 +44,17 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     }));
   };
 
-  const handleAddToCart = (product: Product) => {
-    const quantity = quantities[product.id] || 1;
-    if (quantity > 0 && quantity <= product.stock) {
-      onAddProductToCart(product, quantity);
-      setQuantities((prev) => ({ ...prev, [product.id]: 1 })); // Reset quantity after adding
-    } else if (quantity === 0) {
-      // Optionally show a toast for 0 quantity
-      // toast.error("Quantity must be greater than 0.");
-    } else {
-      // toast.error(`Not enough stock for ${product.name}. Available: ${product.stock}`);
+  const handleAddToCart = (product: Product, quantityToAdd: number) => {
+    if (quantityToAdd <= 0) {
+      toast.error("Quantity must be greater than 0.");
+      return;
     }
+    if (quantityToAdd > product.stock) {
+      toast.error(`Not enough stock for ${product.name}. Available: ${product.stock}`);
+      return;
+    }
+    onAddProductToCart(product, quantityToAdd);
+    setQuantities((prev) => ({ ...prev, [product.id]: 1 })); // Reset quantity after adding
   };
 
   return (
@@ -103,10 +104,20 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                     />
                     <Button
                       size="sm"
-                      onClick={() => handleAddToCart(product)}
+                      onClick={() => handleAddToCart(product, quantities[product.id] || 1)}
                       disabled={!product.stock || (quantities[product.id] || 1) > product.stock || (quantities[product.id] || 1) <= 0}
                     >
                       <PlusCircle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleAddToCart(product, 1)} // Quick add 1 item
+                      disabled={!product.stock || product.stock < 1}
+                      className="shrink-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="sr-only">Quick Add 1</span>
                     </Button>
                   </div>
                 </div>
