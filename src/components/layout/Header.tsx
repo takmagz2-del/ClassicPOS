@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "@/components/layout/Sidebar";
 import CurrencySelector from "@/components/common/CurrencySelector";
 import UserNav from "@/components/layout/UserNav";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const Header = () => {
   const pageTitle = usePageTitle();
@@ -34,6 +35,7 @@ const Header = () => {
       <h1 className="text-xl font-semibold">{pageTitle}</h1>
       <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <CurrencySelector />
+        <ThemeToggle />
         <UserNav />
       </div>
     </header>

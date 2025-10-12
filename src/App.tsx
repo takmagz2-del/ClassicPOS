@@ -17,6 +17,7 @@ import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
 import GlobalLoader from "@/components/common/GlobalLoader";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 function App() {
   const LoginRoute = routesConfig.find(r => r.path === "/login");
@@ -27,54 +28,56 @@ function App() {
 
   return (
     <BrowserRouter>
-      <LoadingProvider>
-        <AuthProvider>
-          <CategoryProvider>
-            <ProductProvider>
-              <CustomerProvider>
-                <SaleProvider>
-                  <CurrencyProvider>
-                    <ReceiptSettingsProvider>
-                      <PrinterSettingsProvider>
-                        <TaxProvider>
-                          <PaymentMethodProvider>
-                            <Toaster richColors position="top-right" />
-                            <GlobalLoader />
-                            <Routes>
-                              <Route path="/login" element={LoginComponent && <LoginComponent />} />
-                              <Route path="/signup" element={SignupComponent && <SignupComponent />} />
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <LoadingProvider>
+          <AuthProvider>
+            <CategoryProvider>
+              <ProductProvider>
+                <CustomerProvider>
+                  <SaleProvider>
+                    <CurrencyProvider>
+                      <ReceiptSettingsProvider>
+                        <PrinterSettingsProvider>
+                          <TaxProvider>
+                            <PaymentMethodProvider>
+                              <Toaster richColors position="top-right" />
+                              <GlobalLoader />
+                              <Routes>
+                                <Route path="/login" element={LoginComponent && <LoginComponent />} />
+                                <Route path="/signup" element={SignupComponent && <SignupComponent />} />
 
-                              <Route path="/" element={<ProtectedRoute />}>
-                                {routesConfig.map((route) => {
-                                  if (route.path === "/login" || route.path === "/signup") {
-                                    return null;
-                                  }
-                                  const Component = route.component;
-                                  // Adjust path for parameterized routes
-                                  const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
-                                  return (
-                                    <Route
-                                      key={route.path}
-                                      path={path}
-                                      index={route.path === "/"}
-                                      element={<Component />}
-                                    />
-                                  );
-                                })}
-                              </Route>
-                              <Route path="*" element={<NotFound />} />
-                            </Routes>
-                          </PaymentMethodProvider>
-                        </TaxProvider>
-                      </PrinterSettingsProvider>
-                    </ReceiptSettingsProvider>
-                  </CurrencyProvider>
-                </SaleProvider>
-              </CustomerProvider>
-            </ProductProvider>
-          </CategoryProvider>
-        </AuthProvider>
-      </LoadingProvider>
+                                <Route path="/" element={<ProtectedRoute />}>
+                                  {routesConfig.map((route) => {
+                                    if (route.path === "/login" || route.path === "/signup") {
+                                      return null;
+                                    }
+                                    const Component = route.component;
+                                    // Adjust path for parameterized routes
+                                    const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
+                                    return (
+                                      <Route
+                                        key={route.path}
+                                        path={path}
+                                        index={route.path === "/"}
+                                        element={<Component />}
+                                      />
+                                    );
+                                  })}
+                                </Route>
+                                <Route path="*" element={<NotFound />} />
+                              </Routes>
+                            </PaymentMethodProvider>
+                          </TaxProvider>
+                        </PrinterSettingsProvider>
+                      </ReceiptSettingsProvider>
+                    </CurrencyProvider>
+                  </SaleProvider>
+                </CustomerProvider>
+              </ProductProvider>
+            </CategoryProvider>
+          </AuthProvider>
+        </LoadingProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
