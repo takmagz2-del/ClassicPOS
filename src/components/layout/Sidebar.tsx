@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History } from "lucide-react";
-import BrandLogo from "@/components/layout/BrandLogo"; // Import BrandLogo
+import BrandLogo from "@/components/layout/BrandLogo";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean;
@@ -15,7 +15,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
   const navItems = [
-    { to: "/", icon: Home, label: "Dashboard" },
+    { to: "/", icon: Home, label: "Dashboard" }, // Changed to "/"
     { to: "/products", icon: Boxes, label: "Products" },
     { to: "/customers", icon: Users, label: "Customers" },
     { to: "/sales", icon: ShoppingCart, label: "Sales Terminal" },

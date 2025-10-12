@@ -6,11 +6,12 @@ import { SaleProvider } from "@/context/SaleContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
-import { ReceiptSettingsProvider } from "@/context/ReceiptSettingsContext"; // New import
+import { ReceiptSettingsProvider } from "@/context/ReceiptSettingsContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
+import Dashboard from "@/pages/Dashboard"; // Explicitly import Dashboard
 
 function App() {
   const LoginRoute = routesConfig.find(r => r.path === "/login");
@@ -26,7 +27,7 @@ function App() {
           <CustomerProvider>
             <SaleProvider>
               <CurrencyProvider>
-                <ReceiptSettingsProvider> {/* Wrap with ReceiptSettingsProvider */}
+                <ReceiptSettingsProvider>
                   <Toaster richColors position="top-right" />
                   <Routes>
                     <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
@@ -39,7 +40,7 @@ function App() {
                           return (
                             <Route
                               key={route.path}
-                              path={route.path === "/" ? undefined : route.path.replace(/^\//, '')}
+                              path={route.path === "/" ? undefined : route.path.replace(/^\//, '')} // Handle root path as index
                               index={route.path === "/"}
                               element={<Component />}
                             />

@@ -11,13 +11,12 @@ import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
-import Index from "@/pages/Index";
 
 export const routesConfig = [
-  { path: "/", title: "Dashboard", component: Index },
+  { path: "/", title: "Dashboard", component: Dashboard }, // Dashboard is now the root
   { path: "/products", title: "Products", component: Products },
   { path: "/customers", title: "Customers", component: Customers },
-  { path: "/sales", title: "New Sale", component: Sales }, // Renamed title
+  { path: "/sales", title: "New Sale", component: Sales },
   { path: "/sales-history", title: "Sales History", component: SalesHistory },
   { path: "/stores", title: "Multi-Store", component: Stores },
   { path: "/accounting", title: "Accounting", component: Accounting },
