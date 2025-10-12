@@ -1,26 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom"; // Corrected import statement
-import { useAuth } from "@/components/auth/AuthContext";
-import { useSales } from "@/context/SaleContext";
-import { useProducts } from "@/context/ProductContext";
-import { useCustomers } from "@/context/CustomerContext";
-import { useCurrency } from "@/context/CurrencyContext";
-import { formatCurrency } from "@/lib/utils";
+// Removed useAuth, useSales, useProducts, useCustomers, useCurrency as they are no longer used in Header
+// Removed formatCurrency as it is no longer used in Header
 import { usePageTitle } from "@/hooks/use-page-title"; // Import usePageTitle
-import { DollarSign, TrendingUp, Users, Boxes, Menu } from "lucide-react";
+import { Menu } from "lucide-react"; // Removed DollarSign, TrendingUp, Users, Boxes as they are no longer used in Header
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Removed Card, CardContent, CardHeader, CardTitle as they are no longer used in Header
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "@/components/layout/Sidebar";
 import CurrencySelector from "@/components/common/CurrencySelector";
 import UserNav from "@/components/layout/UserNav"; // Import UserNav
 
 const Header = () => {
-  // Removed salesHistory, products, customers, totalRevenue, salesToday, productsInStock, activeCustomersCount states and their useEffect.
-  // These metrics are now handled and displayed exclusively on the Dashboard page.
-
   const pageTitle = usePageTitle(); // Use the hook to get the current page title
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
 
@@ -50,4 +43,4 @@ const Header = () => {
   );
 };
 
-export default Header; // Corrected default export
+export default Header;
