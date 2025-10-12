@@ -1,7 +1,7 @@
 "use client";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/sonner";
+// Removed Toaster import as it's now in main.tsx
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { SaleProvider } from "@/context/SaleContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -14,12 +14,12 @@ import Settings from "@/pages/Settings";
 import SalesHistory from "@/pages/SalesHistory";
 import Stores from "@/pages/Stores";
 import Accounting from "@/pages/Accounting";
-import Index from "@/pages/Index"; // Import the new Index page
+import Index from "@/pages/Index";
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster richColors position="top-right" />
+      {/* Toaster is now rendered in main.tsx */}
       <AuthProvider>
         <SaleProvider>
           <Routes>
@@ -32,7 +32,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Index />} /> {/* Route to Index component */}
+              <Route index element={<Index />} />
               <Route path="products" element={<Products />} />
               <Route path="customers" element={<Customers />} />
               <Route path="sales" element={<Sales />} />
