@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TOTP, Secret } from "otpauth";
 import { User, UserRole } from "@/types/user";
+import { useLoading } from "@/context/LoadingContext"; // New import
 
 interface LoginResult {
   success: boolean;
@@ -24,7 +25,7 @@ interface AuthContextType {
   disableMfa: () => Promise<boolean>;
   users: User[];
   addUser: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  updateUser: (updatedUser: User & { password?: string }) => Promise<boolean>; // Updated type to include optional password
+  updateUser: (updatedUser: User & { password?: string }) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+  const { startLoading, stopLoading } = useLoading(); // Use loading context
 
   const [mockUsers, setMockUsers] = useState<{ [key: string]: User & { password: string; tempMfaSecret?: string; tempBackupCodes?: string[] } }>({
     "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN },
@@ -61,11 +63,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [mockUsers]);
 
   const login = async (email: string, password: string, totpCode?: string, backupCode?: string): Promise<LoginResult> => {
+    startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
         const userData = mockUsers[email];
         if (!userData || userData.password !== password) {
           toast.error("Invalid credentials.");
+          stopLoading();
           resolve({ success: false });
           return;
         }
@@ -73,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userData.mfaEnabled) {
           if (!totpCode && !backupCode) {
             toast.info("MFA required. Please enter your TOTP code or a backup code.");
+            stopLoading();
             resolve({ success: false, mfaRequired: true });
             return;
           }
@@ -83,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (isValid === null) {
               toast.error("Invalid TOTP code.");
+              stopLoading();
               resolve({ success: false });
               return;
             }
@@ -100,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               toast.success("Backup code used successfully.");
             } else {
               toast.error("Invalid or used backup code.");
+              stopLoading();
               resolve({ success: false });
               return;
             }
@@ -119,16 +126,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("userEmail", email);
         toast.success("Login successful!");
         navigate("/");
+        stopLoading();
         resolve({ success: true });
       }, 1000);
     });
   };
 
   const register = async (email: string, password: string): Promise<boolean> => {
+    startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
         if (mockUsers[email]) {
           toast.error("Account with this email already exists.");
+          stopLoading();
           resolve(false);
           return;
         }
@@ -139,21 +149,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           [email]: { id: newUserId, email, password, mfaEnabled: false, role: UserRole.EMPLOYEE },
         }));
         toast.success("Account created successfully! Please log in.");
+        stopLoading();
         resolve(true);
       }, 1000);
     });
   };
 
   const logout = () => {
+    startLoading();
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem("authToken");
     localStorage.removeItem("userEmail");
     toast.info("Logged out successfully.");
     navigate("/login");
+    stopLoading();
   };
 
   const generateMfaSecret = useCallback(async (email: string) => {
+    startLoading();
     const randomBytes = crypto.getRandomValues(new Uint8Array(20));
     const secretInstance = new Secret(randomBytes);
 
@@ -176,12 +190,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         tempMfaSecret: secret,
       },
     }));
-
+    stopLoading();
     return { secret, qrCodeUrl };
-  }, []);
+  }, [startLoading, stopLoading]);
 
   const verifyMfaSetup = async (secret: string, totpCode: string): Promise<boolean> => {
-    if (!user?.email) return false;
+    startLoading();
+    if (!user?.email) {
+      stopLoading();
+      return false;
+    }
 
     const otp = new TOTP({ secret });
     const isValid = otp.validate({ token: totpCode });
@@ -197,12 +215,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       }));
       setUser((prev) => prev ? { ...prev, mfaEnabled: true, mfaSecret: secret } : null);
+      stopLoading();
       return true;
     }
+    stopLoading();
     return false;
   };
 
   const generateBackupCodes = useCallback(async (email: string): Promise<string[]> => {
+    startLoading();
     const codes: string[] = [];
     for (let i = 0; i < 10; i++) {
       codes.push(crypto.randomUUID().substring(0, 8).toUpperCase());
@@ -214,10 +235,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         tempBackupCodes: codes,
       },
     }));
+    stopLoading();
     return codes;
-  }, []);
+  }, [startLoading, stopLoading]);
 
   const saveBackupCodes = useCallback((email: string, codes: string[]) => {
+    startLoading();
     setMockUsers((prev) => ({
       ...prev,
       [email]: {
@@ -227,11 +250,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     }));
     setUser((prev) => prev ? { ...prev, backupCodes: codes } : null);
-  }, []);
+    stopLoading();
+  }, [startLoading, stopLoading]);
 
   const disableMfa = async (): Promise<boolean> => {
+    startLoading();
     if (!user?.email) {
       toast.error("No user logged in.");
+      stopLoading();
       return false;
     }
 
@@ -248,14 +274,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }));
     setUser((prev) => prev ? { ...prev, mfaEnabled: false, mfaSecret: undefined, backupCodes: undefined } : null);
     toast.success("MFA disabled successfully.");
+    stopLoading();
     return true;
   };
 
   const addUser = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+    startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
         if (mockUsers[email]) {
           toast.error("User with this email already exists.");
+          stopLoading();
           resolve(false);
           return;
         }
@@ -265,24 +294,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           [email]: { id: newUserId, email, password, mfaEnabled: false, role },
         }));
         toast.success(`User ${email} (${role}) added successfully.`);
+        stopLoading();
         resolve(true);
       }, 500);
     });
   };
 
   const updateUser = async (updatedUser: User & { password?: string }): Promise<boolean> => {
+    startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
         const existingUser = mockUsers[updatedUser.email];
         if (!existingUser) {
           toast.error("User not found.");
+          stopLoading();
           resolve(false);
           return;
         }
 
         const newUserData = { ...existingUser, ...updatedUser };
         if (updatedUser.password) {
-          newUserData.password = updatedUser.password; // Update password if provided
+          newUserData.password = updatedUser.password;
         }
 
         setMockUsers((prev) => ({
@@ -290,35 +322,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           [updatedUser.email]: newUserData,
         }));
 
-        // If the current logged-in user is being updated, refresh their session data
         if (user?.id === updatedUser.id) {
-          setUser(newUserData); // Update the user state with new data
+          setUser(newUserData);
         }
         toast.success(`User ${updatedUser.email} updated successfully.`);
+        stopLoading();
         resolve(true);
       }, 500);
     });
   };
 
   const deleteUser = async (userId: string): Promise<boolean> => {
+    startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
         const userToDelete = Object.values(mockUsers).find(u => u.id === userId);
         if (!userToDelete) {
           toast.error("User not found.");
+          stopLoading();
           resolve(false);
           return;
         }
         if (userToDelete.id === user?.id) {
           toast.error("Cannot delete your own account while logged in.");
-          resolve(false);
-          return;
+          stopLoading();
+          return false;
         }
 
         const newMockUsers = { ...mockUsers };
         delete newMockUsers[userToDelete.email];
         setMockUsers(newMockUsers);
         toast.success(`User ${userToDelete.email} deleted successfully.`);
+        stopLoading();
         resolve(true);
       }, 500);
     });
