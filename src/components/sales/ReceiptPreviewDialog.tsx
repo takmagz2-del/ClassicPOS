@@ -123,7 +123,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             </div>
           )}
           <div className="flex justify-between text-xs mb-1">
-            <span>Tax:</span>
+            <span>Tax ({(sale.taxRateApplied !== undefined ? sale.taxRateApplied * 100 : 0).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
             <span className="font-medium">{formatCurrency(sale.tax, currentCurrency)}</span>
           </div>
           {sale.giftCardAmountUsed && sale.giftCardAmountUsed > 0 && (

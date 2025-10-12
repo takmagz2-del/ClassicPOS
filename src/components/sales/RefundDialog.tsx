@@ -17,7 +17,6 @@ import { Sale, SaleItem } from "@/types/sale";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
-import { TAX_RATE } from "@/config/constants";
 import { useProducts } from "@/context/ProductContext";
 
 interface RefundDialogProps {
@@ -34,6 +33,9 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
   const [refundSubtotal, setRefundSubtotal] = useState<number>(0);
   const [refundTax, setRefundTax] = useState<number>(0);
   const [refundTotal, setRefundTotal] = useState<number>(0);
+
+  // Get the tax rate that was applied to the original sale
+  const originalTaxRate = sale.taxRateApplied !== undefined ? sale.taxRateApplied : 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -55,7 +57,7 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
 
     const currentDiscountAmount = sale.discountPercentage ? currentSubtotal * (sale.discountPercentage / 100) : 0;
     const subtotalAfterDiscount = currentSubtotal - currentDiscountAmount;
-    const currentTax = subtotalAfterDiscount * TAX_RATE;
+    const currentTax = subtotalAfterDiscount * originalTaxRate; // Use originalTaxRate
     const currentTotal = subtotalAfterDiscount + currentTax;
 
     setRefundSubtotal(currentSubtotal);
@@ -160,7 +162,7 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
             </div>
           )}
           <div className="flex justify-between text-sm">
-            <span>Refund Tax ({TAX_RATE * 100}%):</span>
+            <span>Refund Tax ({(originalTaxRate * 100).toFixed(2)}%):</span> {/* Display original tax rate */}
             <span className="font-medium">-{formatCurrency(refundTax, currentCurrency)}</span>
           </div>
           <Separator className="my-2" />

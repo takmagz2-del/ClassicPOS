@@ -32,6 +32,7 @@ interface SaleConfirmationDialogProps {
     customer?: Customer;
     discountPercentage?: number;
     discountAmount?: number;
+    taxRateApplied?: number; // New: The tax rate applied to this sale
   };
   paymentMethod: string;
 }
@@ -43,7 +44,7 @@ const SaleConfirmationDialog = ({
   saleDetails,
   paymentMethod,
 }: SaleConfirmationDialogProps) => {
-  const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount } = saleDetails;
+  const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount, taxRateApplied } = saleDetails;
   const [cashReceived, setCashReceived] = useState<string>("");
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
@@ -102,7 +103,7 @@ const SaleConfirmationDialog = ({
             </div>
           )}
           <div className="flex justify-between">
-            <span>Tax:</span>
+            <span>Tax ({(taxRateApplied !== undefined ? taxRateApplied * 100 : 0).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
             <span className="font-medium">{formatCurrency(tax, currentCurrency)}</span>
           </div>
           {giftCardAmountUsed > 0 && (

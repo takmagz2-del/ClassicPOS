@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/AuthContext";
 import MfaSetup from "@/components/auth/MfaSetup";
 import ReceiptSettingsForm from "@/components/settings/ReceiptSettingsForm";
 import PrinterSettingsForm from "@/components/settings/PrinterSettingsForm";
+import TaxSettingsForm from "@/components/settings/TaxSettingsForm"; // New import
 import { toast } from "sonner";
 
 const Settings = () => {
@@ -84,6 +85,15 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           <PrinterSettingsForm />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Tax Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TaxSettingsForm /> {/* New Tax Settings Form */}
         </CardContent>
       </Card>
     </div>

@@ -13,7 +13,6 @@ import BNPLButtons from "@/components/sales/BNPLButtons";
 import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
-import { TAX_RATE } from "@/config/constants";
 import CustomerSelector from "@/components/sales/CustomerSelector";
 import { useCustomers } from "@/context/CustomerContext";
 import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog";
@@ -21,12 +20,14 @@ import DiscountInput from "@/components/sales/DiscountInput";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
+import { useTax } from "@/context/TaxContext"; // New import
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
   const { products, updateProductStock } = useProducts();
   const { customers } = useCustomers();
   const { currentCurrency } = useCurrency();
+  const { defaultTaxRate } = useTax(); // Use defaultTaxRate from TaxContext
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
@@ -44,7 +45,7 @@ const Sales = () => {
   const currentSubtotal = calculateSubtotal(cartItems);
   const calculatedDiscountAmount = currentSubtotal * (discountPercentage / 100);
   const subtotalAfterDiscount = currentSubtotal - calculatedDiscountAmount;
-  const currentTax = subtotalAfterDiscount * TAX_RATE;
+  const currentTax = subtotalAfterDiscount * defaultTaxRate.rate; // Use defaultTaxRate.rate
   const currentTotalBeforeGiftCard = subtotalAfterDiscount + currentTax;
   const currentFinalTotal = Math.max(0, currentTotalBeforeGiftCard - appliedGiftCardAmount);
 
@@ -146,6 +147,7 @@ const Sales = () => {
       customerName: selectedCustomer?.name,
       discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
+      taxRateApplied: defaultTaxRate.rate, // Store the tax rate applied
     };
 
     addSale(newSale);
@@ -211,7 +213,7 @@ const Sales = () => {
           />
           <SaleSummary
             subtotal={currentSubtotal}
-            taxRate={TAX_RATE}
+            taxRate={defaultTaxRate.rate} // Pass defaultTaxRate.rate
             giftCardAmountUsed={appliedGiftCardAmount}
             discountPercentage={discountPercentage}
             discountAmount={calculatedDiscountAmount}
@@ -247,6 +249,7 @@ const Sales = () => {
             customer: customers.find(c => c.id === selectedCustomerId),
             discountPercentage: discountPercentage,
             discountAmount: calculatedDiscountAmount,
+            taxRateApplied: defaultTaxRate.rate, // Pass tax rate to dialog
           }}
           paymentMethod={paymentMethodToConfirm}
         />

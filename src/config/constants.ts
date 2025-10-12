@@ -1,1 +1,1 @@
-export const TAX_RATE = 0.08; // 8% tax rate
+// TAX_RATE is now managed dynamically via TaxContext

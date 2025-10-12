@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface SaleSummaryProps {
   subtotal: number;
-  taxRate: number;
+  taxRate: number; // Now passed as a prop from Sales page
   giftCardAmountUsed: number;
   discountPercentage: number;
   discountAmount: number;
@@ -45,7 +45,7 @@ const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage
           <span className="font-medium">{formatCurrency(subtotalAfterDiscount, currentCurrency)}</span>
         </div>
         <div className="flex justify-between">
-          <span>Tax ({taxRate * 100}%):</span>
+          <span>Tax ({(taxRate * 100).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
           <span className="font-medium">{formatCurrency(tax, currentCurrency)}</span>
         </div>
         {giftCardAmountUsed > 0 && (

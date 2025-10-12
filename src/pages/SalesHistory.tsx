@@ -123,7 +123,7 @@ const SalesHistory = () => {
       date: new Date().toISOString(),
       items: refundItems.map(item => ({ ...item, quantity: -item.quantity })), // Negative quantities for refund
       subtotal: -refundTotal, // Negative subtotal
-      tax: -(selectedSaleForRefund.tax / selectedSaleForRefund.subtotal) * refundTotal, // Proportionate tax
+      tax: -(selectedSaleForRefund.taxRateApplied || 0) * refundTotal, // Proportionate tax based on original tax rate
       total: -refundTotal, // Negative total
       status: "completed", // Refund is a completed transaction
       type: "refund", // Set type to "refund"
@@ -132,6 +132,7 @@ const SalesHistory = () => {
       customerName: selectedSaleForRefund.customerName,
       discountPercentage: selectedSaleForRefund.discountPercentage,
       discountAmount: selectedSaleForRefund.discountAmount,
+      taxRateApplied: selectedSaleForRefund.taxRateApplied, // Carry over original tax rate
     };
 
     refundSale(newRefundTransaction); // Add the refund transaction to sales history
