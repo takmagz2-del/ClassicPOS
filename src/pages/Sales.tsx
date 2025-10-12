@@ -133,6 +133,12 @@ const Sales = () => {
 
     const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
+    // For credit sales, a customer must be selected
+    if (paymentMethod === "Credit Account" && !selectedCustomer) {
+      toast.error("A customer must be selected for a credit sale.");
+      return;
+    }
+
     const newSale: Sale = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
@@ -140,7 +146,7 @@ const Sales = () => {
       subtotal: currentSubtotal,
       tax: currentTax,
       total: currentFinalTotal,
-      status: "completed",
+      status: paymentMethod === "Credit Account" ? "pending" : "completed", // Set status to 'pending' for credit sales
       type: "sale",
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
@@ -148,6 +154,7 @@ const Sales = () => {
       discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
       taxRateApplied: defaultTaxRate.rate, // Store the tax rate applied
+      paymentMethod: paymentMethod, // Store the payment method
     };
 
     addSale(newSale);
@@ -163,7 +170,7 @@ const Sales = () => {
     setIsReceiptDialogOpen(true);
 
     handleClearCart();
-    toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
+    toast.success(`${paymentMethod === "Credit Account" ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
     if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
       const change = cashReceived - currentFinalTotal;
       toast.info(`Change due: ${formatCurrency(change, currentCurrency)}`);
@@ -222,6 +229,7 @@ const Sales = () => {
             onProcessSale={() => openConfirmationDialog("Cash/Card")}
             onApplePay={() => openConfirmationDialog("Apple Pay")}
             onGooglePay={() => openConfirmationDialog("Google Pay")}
+            onCreditSale={() => openConfirmationDialog("Credit Account")} // New prop usage
             onClearCart={handleClearCart}
             hasItemsInCart={cartItems.length > 0}
             finalTotal={currentFinalTotal}

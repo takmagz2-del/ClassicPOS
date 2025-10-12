@@ -49,6 +49,7 @@ const SaleConfirmationDialog = ({
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   const isCashPayment = paymentMethod === "Cash/Card";
+  const isCreditSale = paymentMethod === "Credit Account";
   const parsedCashReceived = parseFloat(cashReceived);
   const changeDue = isCashPayment && !isNaN(parsedCashReceived) ? parsedCashReceived - total : 0;
 
@@ -133,6 +134,13 @@ const SaleConfirmationDialog = ({
               {changeDue > 0 && (
                 <p className="text-sm text-muted-foreground">Change Due: <span className="font-medium">{formatCurrency(changeDue, currentCurrency)}</span></p>
               )}
+            </div>
+          )}
+
+          {isCreditSale && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-md text-blue-800 dark:text-blue-200">
+              <p className="font-semibold">This is a Credit Sale.</p>
+              <p className="text-sm">The amount will be charged to the customer's account.</p>
             </div>
           )}
         </div>

@@ -21,4 +21,5 @@ export interface Sale {
   discountAmount?: number; // New: Optional calculated discount amount
   originalSaleId?: string; // New: Link to the original sale for refunds
   taxRateApplied?: number; // New: The tax rate applied to this sale
+  paymentMethod?: string; // New: The payment method used for the sale
 }
