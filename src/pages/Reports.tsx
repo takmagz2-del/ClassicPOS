@@ -112,7 +112,7 @@ const Reports = () => {
     // Calculate Sales by Payment Method
     const salesByPaymentMethodMap = new Map<string, number>();
     filteredTransactions.filter(t => t.type === "sale").forEach(sale => {
-      const method = sale.paymentMethod ? getPaymentMethodName(sale.paymentMethod) : "Unknown";
+      const method = sale.paymentMethodId ? getPaymentMethodName(sale.paymentMethodId) : "Unknown";
       salesByPaymentMethodMap.set(method, (salesByPaymentMethodMap.get(method) || 0) + sale.total);
     });
 

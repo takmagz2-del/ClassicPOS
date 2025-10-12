@@ -34,7 +34,7 @@ const Sales = () => {
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
-  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null);
+  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<PaymentMethod | null>(null); // Changed to PaymentMethod object
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [appliedLoyaltyPoints, setAppliedLoyaltyPoints] = useState<number>(0);
   const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0);
@@ -149,7 +149,7 @@ const Sales = () => {
     setLoyaltyPointsDiscountAmount(0);
   };
 
-  const finalizeSale = (paymentMethod: string, cashReceived?: number) => {
+  const finalizeSale = (paymentMethodId: string, cashReceived?: number) => { // Changed to paymentMethodId
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
@@ -161,7 +161,7 @@ const Sales = () => {
     }
 
     // For credit sales, a customer must be selected
-    if (paymentMethod.toLowerCase().includes("credit") && !selectedCustomer) {
+    if (paymentMethodToConfirm?.isCredit && !selectedCustomer) { // Use paymentMethodToConfirm object
       toast.error("A customer must be selected for a credit sale.");
       return;
     }
@@ -173,7 +173,7 @@ const Sales = () => {
       subtotal: currentSubtotal,
       tax: currentTax,
       total: currentFinalTotal,
-      status: paymentMethod.toLowerCase().includes("credit") ? "pending" : "completed",
+      status: paymentMethodToConfirm?.isCredit ? "pending" : "completed", // Use paymentMethodToConfirm object
       type: "sale",
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
@@ -182,7 +182,7 @@ const Sales = () => {
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
       loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
       taxRateApplied: defaultTaxRate.rate,
-      paymentMethod: paymentMethod,
+      paymentMethodId: paymentMethodId, // Use paymentMethodId
     };
 
     addSale(newSale);
@@ -210,7 +210,7 @@ const Sales = () => {
     setIsReceiptDialogOpen(true);
 
     handleClearCart();
-    toast.success(`${paymentMethod.toLowerCase().includes("credit") ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
+    toast.success(`${paymentMethodToConfirm?.isCredit ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethodToConfirm?.name}! Total: ${formatCurrency(newSale.total, currentCurrency)}`); // Use paymentMethodToConfirm.name
     if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
       const change = cashReceived - currentFinalTotal;
       toast.info(`Change due: ${formatCurrency(change, currentCurrency)}`);
@@ -223,7 +223,7 @@ const Sales = () => {
       toast.error("Cart is empty. Add items before checking out.");
       return;
     }
-    setPaymentMethodToConfirm(method.name);
+    setPaymentMethodToConfirm(method); // Pass the full PaymentMethod object
     setIsConfirmationDialogOpen(true);
   };
 
@@ -301,7 +301,7 @@ const Sales = () => {
             loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount,
             taxRateApplied: defaultTaxRate.rate,
           }}
-          paymentMethod={paymentMethodToConfirm}
+          paymentMethod={paymentMethodToConfirm} // Pass the full PaymentMethod object
         />
       )}
 

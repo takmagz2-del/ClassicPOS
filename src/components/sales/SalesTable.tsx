@@ -65,7 +65,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
                   {sale.giftCardAmountUsed ? `-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}` : formatCurrency(0, currentCurrency)}
                 </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
-                <TableCell className="text-center capitalize">{sale.paymentMethod ? getPaymentMethodName(sale.paymentMethod) : "N/A"}</TableCell> {/* Display payment method name */}
+                <TableCell className="text-center capitalize">{sale.paymentMethodId ? getPaymentMethodName(sale.paymentMethodId) : "N/A"}</TableCell> {/* Display payment method name */}
                 <TableCell className="text-center capitalize">
                   <span className={sale.status === "pending" ? "text-orange-500 font-semibold" : ""}>
                     {sale.status}

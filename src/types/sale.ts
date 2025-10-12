@@ -22,5 +22,5 @@ export interface Sale {
   loyaltyPointsUsed?: number; // New: Optional loyalty points used in the sale
   originalSaleId?: string; // New: Link to the original sale for refunds
   taxRateApplied?: number; // New: The tax rate applied to this sale
-  paymentMethod?: string; // New: The payment method used for the sale
+  paymentMethodId?: string; // Changed from paymentMethod: string to paymentMethodId: string
 }

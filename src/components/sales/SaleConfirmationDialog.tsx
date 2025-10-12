@@ -18,11 +18,12 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
 import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { PaymentMethod } from "@/types/payment"; // Import PaymentMethod type
 
 interface SaleConfirmationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirmSale: (paymentMethod: string, cashReceived?: number) => void;
+  onConfirmSale: (paymentMethodId: string, cashReceived?: number) => void; // Changed to paymentMethodId
   saleDetails: {
     items: SaleItem[];
     subtotal: number;
@@ -36,7 +37,7 @@ interface SaleConfirmationDialogProps {
     loyaltyPointsDiscountAmount?: number; // New: Loyalty points discount amount
     taxRateApplied?: number;
   };
-  paymentMethod: string;
+  paymentMethod: PaymentMethod; // Changed to PaymentMethod object
 }
 
 const SaleConfirmationDialog = ({
@@ -44,14 +45,14 @@ const SaleConfirmationDialog = ({
   onClose,
   onConfirmSale,
   saleDetails,
-  paymentMethod,
+  paymentMethod, // Now a PaymentMethod object
 }: SaleConfirmationDialogProps) => {
   const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount, loyaltyPointsUsed, loyaltyPointsDiscountAmount, taxRateApplied } = saleDetails;
   const [cashReceived, setCashReceived] = useState<string>("");
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
-  const isCashPayment = paymentMethod === "Cash/Card";
-  const isCreditSale = paymentMethod === "Credit Account";
+  const isCashPayment = paymentMethod.isCashEquivalent; // Use isCashEquivalent from object
+  const isCreditSale = paymentMethod.isCredit; // Use isCredit from object
   const parsedCashReceived = parseFloat(cashReceived);
   const changeDue = isCashPayment && !isNaN(parsedCashReceived) ? parsedCashReceived - total : 0;
 
@@ -60,7 +61,7 @@ const SaleConfirmationDialog = ({
       toast.error(`Cash received must be equal to or greater than the total amount (${formatCurrency(total, currentCurrency)}).`);
       return;
     }
-    onConfirmSale(paymentMethod, isCashPayment ? parsedCashReceived : undefined);
+    onConfirmSale(paymentMethod.id, isCashPayment ? parsedCashReceived : undefined); // Pass paymentMethod.id
   };
 
   const subtotalAfterDiscount = subtotal - (discountAmount || 0) - (loyaltyPointsDiscountAmount || 0);
@@ -157,7 +158,7 @@ const SaleConfirmationDialog = ({
             Cancel
           </Button>
           <Button onClick={handleConfirm}>
-            Confirm {paymentMethod}
+            Confirm {paymentMethod.name}
           </Button>
         </DialogFooter>
       </DialogContent>
