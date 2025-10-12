@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/components/auth/AuthContext";
+// Removed useAuth as it is no longer used
 import { Button } from "@/components/ui/button";
 import ProductTable from "@/components/products/ProductTable";
 import { Product } from "@/types/product";
