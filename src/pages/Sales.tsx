@@ -9,7 +9,8 @@ import ProductSelector from "@/components/sales/ProductSelector";
 import SaleCart from "@/components/sales/SaleCart";
 import SaleSummary from "@/components/sales/SaleSummary";
 import GiftCardInput from "@/components/sales/GiftCardInput";
-import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons"; // Import the new component
+import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
+import BNPLButtons from "@/components/sales/BNPLButtons"; // Import the new BNPLButtons component
 import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
 
@@ -165,6 +166,26 @@ const Sales = () => {
     processSale("Google Pay");
   };
 
+  const handleAfterpay = () => {
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty. Add items before checking out.");
+      return;
+    }
+    toast.info("Initiating Afterpay...");
+    // Integrate Afterpay SDK here
+    processSale("Afterpay");
+  };
+
+  const handleKlarna = () => {
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty. Add items before checking out.");
+      return;
+    }
+    toast.info("Initiating Klarna...");
+    // Integrate Klarna SDK here
+    processSale("Klarna");
+  };
+
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
@@ -199,6 +220,12 @@ const Sales = () => {
             onApplePay={handleApplePay}
             onGooglePay={handleGooglePay}
             onClearCart={handleClearCart}
+            hasItemsInCart={cartItems.length > 0}
+            finalTotal={currentFinalTotal}
+          />
+          <BNPLButtons
+            onAfterpay={handleAfterpay}
+            onKlarna={handleKlarna}
             hasItemsInCart={cartItems.length > 0}
             finalTotal={currentFinalTotal}
           />
