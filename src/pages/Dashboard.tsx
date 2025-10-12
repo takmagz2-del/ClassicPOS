@@ -10,6 +10,7 @@ import { useCustomers } from "@/context/CustomerContext";
 import { format, startOfDay, endOfDay, isWithinInterval, subDays, eachDayOfInterval } from "date-fns";
 import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import LowStockProducts from "@/components/dashboard/LowStockProducts";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -147,8 +148,10 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">Total units across all products</p>
           </CardContent>
         </Card>
+      </div>
 
-        <Card className="md:col-span-2 lg:col-span-4">
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-7">
+        <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Sales Overview (Last 30 Days)</CardTitle>
           </CardHeader>
@@ -178,6 +181,10 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        <div className="lg:col-span-3">
+          <LowStockProducts products={products} />
+        </div>
       </div>
     </div>
   );
