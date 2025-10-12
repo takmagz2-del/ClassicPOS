@@ -17,7 +17,7 @@ import { Sale, SaleItem } from "@/types/sale";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
-import { useProducts } from "@/context/ProductContext";
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
 
 interface RefundDialogProps {
   isOpen: boolean;
@@ -142,7 +142,7 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
                     min="0"
                     max={item.quantity}
                     value={refundQuantities[item.productId] || 0}
-                    onChange={(e) => handleQuantityChange(item.productId, e.target.value)}
+                    onChange={(e) => handleQuantityChange(e.target.value, item.productId)}
                     className="w-24 text-center"
                   />
                 </div>
