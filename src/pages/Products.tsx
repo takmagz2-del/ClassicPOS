@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-// Removed useAuth as it is no longer used
 import { Button } from "@/components/ui/button";
 import ProductTable from "@/components/products/ProductTable";
 import { Product } from "@/types/product";
@@ -12,10 +11,10 @@ import EditProductForm from "@/components/products/EditProductForm";
 import DeleteProductDialog from "@/components/products/DeleteProductDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useProducts } from "@/context/ProductContext";
 
 const Products = () => {
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts(); // Use products and functions from context
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

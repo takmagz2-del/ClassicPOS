@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
 import MfaSetup from "@/components/auth/MfaSetup";
 import ReceiptSettingsForm from "@/components/settings/ReceiptSettingsForm";
-import PrinterSettingsForm from "@/components/settings/PrinterSettingsForm"; // New import
+import PrinterSettingsForm from "@/components/settings/PrinterSettingsForm";
 import { toast } from "sonner";
 
 const Settings = () => {

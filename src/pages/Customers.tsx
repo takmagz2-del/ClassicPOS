@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-// Removed useAuth as it is no longer used
 import { Button } from "@/components/ui/button";
 import { Customer } from "@/types/customer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,10 +11,10 @@ import EditCustomerForm from "@/components/customers/EditCustomerForm";
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useCustomers } from "@/context/CustomerContext"; // Use useCustomers hook
+import { useCustomers } from "@/context/CustomerContext";
 
 const Customers = () => {
-  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers(); // Use context functions
+  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -23,7 +22,7 @@ const Customers = () => {
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
 
   const handleAddCustomer = (newCustomer: Customer) => {
-    addCustomer(newCustomer); // Use context function
+    addCustomer(newCustomer);
   };
 
   const handleEditCustomer = (customer: Customer) => {
@@ -32,7 +31,7 @@ const Customers = () => {
   };
 
   const handleUpdateCustomer = (updatedCustomer: Customer) => {
-    updateCustomer(updatedCustomer); // Use context function
+    updateCustomer(updatedCustomer);
   };
 
   const handleDeleteCustomer = (customer: Customer) => {
@@ -41,7 +40,7 @@ const Customers = () => {
   };
 
   const confirmDeleteCustomer = (customerId: string) => {
-    deleteCustomer(customerId); // Use context function
+    deleteCustomer(customerId);
     toast.success("Customer deleted successfully!");
     setDeletingCustomer(null);
   };

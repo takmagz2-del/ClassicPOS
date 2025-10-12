@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/components/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
 import { Sale, SaleItem } from "@/types/sale";
@@ -21,7 +20,7 @@ import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog";
 import DiscountInput from "@/components/sales/DiscountInput";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
-import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog"; // New import
+import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -35,8 +34,8 @@ const Sales = () => {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
   const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
-  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false); // New state for receipt dialog
-  const [lastSale, setLastSale] = useState<Sale | null>(null); // New state to store last sale for receipt
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
+  const [lastSale, setLastSale] = useState<Sale | null>(null);
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -141,7 +140,7 @@ const Sales = () => {
       tax: currentTax,
       total: currentFinalTotal,
       status: "completed",
-      type: "sale", // Explicitly set type to "sale"
+      type: "sale",
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
       customerName: selectedCustomer?.name,
@@ -158,8 +157,8 @@ const Sales = () => {
       }
     });
 
-    setLastSale(newSale); // Store the new sale for the receipt dialog
-    setIsReceiptDialogOpen(true); // Open the receipt dialog
+    setLastSale(newSale);
+    setIsReceiptDialogOpen(true);
 
     handleClearCart();
     toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
