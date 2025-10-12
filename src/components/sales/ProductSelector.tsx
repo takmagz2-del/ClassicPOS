@@ -14,6 +14,7 @@ import { ImageIcon, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import ImagePreviewDialog from "@/components/common/ImagePreviewDialog"; // Import the new component
 
 interface ProductSelectorProps {
   products: Product[];
@@ -29,6 +30,11 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]); // Default wide range
   const { currentCurrency } = useCurrency();
   const { categories } = useCategories();
+  
+  // State for image preview dialog
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
+  const [previewImageAlt, setPreviewImageAlt] = useState("");
 
   // Calculate min and max price for slider
   const minPrice = useMemo(() => Math.min(...products.map(p => p.price)), [products]);
@@ -70,6 +76,12 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     setSelectedCategoryId("all");
     setStockStatusFilter("all");
     setPriceRange([minPrice, maxPrice]);
+  };
+
+  const handleImageClick = (imageUrl: string, altText: string) => {
+    setPreviewImageUrl(imageUrl);
+    setPreviewImageAlt(altText);
+    setIsImagePreviewOpen(true);
   };
 
   return (
@@ -163,7 +175,15 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                   }}
                 >
                   <CardContent className="p-0 flex flex-col items-center text-center">
-                    <div className="w-full h-24 bg-muted flex items-center justify-center">
+                    <div 
+                      className="w-full h-24 bg-muted flex items-center justify-center cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click event
+                        if (product.imageUrl) {
+                          handleImageClick(product.imageUrl, product.name);
+                        }
+                      }}
+                    >
                       {product.imageUrl ? (
                         <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                       ) : (
@@ -187,6 +207,14 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
           </div>
         </ScrollArea>
       </CardContent>
+      
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog
+        isOpen={isImagePreviewOpen}
+        onClose={() => setIsImagePreviewOpen(false)}
+        imageUrl={previewImageUrl}
+        altText={previewImageAlt}
+      />
     </Card>
   );
 };

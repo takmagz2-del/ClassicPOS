@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import { Edit, Trash2, ImageIcon } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useCategories } from "@/context/CategoryContext";
+import ImagePreviewDialog from "@/components/common/ImagePreviewDialog"; // Import the new component
 
 interface ProductTableProps {
   products: Product[];
@@ -25,6 +26,17 @@ interface ProductTableProps {
 const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTableProps) => {
   const { currentCurrency } = useCurrency();
   const { getCategoryName } = useCategories();
+  
+  // State for image preview dialog
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
+  const [previewImageAlt, setPreviewImageAlt] = useState("");
+
+  const handleImageClick = (imageUrl: string, altText: string) => {
+    setPreviewImageUrl(imageUrl);
+    setPreviewImageAlt(altText);
+    setIsImagePreviewOpen(true);
+  };
 
   return (
     <div className="rounded-md border">
@@ -45,7 +57,14 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
             products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
-                  <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-md overflow-hidden">
+                  <div 
+                    className="w-16 h-16 bg-muted flex items-center justify-center rounded-md overflow-hidden cursor-pointer"
+                    onClick={() => {
+                      if (product.imageUrl) {
+                        handleImageClick(product.imageUrl, product.name);
+                      }
+                    }}
+                  >
                     {product.imageUrl ? (
                       <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                     ) : (
@@ -79,6 +98,14 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
           )}
         </TableBody>
       </Table>
+      
+      {/* Image Preview Dialog */}
+      <ImagePreviewDialog
+        isOpen={isImagePreviewOpen}
+        onClose={() => setIsImagePreviewOpen(false)}
+        imageUrl={previewImageUrl}
+        altText={previewImageAlt}
+      />
     </div>
   );
 };
