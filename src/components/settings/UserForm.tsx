@@ -18,14 +18,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, UserRole } from "@/types/user";
 import { toast } from "sonner";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional(),
-  role: z.nativeEnum(UserRole, { message: "Please select a valid role." }),
-});
-
-type UserFormValues = z.infer<typeof formSchema>;
-
 interface UserFormProps {
   initialUser?: User; // Optional for editing
   onUserSubmit: (values: { email: string; password?: string; role: UserRole }) => Promise<boolean>;
@@ -33,6 +25,18 @@ interface UserFormProps {
 }
 
 const UserForm = ({ initialUser, onUserSubmit, onClose }: UserFormProps) => {
+  const isEditMode = !!initialUser;
+
+  const formSchema = z.object({
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    password: isEditMode
+      ? z.string().min(6, { message: "New password must be at least 6 characters." }).optional().or(z.literal(""))
+      : z.string().min(6, { message: "Password must be at least 6 characters." }),
+    role: z.nativeEnum(UserRole, { message: "Please select a valid role." }),
+  });
+
+  type UserFormValues = z.infer<typeof formSchema>;
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,9 +92,9 @@ const UserForm = ({ initialUser, onUserSubmit, onClose }: UserFormProps) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{initialUser ? "New Password (optional)" : "Password"}</FormLabel>
+              <FormLabel>{isEditMode ? "New Password (optional)" : "Password"}</FormLabel>
               <FormControl>
-                <Input type="password" placeholder={initialUser ? "Leave blank to keep current" : "Enter password"} {...field} />
+                <Input type="password" placeholder={isEditMode ? "Leave blank to keep current" : "Enter password"} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -121,7 +125,7 @@ const UserForm = ({ initialUser, onUserSubmit, onClose }: UserFormProps) => {
           )}
         />
         <Button type="submit" className="w-full">
-          {initialUser ? "Save Changes" : "Add User"}
+          {isEditMode ? "Save Changes" : "Add User"}
         </Button>
       </form>
     </Form>
