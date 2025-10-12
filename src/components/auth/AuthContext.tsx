@@ -5,10 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TOTP, Secret } from "otpauth";
 
+interface LoginResult {
+  success: boolean;
+  mfaRequired?: boolean;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: { email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null;
-  login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<boolean>;
+  login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<LoginResult>;
   logout: () => void;
   generateMfaSecret: (email: string) => Promise<{ secret: string; qrCodeUrl: string }>;
   verifyMfaSetup: (secret: string, totpCode: string) => Promise<boolean>;
@@ -43,17 +48,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [mockUsers]);
 
-  const login = async (email: string, password: string, totpCode?: string, backupCode?: string): Promise<boolean> => {
+  const login = async (email: string, password: string, totpCode?: string, backupCode?: string): Promise<LoginResult> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const userData = mockUsers[email];
         if (!userData || userData.password !== password) {
           toast.error("Invalid credentials.");
-          resolve(false);
+          resolve({ success: false });
           return;
         }
 
         if (userData.mfaEnabled) {
+          if (!totpCode && !backupCode) {
+            // MFA is enabled but no code provided
+            toast.info("MFA required. Please enter your TOTP code or a backup code.");
+            resolve({ success: false, mfaRequired: true });
+            return;
+          }
+
           if (totpCode) {
             // Verify TOTP code
             const otp = new TOTP({ secret: userData.mfaSecret });
@@ -61,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (isValid === null) {
               toast.error("Invalid TOTP code.");
-              resolve(false);
+              resolve({ success: false });
               return;
             }
           } else if (backupCode) {
@@ -80,13 +92,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               toast.success("Backup code used successfully.");
             } else {
               toast.error("Invalid or used backup code.");
-              resolve(false);
+              resolve({ success: false });
               return;
             }
-          } else {
-            toast.info("MFA required. Please enter your TOTP code or a backup code.");
-            resolve(false);
-            return;
           }
         }
 
@@ -101,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("userEmail", email);
         toast.success("Login successful!");
         navigate("/");
-        resolve(true);
+        resolve({ success: true });
       }, 1000);
     });
   };

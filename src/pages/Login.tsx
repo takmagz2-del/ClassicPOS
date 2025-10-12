@@ -24,15 +24,12 @@ const Login = () => {
     setIsLoading(true);
     setMfaRequired(false); // Reset MFA requirement on new submission
 
-    const success = await login(email, password, useBackupCode ? undefined : totpCode, useBackupCode ? backupCode : undefined);
+    const result = await login(email, password, useBackupCode ? undefined : totpCode, useBackupCode ? backupCode : undefined);
     setIsLoading(false);
 
-    if (!success) {
-      // If login failed and MFA was not yet attempted, check if it's an MFA requirement
-      const mockUser = (useAuth() as any).mockUsers[email]; // Access mockUsers for demo
-      if (mockUser?.mfaEnabled && !totpCode && !backupCode) {
+    if (!result.success) {
+      if (result.mfaRequired) {
         setMfaRequired(true);
-        toast.info("MFA required. Please enter your TOTP code or a backup code.");
       }
     }
   };
