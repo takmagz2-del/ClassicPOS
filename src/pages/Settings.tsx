@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
 import MfaSetup from "@/components/auth/MfaSetup";
 import ReceiptSettingsForm from "@/components/settings/ReceiptSettingsForm";
+import PrinterSettingsForm from "@/components/settings/PrinterSettingsForm"; // New import
 import { toast } from "sonner";
 
 const Settings = () => {
@@ -74,6 +75,15 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           <ReceiptSettingsForm />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Printer Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PrinterSettingsForm />
         </CardContent>
       </Card>
     </div>
