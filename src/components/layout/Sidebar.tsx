@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Package2, Home, ShoppingCart, Users, LineChart, Settings, Boxes, CreditCard, Store, DollarSign } from "lucide-react";
+import { Package2, Home, ShoppingCart, Users, LineChart, Settings, Boxes, CreditCard, Store, DollarSign, History } from "lucide-react"; // Added History icon
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean;
@@ -15,9 +15,10 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
   const navItems = [
     { to: "/", icon: Home, label: "Dashboard" },
-    { to: "/products", icon: Boxes, label: "Products" }, // Added Products link
-    { to: "/customers", icon: Users, label: "Customers" }, // Added Customers link
-    { to: "/sales", icon: ShoppingCart, label: "Sales" },
+    { to: "/products", icon: Boxes, label: "Products" },
+    { to: "/customers", icon: Users, label: "Customers" },
+    { to: "/sales", icon: ShoppingCart, label: "Sales Terminal" }, // Renamed for clarity
+    { to: "/sales-history", icon: History, label: "Sales History" }, // Added Sales History link
     { to: "/stores", icon: Store, label: "Multi-Store" },
     { to: "/accounting", icon: DollarSign, label: "Accounting" },
     { to: "/reports", icon: LineChart, label: "Reports" },

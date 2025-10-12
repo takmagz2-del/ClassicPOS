@@ -8,8 +8,9 @@ import { Sale, SaleItem } from "@/types/sale";
 import ProductSelector from "@/components/sales/ProductSelector";
 import SaleCart from "@/components/sales/SaleCart";
 import SaleSummary from "@/components/sales/SaleSummary";
-import GiftCardInput from "@/components/sales/GiftCardInput"; // Import GiftCardInput
+import GiftCardInput from "@/components/sales/GiftCardInput";
 import { toast } from "sonner";
+import { useSales } from "@/context/SaleContext"; // Ensure this uses the alias
 
 // Mock products (should ideally come from a global state or API)
 const mockProducts: Product[] = [
@@ -27,10 +28,10 @@ const TAX_RATE = 0.08; // 8% tax rate
 
 const Sales = () => {
   const { logout } = useAuth();
-  const [products, setProducts] = useState<Product[]>(mockProducts); // Using mock products for now
+  const { addSale } = useSales();
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
-  const [salesHistory, setSalesHistory] = useState<Sale[]>([]);
-  const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0); // New state for gift card
+  const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -66,7 +67,7 @@ const Sales = () => {
       setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, quantity }]);
     }
     toast.success(`${quantity}x ${product.name} added to cart.`);
-    setAppliedGiftCardAmount(0); // Reset gift card on cart change
+    setAppliedGiftCardAmount(0);
   };
 
   const handleUpdateCartItemQuantity = (productId: string, newQuantity: number) => {
@@ -87,24 +88,22 @@ const Sales = () => {
         item.productId === productId ? { ...item, quantity: newQuantity } : item
       )
     );
-    setAppliedGiftCardAmount(0); // Reset gift card on cart change
+    setAppliedGiftCardAmount(0);
   };
 
   const handleRemoveCartItem = (productId: string) => {
     setCartItems((prev) => prev.filter((item) => item.productId !== productId));
     toast.info("Item removed from cart.");
-    setAppliedGiftCardAmount(0); // Reset gift card on cart change
+    setAppliedGiftCardAmount(0);
   };
 
   const handleClearCart = () => {
     setCartItems([]);
-    setAppliedGiftCardAmount(0); // Reset gift card when cart is cleared
+    setAppliedGiftCardAmount(0);
     toast.info("Cart cleared.");
   };
 
   const handleApplyGiftCard = (code: string, amount: number) => {
-    // In a real app, you'd validate the code and deduct from its balance
-    // For now, we just apply the amount to the current sale.
     setAppliedGiftCardAmount((prev) => prev + amount);
   };
 
@@ -125,14 +124,13 @@ const Sales = () => {
       items: cartItems,
       subtotal: currentSubtotal,
       tax: currentTax,
-      total: currentFinalTotal, // Use the final total after gift card
+      total: currentFinalTotal,
       status: "completed",
-      giftCardAmountUsed: appliedGiftCardAmount, // Record gift card usage
+      giftCardAmountUsed: appliedGiftCardAmount,
     };
 
-    setSalesHistory((prev) => [...prev, newSale]);
+    addSale(newSale);
 
-    // Update product stock
     const updatedProducts = products.map(p => {
       const soldItem = cartItems.find(item => item.productId === p.id);
       if (soldItem) {

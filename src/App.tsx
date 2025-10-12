@@ -8,8 +8,10 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
-import Sales from "./pages/Sales"; // Import the new Sales page
+import Sales from "./pages/Sales";
+import SalesHistory from "./pages/SalesHistory";
 import { AuthProvider, useAuth } from "./components/auth/AuthContext";
+import { SaleProvider } from "@/context/SaleContext"; // Ensure this uses the alias
 import { ReactNode } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 
@@ -21,7 +23,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  return <MainLayout>{children}</MainLayout>; // Wrap children with MainLayout
+  return <MainLayout>{children}</MainLayout>;
 };
 
 const App = () => (
@@ -31,43 +33,53 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/products"
-              element={
-                <ProtectedRoute>
-                  <Products />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/customers"
-              element={
-                <ProtectedRoute>
-                  <Customers />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sales"
-              element={
-                <ProtectedRoute>
-                  <Sales />
-                </ProtectedRoute>
-              }
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <SaleProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute>
+                    <Products />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/customers"
+                element={
+                  <ProtectedRoute>
+                    <Customers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sales"
+                element={
+                  <ProtectedRoute>
+                    <Sales />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sales-history"
+                element={
+                  <ProtectedRoute>
+                    <SalesHistory />
+                  </ProtectedRoute>
+                }
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SaleProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
