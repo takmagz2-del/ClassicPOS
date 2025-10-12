@@ -59,9 +59,7 @@ const Dashboard = () => {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button onClick={logout} variant="destructive">
-          Logout
-        </Button>
+        {/* Removed the redundant Logout button */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
