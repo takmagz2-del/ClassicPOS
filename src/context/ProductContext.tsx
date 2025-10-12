@@ -7,6 +7,7 @@ import { mockProducts } from "@/data/mockProducts";
 interface ProductContextType {
   products: Product[];
   updateProductStock: (productId: string, newStock: number) => void;
+  increaseProductStock: (productId: string, quantity: number) => void; // New function
   updateProduct: (updatedProduct: Product) => void;
   addProduct: (newProduct: Product) => void;
   deleteProduct: (productId: string) => void;
@@ -20,6 +21,12 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const updateProductStock = useCallback((productId: string, newStock: number) => {
     setProducts((prevProducts) =>
       prevProducts.map((p) => (p.id === productId ? { ...p, stock: newStock } : p))
+    );
+  }, []);
+
+  const increaseProductStock = useCallback((productId: string, quantity: number) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((p) => (p.id === productId ? { ...p, stock: p.stock + quantity } : p))
     );
   }, []);
 
@@ -38,7 +45,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <ProductContext.Provider value={{ products, updateProductStock, updateProduct, addProduct, deleteProduct }}>
+    <ProductContext.Provider value={{ products, updateProductStock, increaseProductStock, updateProduct, addProduct, deleteProduct }}>
       {children}
     </ProductContext.Provider>
   );

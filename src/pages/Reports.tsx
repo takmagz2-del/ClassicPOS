@@ -31,36 +31,41 @@ const Reports = () => {
   });
 
   const { totalRevenue, averageSaleValue, dailySalesData } = useMemo(() => {
-    let filteredSales = salesHistory;
+    let filteredTransactions = salesHistory;
 
     if (dateRange.from && dateRange.to) {
-      filteredSales = salesHistory.filter((sale) => {
-        const saleDate = new Date(sale.date);
-        return isWithinInterval(saleDate, {
+      filteredTransactions = salesHistory.filter((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return isWithinInterval(transactionDate, {
           start: startOfDay(dateRange.from!),
           end: endOfDay(dateRange.to!),
         });
       });
     } else if (dateRange.from) {
-      filteredSales = salesHistory.filter((sale) => {
-        const saleDate = new Date(sale.date);
-        return saleDate >= startOfDay(dateRange.from!);
+      filteredTransactions = salesHistory.filter((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate >= startOfDay(dateRange.from!);
       });
     } else if (dateRange.to) {
-      filteredSales = salesHistory.filter((sale) => {
-        const saleDate = new Date(sale.date);
-        return saleDate <= endOfDay(dateRange.to!);
+      filteredTransactions = salesHistory.filter((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return transactionDate <= endOfDay(dateRange.to!);
       });
     }
 
-    const total = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
-    const average = filteredSales.length > 0 ? total / filteredSales.length : 0;
+    // Calculate total revenue by summing up all transaction totals (refunds will be negative)
+    const total = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
 
-    // Aggregate daily sales
+    // For average sale value, we only consider actual sales, not refunds
+    const actualSales = filteredTransactions.filter(t => t.type === "sale");
+    const average = actualSales.length > 0 ? actualSales.reduce((sum, sale) => sum + sale.total, 0) / actualSales.length : 0;
+
+
+    // Aggregate daily sales (including refunds as negative values)
     const dailySalesMap = new Map<string, number>();
-    filteredSales.forEach((sale) => {
-      const day = format(new Date(sale.date), "yyyy-MM-dd");
-      dailySalesMap.set(day, (dailySalesMap.get(day) || 0) + sale.total);
+    filteredTransactions.forEach((transaction) => {
+      const day = format(new Date(transaction.date), "yyyy-MM-dd");
+      dailySalesMap.set(day, (dailySalesMap.get(day) || 0) + transaction.total);
     });
 
     const sortedDailySales = Array.from(dailySalesMap.entries())
@@ -123,11 +128,11 @@ const Reports = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Net Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">Across selected period</p>
+            <p className="text-xs text-muted-foreground">Total sales minus refunds</p>
           </CardContent>
         </Card>
         <Card>
@@ -136,14 +141,14 @@ const Reports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(averageSaleValue, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">Average per transaction</p>
+            <p className="text-xs text-muted-foreground">Average per completed sale (excluding refunds)</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Daily Sales Trend</CardTitle>
+          <CardTitle>Daily Sales & Refunds Trend</CardTitle>
         </CardHeader>
         <CardContent>
           {dailySalesData.length > 0 ? (
@@ -172,7 +177,7 @@ const Reports = () => {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-center text-muted-foreground">No sales data for the selected period.</p>
+            <p className="text-center text-muted-foreground">No sales or refund data for the selected period.</p>
           )}
         </CardContent>
       </Card>

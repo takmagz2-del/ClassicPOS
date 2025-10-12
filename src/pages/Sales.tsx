@@ -141,6 +141,7 @@ const Sales = () => {
       tax: currentTax,
       total: currentFinalTotal,
       status: "completed",
+      type: "sale", // Explicitly set type to "sale"
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
       customerName: selectedCustomer?.name,

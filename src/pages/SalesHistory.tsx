@@ -13,24 +13,34 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { Sale } from "@/types/sale";
-import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog"; // Import ReceiptPreviewDialog
-import { useCustomers } from "@/context/CustomerContext"; // Import useCustomers
-import { Customer } from "@/types/customer"; // Import Customer type
+import { Sale, SaleItem } from "@/types/sale";
+import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
+import RefundDialog from "@/components/sales/RefundDialog"; // Import RefundDialog
+import { useCustomers } from "@/context/CustomerContext";
+import { Customer } from "@/types/customer";
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 const SalesHistory = () => {
-  const { salesHistory } = useSales();
-  const { customers } = useCustomers(); // Use customers context
+  const { salesHistory, refundSale } = useSales();
+  const { customers } = useCustomers();
+  const { increaseProductStock } = useProducts(); // Use increaseProductStock
+  const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [statusFilter, setStatusFilter] = useState<string>("all"); // "all", "completed", "pending", "cancelled"
-  const [sortKey, setSortKey] = useState<keyof Sale>("date"); // 'date', 'total'
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); // 'asc', 'desc'
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortKey, setSortKey] = useState<keyof Sale>("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [selectedSaleForReceipt, setSelectedSaleForReceipt] = useState<Sale | null>(null);
   const [selectedCustomerForReceipt, setSelectedCustomerForReceipt] = useState<Customer | undefined>(undefined);
+
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState<boolean>(false); // New state for refund dialog
+  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null); // New state for selected sale to refund
 
   const filteredAndSortedSales = useMemo(() => {
     let filteredSales = salesHistory;
@@ -91,6 +101,42 @@ const SalesHistory = () => {
       setSelectedCustomerForReceipt(undefined);
     }
     setIsReceiptDialogOpen(true);
+  };
+
+  const handleRefundSale = (sale: Sale) => {
+    setSelectedSaleForRefund(sale);
+    setIsRefundDialogOpen(true);
+  };
+
+  const handleConfirmRefund = (refundItems: SaleItem[], refundTotal: number) => {
+    if (!selectedSaleForRefund) return;
+
+    const newRefundTransaction: Sale = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      items: refundItems.map(item => ({ ...item, quantity: -item.quantity })), // Negative quantities for refund
+      subtotal: -refundTotal, // Negative subtotal
+      tax: -(selectedSaleForRefund.tax / selectedSaleForRefund.subtotal) * refundTotal, // Proportionate tax
+      total: -refundTotal, // Negative total
+      status: "completed", // Refund is a completed transaction
+      type: "refund", // Set type to "refund"
+      originalSaleId: selectedSaleForRefund.id,
+      customerId: selectedSaleForRefund.customerId,
+      customerName: selectedSaleForRefund.customerName,
+      discountPercentage: selectedSaleForRefund.discountPercentage,
+      discountAmount: selectedSaleForRefund.discountAmount,
+    };
+
+    refundSale(newRefundTransaction); // Add the refund transaction to sales history
+
+    // Increase product stock for refunded items
+    refundItems.forEach(item => {
+      increaseProductStock(item.productId, item.quantity);
+    });
+
+    toast.success(`Refund processed for Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}. Total: ${formatCurrency(refundTotal, currentCurrency)}`);
+    setIsRefundDialogOpen(false);
+    setSelectedSaleForRefund(null);
   };
 
   return (
@@ -181,7 +227,7 @@ const SalesHistory = () => {
               </SelectContent>
             </Select>
           </div>
-          <SalesTable sales={filteredAndSortedSales} onViewReceipt={handleViewReceipt} />
+          <SalesTable sales={filteredAndSortedSales} onViewReceipt={handleViewReceipt} onRefundSale={handleRefundSale} />
         </CardContent>
       </Card>
 
@@ -191,6 +237,15 @@ const SalesHistory = () => {
           onClose={() => setIsReceiptDialogOpen(false)}
           sale={selectedSaleForReceipt}
           customer={selectedCustomerForReceipt}
+        />
+      )}
+
+      {selectedSaleForRefund && (
+        <RefundDialog
+          isOpen={isRefundDialogOpen}
+          onClose={() => setIsRefundDialogOpen(false)}
+          sale={selectedSaleForRefund}
+          onRefundConfirm={handleConfirmRefund}
         />
       )}
     </div>

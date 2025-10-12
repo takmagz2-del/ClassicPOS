@@ -25,18 +25,20 @@ const Dashboard = () => {
   const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
 
   useEffect(() => {
-    // Calculate Total Revenue
-    const revenue = salesHistory.reduce((sum, sale) => sum + sale.total, 0);
+    // Calculate Total Revenue (subtract refunds)
+    const revenue = salesHistory.reduce((sum, sale) => {
+      return sum + (sale.type === "sale" ? sale.total : sale.total); // Refunds have negative total, so just add
+    }, 0);
     setTotalRevenue(revenue);
 
-    // Calculate Sales Today
+    // Calculate Sales Today (subtract refunds)
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day
     const salesForToday = salesHistory.filter(sale => {
       const saleDate = new Date(sale.date);
       saleDate.setHours(0, 0, 0, 0);
       return saleDate.getTime() === today.getTime();
-    }).reduce((sum, sale) => sum + sale.total, 0);
+    }).reduce((sum, sale) => sum + (sale.type === "sale" ? sale.total : sale.total), 0); // Refunds have negative total
     setSalesToday(salesForToday);
 
     // Calculate Products in Stock
@@ -48,7 +50,7 @@ const Dashboard = () => {
 
   }, [salesHistory, products, customers]);
 
-  // Get recent sales for display
+  // Get recent sales for display (including refunds for history, but maybe filter for "sales" if desired)
   const recentSales = [...salesHistory]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
@@ -107,7 +109,7 @@ const Dashboard = () => {
 
       <Card className="flex-1">
         <CardHeader>
-          <CardTitle>Recent Sales</CardTitle>
+          <CardTitle>Recent Sales & Refunds</CardTitle>
         </CardHeader>
         <CardContent>
           {recentSales.length > 0 ? (
@@ -115,7 +117,9 @@ const Dashboard = () => {
               {recentSales.map((sale) => (
                 <div key={sale.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
                   <div>
-                    <p className="font-medium">Sale ID: {sale.id.substring(0, 8)}</p>
+                    <p className="font-medium">
+                      {sale.type === "refund" ? "Refund" : "Sale"} ID: {sale.id.substring(0, 8)}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {sale.customerName ? `Customer: ${sale.customerName}` : "Walk-in Customer"}
                     </p>
@@ -123,12 +127,14 @@ const Dashboard = () => {
                       {format(new Date(sale.date), "MMM dd, yyyy HH:mm")}
                     </p>
                   </div>
-                  <span className="font-semibold text-lg">{formatCurrency(sale.total, currentCurrency)}</span>
+                  <span className={`font-semibold text-lg ${sale.type === "refund" ? "text-destructive" : ""}`}>
+                    {sale.type === "refund" ? "-" : ""}{formatCurrency(Math.abs(sale.total), currentCurrency)}
+                  </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">No recent sales to display.</p>
+            <p className="text-muted-foreground">No recent sales or refunds to display.</p>
           )}
         </CardContent>
       </Card>
