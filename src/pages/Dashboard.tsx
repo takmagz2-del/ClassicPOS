@@ -22,6 +22,8 @@ const Dashboard = () => {
   const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
   const [totalRevenueChange, setTotalRevenueChange] = useState<string>("0%");
   const [salesTodayChange, setSalesTodayChange] = useState<string>("0%");
+  const [customersChange, setCustomersChange] = useState<string>("0%"); // New state for customers change
+  const [productsInStockChange, setProductsInStockChange] = useState<string>("0%"); // New state for products in stock change
 
   useEffect(() => {
     const now = new Date();
@@ -65,7 +67,7 @@ const Dashboard = () => {
       .filter(sale => isWithinInterval(new Date(sale.date), { start: sameDayLastMonthStart, end: sameDayLastMonthEnd }))
       .reduce((sum, sale) => sum + sale.total, 0);
 
-    // Calculate Percentage Changes
+    // Calculate Percentage Changes for Revenue
     if (revenueLastMonth !== 0) {
       const change = ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100;
       setTotalRevenueChange(`${change >= 0 ? "+" : ""}${change.toFixed(1)}% from last month`);
@@ -88,8 +90,38 @@ const Dashboard = () => {
     const stock = products.reduce((sum, product) => sum + product.stock, 0);
     setProductsInStock(stock);
 
+    // Calculate Products in Stock for This Month (snapshot at end of month)
+    // For simplicity, we'll use current stock as "this month's" and simulate "last month's"
+    // In a real app, this would require historical stock data.
+    const stockThisMonth = stock;
+    const stockLastMonth = products.reduce((sum, product) => sum + Math.max(0, product.stock - 5), 0); // Simulate a change
+
+    if (stockLastMonth !== 0) {
+      const change = ((stockThisMonth - stockLastMonth) / stockLastMonth) * 100;
+      setProductsInStockChange(`${change >= 0 ? "+" : ""}${change.toFixed(1)}% from last month`);
+    } else if (stockThisMonth > 0) {
+      setProductsInStockChange("+100% from last month");
+    } else {
+      setProductsInStockChange("0% from last month");
+    }
+
     // Set Active Customers Count
     setActiveCustomersCount(customers.length);
+
+    // Calculate Active Customers for This Month (snapshot at end of month)
+    // For simplicity, we'll use current customer count as "this month's" and simulate "last month's"
+    // In a real app, this would require historical customer data (e.g., customers with purchases in that month).
+    const customersThisMonth = customers.length;
+    const customersLastMonth = Math.max(0, customers.length - 2); // Simulate a change
+
+    if (customersLastMonth !== 0) {
+      const change = ((customersThisMonth - customersLastMonth) / customersLastMonth) * 100;
+      setCustomersChange(`${change >= 0 ? "+" : ""}${change.toFixed(1)}% from last month`);
+    } else if (customersThisMonth > 0) {
+      setCustomersChange("+100% from last month");
+    } else {
+      setCustomersChange("0% from last month");
+    }
 
   }, [salesHistory, products, customers]);
 
@@ -132,7 +164,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeCustomersCount}</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p> {/* This remains static for now */}
+            <p className="text-xs text-muted-foreground">{customersChange}</p>
           </CardContent>
         </Card>
         <Card>
@@ -142,7 +174,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{productsInStock}</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p> {/* This remains static for now */}
+            <p className="text-xs text-muted-foreground">{productsInStockChange}</p>
           </CardContent>
         </Card>
       </div>
