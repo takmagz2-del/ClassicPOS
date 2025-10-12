@@ -7,24 +7,18 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { routesConfig } from "@/config/routesConfig";
-import BrandLogo from "@/components/layout/BrandLogo"; // Import BrandLogo
+import { usePageTitle } from "@/hooks/use-page-title"; // Import the new hook
+import BrandLogo from "@/components/layout/BrandLogo";
 
 const Header = () => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-  const location = useLocation();
+  const pageTitle = usePageTitle(); // Use the new hook
 
   const handleLinkClick = () => {
     if (isMobile) {
       setIsSheetOpen(false);
     }
-  };
-
-  // Function to get page title based on path from routesConfig
-  const getPageTitle = (pathname: string) => {
-    const route = routesConfig.find(r => r.path === pathname);
-    return route ? route.title : "ClassicPOS"; // Default title if route not found
   };
 
   return (
@@ -46,7 +40,7 @@ const Header = () => {
       {isMobile && !isSheetOpen ? (
         <BrandLogo />
       ) : (
-        <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
+        <h1 className="text-xl font-semibold ml-auto md:ml-0">{pageTitle}</h1>
       )}
     </header>
   );
