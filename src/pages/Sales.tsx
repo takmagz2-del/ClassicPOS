@@ -9,7 +9,6 @@ import SaleCart from "@/components/sales/SaleCart";
 import SaleSummary from "@/components/sales/SaleSummary";
 import GiftCardInput from "@/components/sales/GiftCardInput";
 import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
-import BNPLButtons from "@/components/sales/BNPLButtons";
 import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
@@ -17,16 +16,17 @@ import CustomerSelector from "@/components/sales/CustomerSelector";
 import { useCustomers } from "@/context/CustomerContext";
 import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog";
 import DiscountInput from "@/components/sales/DiscountInput";
-import LoyaltyPointsInput from "@/components/sales/LoyaltyPointsInput"; // New import
+import LoyaltyPointsInput from "@/components/sales/LoyaltyPointsInput";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
+import { PaymentMethod } from "@/types/payment"; // New import
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
   const { products, updateProductStock } = useProducts();
-  const { customers, updateCustomerLoyaltyPoints } = useCustomers(); // Use updateCustomerLoyaltyPoints
+  const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
 
@@ -36,8 +36,8 @@ const Sales = () => {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
   const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
-  const [appliedLoyaltyPoints, setAppliedLoyaltyPoints] = useState<number>(0); // New state for applied loyalty points
-  const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0); // New state for loyalty points discount amount
+  const [appliedLoyaltyPoints, setAppliedLoyaltyPoints] = useState<number>(0);
+  const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
 
@@ -49,7 +49,7 @@ const Sales = () => {
 
   const currentSubtotal = calculateSubtotal(cartItems);
   const calculatedDiscountAmount = currentSubtotal * (discountPercentage / 100);
-  const subtotalAfterDiscount = currentSubtotal - calculatedDiscountAmount - loyaltyPointsDiscountAmount; // Apply loyalty points discount here
+  const subtotalAfterDiscount = currentSubtotal - calculatedDiscountAmount - loyaltyPointsDiscountAmount;
   const currentTax = subtotalAfterDiscount * defaultTaxRate.rate;
   const currentTotalBeforeGiftCard = subtotalAfterDiscount + currentTax;
   const currentFinalTotal = Math.max(0, currentTotalBeforeGiftCard - appliedGiftCardAmount);
@@ -80,7 +80,7 @@ const Sales = () => {
     }
     toast.success(`${quantity}x ${product.name} added to cart.`);
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0); // Reset loyalty points on cart change
+    setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -103,7 +103,7 @@ const Sales = () => {
       )
     );
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0); // Reset loyalty points on cart change
+    setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -111,7 +111,7 @@ const Sales = () => {
     setCartItems((prev) => prev.filter((item) => item.productId !== productId));
     toast.info("Item removed from cart.");
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0); // Reset loyalty points on cart change
+    setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -120,8 +120,8 @@ const Sales = () => {
     setAppliedGiftCardAmount(0);
     setSelectedCustomerId(null);
     setDiscountPercentage(0);
-    setAppliedLoyaltyPoints(0); // Clear applied loyalty points
-    setLoyaltyPointsDiscountAmount(0); // Clear loyalty points discount
+    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsDiscountAmount(0);
     toast.info("Cart cleared.");
   };
 
@@ -150,7 +150,7 @@ const Sales = () => {
     }
 
     // For credit sales, a customer must be selected
-    if (paymentMethod === "Credit Account" && !selectedCustomer) {
+    if (paymentMethod.toLowerCase().includes("credit") && !selectedCustomer) {
       toast.error("A customer must be selected for a credit sale.");
       return;
     }
@@ -162,28 +162,26 @@ const Sales = () => {
       subtotal: currentSubtotal,
       tax: currentTax,
       total: currentFinalTotal,
-      status: paymentMethod === "Credit Account" ? "pending" : "completed",
+      status: paymentMethod.toLowerCase().includes("credit") ? "pending" : "completed",
       type: "sale",
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
       customerName: selectedCustomer?.name,
       discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
-      loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined, // Store used loyalty points
+      loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
       taxRateApplied: defaultTaxRate.rate,
       paymentMethod: paymentMethod,
     };
 
     addSale(newSale);
 
-    // Deduct loyalty points from customer if used
     if (selectedCustomer && appliedLoyaltyPoints > 0) {
       updateCustomerLoyaltyPoints(selectedCustomer.id, -appliedLoyaltyPoints);
     }
 
-    // Award new loyalty points (e.g., 1 point per $1 spent on subtotal after discounts, before tax)
     if (selectedCustomer) {
-      const pointsEarned = Math.floor(subtotalAfterDiscount); // Example: 1 point per dollar
+      const pointsEarned = Math.floor(subtotalAfterDiscount);
       if (pointsEarned > 0) {
         updateCustomerLoyaltyPoints(selectedCustomer.id, pointsEarned);
         toast.info(`${pointsEarned} loyalty points earned!`);
@@ -201,7 +199,7 @@ const Sales = () => {
     setIsReceiptDialogOpen(true);
 
     handleClearCart();
-    toast.success(`${paymentMethod === "Credit Account" ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
+    toast.success(`${paymentMethod.toLowerCase().includes("credit") ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
     if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
       const change = cashReceived - currentFinalTotal;
       toast.info(`Change due: ${formatCurrency(change, currentCurrency)}`);
@@ -209,12 +207,12 @@ const Sales = () => {
     setIsConfirmationDialogOpen(false);
   };
 
-  const openConfirmationDialog = (method: string) => {
+  const openConfirmationDialog = (method: PaymentMethod) => {
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
     }
-    setPaymentMethodToConfirm(method);
+    setPaymentMethodToConfirm(method.name);
     setIsConfirmationDialogOpen(true);
   };
 
@@ -248,13 +246,13 @@ const Sales = () => {
             <LoyaltyPointsInput
               availablePoints={selectedCustomer.loyaltyPoints}
               onApplyPoints={handleApplyLoyaltyPoints}
-              currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount} // Pass remaining total
+              currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
               appliedPoints={appliedLoyaltyPoints}
             />
           )}
           <GiftCardInput
             onApplyGiftCard={handleApplyGiftCard}
-            currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount} // Pass remaining total
+            currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
             appliedGiftCardAmount={appliedGiftCardAmount}
           />
           <SaleSummary
@@ -263,20 +261,11 @@ const Sales = () => {
             giftCardAmountUsed={appliedGiftCardAmount}
             discountPercentage={discountPercentage}
             discountAmount={calculatedDiscountAmount}
-            loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount} // Pass loyalty points discount
+            loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
           />
           <PaymentMethodButtons
-            onProcessSale={() => openConfirmationDialog("Cash/Card")}
-            onApplePay={() => openConfirmationDialog("Apple Pay")}
-            onGooglePay={() => openConfirmationDialog("Google Pay")}
-            onCreditSale={() => openConfirmationDialog("Credit Account")}
+            onSelectPaymentMethod={openConfirmationDialog}
             onClearCart={handleClearCart}
-            hasItemsInCart={cartItems.length > 0}
-            finalTotal={currentFinalTotal}
-          />
-          <BNPLButtons
-            onAfterpay={() => openConfirmationDialog("Afterpay")}
-            onKlarna={() => openConfirmationDialog("Klarna")}
             hasItemsInCart={cartItems.length > 0}
             finalTotal={currentFinalTotal}
           />
@@ -297,8 +286,8 @@ const Sales = () => {
             customer: selectedCustomer,
             discountPercentage: discountPercentage,
             discountAmount: calculatedDiscountAmount,
-            loyaltyPointsUsed: appliedLoyaltyPoints, // Pass loyalty points used
-            loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount, // Pass loyalty points discount amount
+            loyaltyPointsUsed: appliedLoyaltyPoints,
+            loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount,
             taxRateApplied: defaultTaxRate.rate,
           }}
           paymentMethod={paymentMethodToConfirm}

@@ -12,7 +12,8 @@ import CategorySettingsForm from "@/components/settings/CategorySettingsForm";
 import UserManagementTable from "@/components/settings/UserManagementTable";
 import UserForm from "@/components/settings/UserForm";
 import DeleteUserDialog from "@/components/settings/DeleteUserDialog";
-import UserProfileForm from "@/components/settings/UserProfileForm"; // New import
+import UserProfileForm from "@/components/settings/UserProfileForm";
+import PaymentMethodSettingsForm from "@/components/settings/PaymentMethodSettingsForm"; // New import
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
@@ -207,6 +208,15 @@ const Settings = () => {
         </CardHeader>
         <CardContent>
           <CategorySettingsForm />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Method Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PaymentMethodSettingsForm />
         </CardContent>
       </Card>
     </div>
