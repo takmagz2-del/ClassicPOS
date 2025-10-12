@@ -11,6 +11,7 @@ interface ProductContextType {
   updateProduct: (updatedProduct: Product) => void;
   addProduct: (newProduct: Product) => void;
   deleteProduct: (productId: string) => void;
+  reassignProductsToCategory: (oldCategoryId: string, newCategoryId: string) => void; // New function
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -44,8 +45,16 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     setProducts((prevProducts) => prevProducts.filter((p) => p.id !== productId));
   }, []);
 
+  const reassignProductsToCategory = useCallback((oldCategoryId: string, newCategoryId: string) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.categoryId === oldCategoryId ? { ...product, categoryId: newCategoryId } : product
+      )
+    );
+  }, []);
+
   return (
-    <ProductContext.Provider value={{ products, updateProductStock, increaseProductStock, updateProduct, addProduct, deleteProduct }}>
+    <ProductContext.Provider value={{ products, updateProductStock, increaseProductStock, updateProduct, addProduct, deleteProduct, reassignProductsToCategory }}>
       {children}
     </ProductContext.Provider>
   );

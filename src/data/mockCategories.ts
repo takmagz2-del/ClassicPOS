@@ -6,4 +6,5 @@ export const mockCategories: Category[] = [
   { id: "cat-3", name: "Storage" },
   { id: "cat-4", name: "Furniture" },
   { id: "cat-5", name: "Books" },
+  { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true }, // Added default Uncategorized category
 ];

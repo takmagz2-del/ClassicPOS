@@ -9,8 +9,9 @@ interface CategoryContextType {
   categories: Category[];
   addCategory: (name: string) => void;
   updateCategory: (updatedCategory: Category) => void;
-  deleteCategory: (id: string) => void;
+  deleteCategory: (id: string) => string | null; // Returns uncategorizedId if products need reassigning
   getCategoryName: (id: string) => string;
+  getUncategorizedCategoryId: () => string; // New: Function to get the ID of the 'Uncategorized' category
 }
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
@@ -19,7 +20,13 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
   const [categories, setCategories] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       const storedCategories = localStorage.getItem("productCategories");
-      return storedCategories ? JSON.parse(storedCategories) : mockCategories;
+      const parsedCategories: Category[] = storedCategories ? JSON.parse(storedCategories) : mockCategories;
+
+      // Ensure 'Uncategorized' category exists
+      if (!parsedCategories.some(cat => cat.isUncategorized)) {
+        return [...parsedCategories, { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true }];
+      }
+      return parsedCategories;
     }
     return mockCategories;
   });
@@ -28,6 +35,17 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("productCategories", JSON.stringify(categories));
     }
+  }, [categories]);
+
+  const getUncategorizedCategoryId = useCallback(() => {
+    const uncategorized = categories.find(cat => cat.isUncategorized);
+    if (!uncategorized) {
+      // This should ideally not happen due to the initial state logic, but as a fallback
+      const newUncategorized: Category = { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true };
+      setCategories(prev => [...prev, newUncategorized]);
+      return newUncategorized.id;
+    }
+    return uncategorized.id;
   }, [categories]);
 
   const addCategory = useCallback((name: string) => {
@@ -51,17 +69,27 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
     toast.success(`Category "${updatedCategory.name}" updated.`);
   }, [categories]);
 
-  const deleteCategory = useCallback((id: string) => {
+  const deleteCategory = useCallback((id: string): string | null => {
+    const categoryToDelete = categories.find(cat => cat.id === id);
+    if (!categoryToDelete) return null;
+
+    if (categoryToDelete.isUncategorized) {
+      toast.error("The 'Uncategorized' category cannot be deleted.");
+      return null;
+    }
+
+    const uncategorizedId = getUncategorizedCategoryId();
     setCategories((prev) => prev.filter((cat) => cat.id !== id));
-    toast.info("Category deleted.");
-  }, []);
+    toast.info(`Category "${categoryToDelete.name}" deleted.`);
+    return uncategorizedId; // Return the ID of the uncategorized category for product reassignment
+  }, [categories, getUncategorizedCategoryId]);
 
   const getCategoryName = useCallback((id: string) => {
     return categories.find(cat => cat.id === id)?.name || "Uncategorized";
   }, [categories]);
 
   return (
-    <CategoryContext.Provider value={{ categories, addCategory, updateCategory, deleteCategory, getCategoryName }}>
+    <CategoryContext.Provider value={{ categories, addCategory, updateCategory, deleteCategory, getCategoryName, getUncategorizedCategoryId }}>
       {children}
     </CategoryContext.Provider>
   );

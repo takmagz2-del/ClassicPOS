@@ -38,8 +38,8 @@ const formSchema = z.object({
 type CategoryFormValues = z.infer<typeof formSchema>;
 
 const CategorySettingsForm = () => {
-  const { categories, addCategory, updateCategory, deleteCategory } = useCategories();
-  const { products } = useProducts(); // Get products to check for category usage
+  const { categories, addCategory, updateCategory, deleteCategory, getUncategorizedCategoryId } = useCategories();
+  const { products, reassignProductsToCategory } = useProducts(); // Get products and reassign function
 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
@@ -86,14 +86,22 @@ const CategorySettingsForm = () => {
 
   const confirmDelete = () => {
     if (categoryToDelete) {
-      const hasAssociatedProducts = products.some(product => product.categoryId === categoryToDelete.id);
-      if (hasAssociatedProducts) {
-        toast.error(`Cannot delete category "${categoryToDelete.name}" because it has associated products. Please reassign or delete products first.`);
+      if (categoryToDelete.isUncategorized) {
+        toast.error("The 'Uncategorized' category cannot be deleted.");
         setIsDeleteDialogOpen(false);
         setCategoryToDelete(null);
         return;
       }
-      deleteCategory(categoryToDelete.id);
+
+      const productsInDeletedCategory = products.filter(product => product.categoryId === categoryToDelete.id);
+      const uncategorizedId = getUncategorizedCategoryId();
+
+      if (productsInDeletedCategory.length > 0) {
+        reassignProductsToCategory(categoryToDelete.id, uncategorizedId);
+        toast.info(`${productsInDeletedCategory.length} products reassigned to 'Uncategorized'.`);
+      }
+
+      deleteCategory(categoryToDelete.id); // This now returns uncategorizedId, but we already handled reassignment
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
     }
@@ -117,11 +125,11 @@ const CategorySettingsForm = () => {
                     <p className="font-medium">{category.name}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(category)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(category)} disabled={category.isUncategorized}>
                       <Edit className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(category)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(category)} disabled={category.isUncategorized}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                       <span className="sr-only">Delete</span>
                     </Button>
@@ -152,7 +160,7 @@ const CategorySettingsForm = () => {
                   <FormItem>
                     <FormLabel>Category Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Electronics" {...field} />
+                      <Input placeholder="e.g., Electronics" {...field} disabled={editingCategory?.isUncategorized} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -174,12 +182,20 @@ const CategorySettingsForm = () => {
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the category{" "}
               <span className="font-semibold text-foreground">"{categoryToDelete?.name}"</span>.
-              Any products currently assigned to this category will become "Uncategorized".
+              {categoryToDelete && products.some(product => product.categoryId === categoryToDelete.id) ? (
+                <p className="mt-2">
+                  Any products currently assigned to this category will be automatically reassigned to the "Uncategorized" category.
+                </p>
+              ) : (
+                <p className="mt-2">
+                  This category has no associated products.
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={categoryToDelete?.isUncategorized}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
