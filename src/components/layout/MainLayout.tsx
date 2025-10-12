@@ -1,11 +1,10 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import Sidebar from "@/components/layout/Sidebar"; // Corrected import path
-import Header from "@/components/layout/Header"; // Corrected import path
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Package2 } from "lucide-react"; // Added missing import
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,15 +18,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {!isMobile && (
         <div className="hidden border-r bg-muted/40 md:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
-            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <a href="/" className="flex items-center gap-2 font-semibold">
-                <Package2 className="h-6 w-6" />
-                <span className="">ClassicPOS</span>
-              </a>
-            </div>
-            <div className="flex-1">
-              <Sidebar />
-            </div>
+            {/* The Sidebar component now includes its own header/branding */}
+            <Sidebar /> {/* Directly render Sidebar */}
           </div>
         </div>
       )}
