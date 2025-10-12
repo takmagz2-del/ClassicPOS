@@ -13,7 +13,7 @@ import UserManagementTable from "@/components/settings/UserManagementTable";
 import UserForm from "@/components/settings/UserForm";
 import DeleteUserDialog from "@/components/settings/DeleteUserDialog";
 import UserProfileForm from "@/components/settings/UserProfileForm";
-import PaymentMethodSettingsForm from "@/components/settings/PaymentMethodSettingsForm"; // New import
+import PaymentMethodSettingsForm from "@/components/settings/PaymentMethodSettingsForm";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
@@ -65,7 +65,6 @@ const Settings = () => {
       role: values.role,
     };
 
-    // Pass the editingUser.id as the first argument
     return await updateUser(editingUser.id, updatedUserFields, undefined, values.password || undefined);
   };
 
@@ -82,6 +81,7 @@ const Settings = () => {
   };
 
   const canManageUsers = hasPermission([UserRole.ADMIN, UserRole.MANAGER]);
+  const canManageAppSettings = hasPermission([UserRole.ADMIN, UserRole.MANAGER]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -174,50 +174,54 @@ const Settings = () => {
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Receipt Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ReceiptSettingsForm />
-        </CardContent>
-      </Card>
+      {canManageAppSettings && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Receipt Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReceiptSettingsForm />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Printer Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PrinterSettingsForm />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Printer Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PrinterSettingsForm />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tax Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TaxSettingsForm />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Tax Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TaxSettingsForm />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Category Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CategorySettingsForm />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CategorySettingsForm />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Method Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PaymentMethodSettingsForm />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Method Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PaymentMethodSettingsForm />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
