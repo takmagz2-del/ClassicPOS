@@ -5,7 +5,8 @@ import { AuthProvider } from "@/components/auth/AuthContext";
 import { SaleProvider } from "@/context/SaleContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { CustomerProvider } from "@/context/CustomerContext";
-import { CurrencyProvider } from "@/context/CurrencyContext"; // New import
+import { CurrencyProvider } from "@/context/CurrencyContext";
+import { ReceiptSettingsProvider } from "@/context/ReceiptSettingsContext"; // New import
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
@@ -24,30 +25,32 @@ function App() {
         <ProductProvider>
           <CustomerProvider>
             <SaleProvider>
-              <CurrencyProvider> {/* Wrap with CurrencyProvider */}
-                <Toaster richColors position="top-right" />
-                <Routes>
-                  <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
-                  <Route path="/signup" element={SignupComponent ? <SignupComponent /> : null} />
+              <CurrencyProvider>
+                <ReceiptSettingsProvider> {/* Wrap with ReceiptSettingsProvider */}
+                  <Toaster richColors position="top-right" />
+                  <Routes>
+                    <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
+                    <Route path="/signup" element={SignupComponent ? <SignupComponent /> : null} />
 
-                  <Route path="/" element={<ProtectedRoute />}>
-                    {routesConfig.map((route) => {
-                      if (route.path !== "/login" && route.path !== "/signup") {
-                        const Component = route.component;
-                        return (
-                          <Route
-                            key={route.path}
-                            path={route.path === "/" ? undefined : route.path.replace(/^\//, '')}
-                            index={route.path === "/"}
-                            element={<Component />}
-                          />
-                        );
-                      }
-                      return null;
-                    })}
-                  </Route>
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                    <Route path="/" element={<ProtectedRoute />}>
+                      {routesConfig.map((route) => {
+                        if (route.path !== "/login" && route.path !== "/signup") {
+                          const Component = route.component;
+                          return (
+                            <Route
+                              key={route.path}
+                              path={route.path === "/" ? undefined : route.path.replace(/^\//, '')}
+                              index={route.path === "/"}
+                              element={<Component />}
+                            />
+                          );
+                        }
+                        return null;
+                      })}
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </ReceiptSettingsProvider>
               </CurrencyProvider>
             </SaleProvider>
           </CustomerProvider>
