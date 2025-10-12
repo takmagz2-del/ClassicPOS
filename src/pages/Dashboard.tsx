@@ -14,6 +14,7 @@ import LowStockProducts from "@/components/dashboard/LowStockProducts";
 import TopCustomers from "@/components/dashboard/TopCustomers";
 import CategorySalesChart from "@/components/dashboard/CategorySalesChart";
 import RecentSales from "@/components/dashboard/RecentSales";
+import QuickActionsToolbar from "@/components/dashboard/QuickActionsToolbar"; // Import the new component
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -109,6 +110,9 @@ const Dashboard = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
       </div>
+
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
