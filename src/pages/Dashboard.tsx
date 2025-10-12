@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useCustomers } from "@/context/CustomerContext";
-import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, isWithinInterval, subDays, eachDayOfInterval } from "date-fns";
 import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Sale } from "@/types/sale";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -22,8 +24,9 @@ const Dashboard = () => {
   const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
   const [totalRevenueChange, setTotalRevenueChange] = useState<string>("0%");
   const [salesTodayChange, setSalesTodayChange] = useState<string>("0%");
-  const [customersChange, setCustomersChange] = useState<string>("0%"); // New state for customers change
-  const [productsInStockChange, setProductsInStockChange] = useState<string>("0%"); // New state for products in stock change
+  const [customersChange, setCustomersChange] = useState<string>("0%");
+  const [productsInStockChange, setProductsInStockChange] = useState<string>("0%");
+  const [salesOverviewData, setSalesOverviewData] = useState<{ date: string; sales: number }[]>([]);
 
   useEffect(() => {
     const now = new Date();
@@ -91,8 +94,6 @@ const Dashboard = () => {
     setProductsInStock(stock);
 
     // Calculate Products in Stock for This Month (snapshot at end of month)
-    // For simplicity, we'll use current stock as "this month's" and simulate "last month's"
-    // In a real app, this would require historical stock data.
     const stockThisMonth = stock;
     const stockLastMonth = products.reduce((sum, product) => sum + Math.max(0, product.stock - 5), 0); // Simulate a change
 
@@ -108,9 +109,7 @@ const Dashboard = () => {
     // Set Active Customers Count
     setActiveCustomersCount(customers.length);
 
-    // Calculate Active Customers for This Month (snapshot at end of month)
-    // For simplicity, we'll use current customer count as "this month's" and simulate "last month's"
-    // In a real app, this would require historical customer data (e.g., customers with purchases in that month).
+    // Calculate Active Customers for This Month
     const customersThisMonth = customers.length;
     const customersLastMonth = Math.max(0, customers.length - 2); // Simulate a change
 
@@ -123,12 +122,26 @@ const Dashboard = () => {
       setCustomersChange("0% from last month");
     }
 
-  }, [salesHistory, products, customers]);
+    // Calculate Sales Overview Data for the last 30 days
+    const thirtyDaysAgo = subDays(now, 29);
+    const dateInterval = eachDayOfInterval({ start: thirtyDaysAgo, end: now });
 
-  // Get recent sales for display (including refunds for history, but maybe filter for "sales" if desired)
-  const recentSales = [...salesHistory]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+    const salesByDay = dateInterval.map(day => {
+      const dayStart = startOfDay(day);
+      const dayEnd = endOfDay(day);
+
+      const total = salesHistory
+        .filter(sale => isWithinInterval(new Date(sale.date), { start: dayStart, end: dayEnd }))
+        .reduce((sum, sale) => sum + sale.total, 0);
+
+      return {
+        date: format(day, 'MMM dd'),
+        sales: total
+      };
+    });
+    setSalesOverviewData(salesByDay);
+
+  }, [salesHistory, products, customers]);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -177,39 +190,38 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">{productsInStockChange}</p>
           </CardContent>
         </Card>
-      </div>
 
-      <Card className="flex-1">
-        <CardHeader>
-          <CardTitle>Recent Sales & Refunds</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentSales.length > 0 ? (
-            <div className="space-y-4">
-              {recentSales.map((sale) => (
-                <div key={sale.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
-                  <div>
-                    <p className="font-medium">
-                      {sale.type === "refund" ? "Refund" : "Sale"} ID: {sale.id.substring(0, 8)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {sale.customerName ? `Customer: ${sale.customerName}` : "Walk-in Customer"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(sale.date), "MMM dd, yyyy HH:mm")}
-                    </p>
-                  </div>
-                  <span className={`font-semibold text-lg ${sale.type === "refund" ? "text-destructive" : ""}`}>
-                    {sale.type === "refund" ? "-" : ""}{formatCurrency(Math.abs(sale.total), currentCurrency)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No recent sales or refunds to display.</p>
-          )}
-        </CardContent>
-      </Card>
+        <Card className="md:col-span-2 lg:col-span-4">
+          <CardHeader>
+            <CardTitle>Sales Overview (Last 30 Days)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {salesOverviewData.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={salesOverviewData}
+                    margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis tickFormatter={(value) => formatCurrency(value, currentCurrency)} />
+                    <Tooltip formatter={(value: number) => formatCurrency(value, currentCurrency)} />
+                    <Line
+                      type="monotone"
+                      dataKey="sales"
+                      stroke="hsl(var(--primary))"
+                      activeDot={{ r: 8 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground">No sales data to display for the last 30 days.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
