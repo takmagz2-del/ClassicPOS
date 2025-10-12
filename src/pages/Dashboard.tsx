@@ -13,6 +13,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import LowStockProducts from "@/components/dashboard/LowStockProducts";
 import TopCustomers from "@/components/dashboard/TopCustomers";
 import CategorySalesChart from "@/components/dashboard/CategorySalesChart";
+import RecentSales from "@/components/dashboard/RecentSales";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -152,7 +153,7 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Sales Overview (Last 30 Days)</CardTitle>
@@ -185,12 +186,13 @@ const Dashboard = () => {
         </Card>
 
         <div className="lg:col-span-3">
-          <LowStockProducts products={products} />
+          <RecentSales />
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <TopCustomers />
+        <LowStockProducts products={products} />
         <CategorySalesChart />
       </div>
     </div>
