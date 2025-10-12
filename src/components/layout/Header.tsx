@@ -23,7 +23,7 @@ const Header = () => {
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
       case "/":
-        return "Dashboard"; // Updated for the new Dashboard page
+        return "Dashboard";
       case "/products":
         return "Products";
       case "/customers":
@@ -56,28 +56,14 @@ const Header = () => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="sm:max-w-xs p-0">
-            <nav className="grid gap-6 text-lg font-medium pt-6">
-              <Link
-                to="/"
-                className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                onClick={handleLinkClick}
-              >
-                <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                <span className="sr-only">ClassicPOS</span>
-              </Link>
-              <Sidebar onLinkClick={handleLinkClick} />
-            </nav>
+            {/* The Sidebar component already contains the logo and title */}
+            <Sidebar onLinkClick={handleLinkClick} />
           </SheetContent>
         </Sheet>
       )}
-      <Link
-        to="/"
-        className="hidden sm:flex items-center gap-2 text-lg font-semibold md:text-base"
-      >
-        <Package2 className="h-6 w-6" />
-        <span className="sr-only">ClassicPOS</span>
-      </Link>
-      <h1 className="text-xl font-semibold ml-auto">{getPageTitle(location.pathname)}</h1>
+      {/* On desktop, the sidebar already shows the app title. On mobile, the sheet shows it. */}
+      {/* This h1 will display the current page title */}
+      <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
     </header>
   );
 };
