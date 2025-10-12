@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
 import { User, UserRole } from "@/types/user";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Settings = () => {
   const { user, disableMfa, users, addUser, updateUser, deleteUser, hasPermission } = useAuth();
@@ -86,142 +87,157 @@ const Settings = () => {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold">Settings</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>User Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserProfileForm />
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Two-Factor Authentication (MFA)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {user?.mfaEnabled ? (
-            <div className="space-y-4">
-              <p className="text-muted-foreground">MFA is currently enabled for your account.</p>
-              <Button variant="destructive" onClick={handleDisableMfa}>
-                Disable MFA
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-muted-foreground">MFA is currently disabled. Enable it for enhanced security.</p>
-              {!showMfaSetup ? (
-                <Button onClick={() => setShowMfaSetup(true)}>
-                  Enable MFA
-                </Button>
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          {canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
+          {canManageAppSettings && <TabsTrigger value="application">Application</TabsTrigger>}
+          {canManageAppSettings && <TabsTrigger value="business">Business</TabsTrigger>}
+        </TabsList>
+
+        <TabsContent value="profile" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UserProfileForm />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Two-Factor Authentication (MFA)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {user?.mfaEnabled ? (
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">MFA is currently enabled for your account.</p>
+                  <Button variant="destructive" onClick={handleDisableMfa}>
+                    Disable MFA
+                  </Button>
+                </div>
               ) : (
-                <MfaSetup onSetupComplete={handleMfaSetupComplete} />
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">MFA is currently disabled. Enable it for enhanced security.</p>
+                  {!showMfaSetup ? (
+                    <Button onClick={() => setShowMfaSetup(true)}>
+                      Enable MFA
+                    </Button>
+                  ) : (
+                    <MfaSetup onSetupComplete={handleMfaSetupComplete} />
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {canManageUsers && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>User Management</CardTitle>
-            <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Add User
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Add New User</DialogTitle>
-                </DialogHeader>
-                <UserForm onUserSubmit={handleAddUserSubmit} onClose={() => setIsAddUserDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent>
-            <UserManagementTable
-              users={users}
-              onEditUser={handleEditUserClick}
-              onDeleteUser={handleDeleteUserClick}
-            />
+        {canManageUsers && (
+          <TabsContent value="users" className="mt-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>User Management</CardTitle>
+                <Dialog open={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New User</DialogTitle>
+                    </DialogHeader>
+                    <UserForm onUserSubmit={handleAddUserSubmit} onClose={() => setIsAddUserDialogOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                <UserManagementTable
+                  users={users}
+                  onEditUser={handleEditUserClick}
+                  onDeleteUser={handleDeleteUserClick}
+                />
 
-            {editingUser && (
-              <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Edit User</DialogTitle>
-                  </DialogHeader>
-                  <UserForm
-                    initialUser={editingUser}
-                    onUserSubmit={handleUpdateUserSubmit}
-                    onClose={() => setIsEditUserDialogOpen(false)}
+                {editingUser && (
+                  <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                      </DialogHeader>
+                      <UserForm
+                        initialUser={editingUser}
+                        onUserSubmit={handleUpdateUserSubmit}
+                        onClose={() => setIsEditUserDialogOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
+
+                {deletingUser && (
+                  <DeleteUserDialog
+                    user={deletingUser}
+                    isOpen={isDeleteUserDialogOpen}
+                    onClose={() => setIsDeleteUserDialogOpen(false)}
+                    onConfirm={confirmDeleteUser}
                   />
-                </DialogContent>
-              </Dialog>
-            )}
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
-            {deletingUser && (
-              <DeleteUserDialog
-                user={deletingUser}
-                isOpen={isDeleteUserDialogOpen}
-                onClose={() => setIsDeleteUserDialogOpen(false)}
-                onConfirm={confirmDeleteUser}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
+        {canManageAppSettings && (
+          <TabsContent value="application" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Receipt Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ReceiptSettingsForm />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Printer Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PrinterSettingsForm />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Method Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PaymentMethodSettingsForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
-      {canManageAppSettings && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Receipt Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ReceiptSettingsForm />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Printer Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PrinterSettingsForm />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Tax Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TaxSettingsForm />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Category Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CategorySettingsForm />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Method Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PaymentMethodSettingsForm />
-            </CardContent>
-          </Card>
-        </>
-      )}
+        {canManageAppSettings && (
+          <TabsContent value="business" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tax Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TaxSettingsForm />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Category Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CategorySettingsForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 };
