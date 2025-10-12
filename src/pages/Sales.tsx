@@ -21,7 +21,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
-import { PaymentMethod } from "@/types/payment"; // New import
+import { PaymentMethod } from "@/types/payment";
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
