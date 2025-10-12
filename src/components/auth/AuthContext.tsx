@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TOTP, Secret } from "otpauth";
-import { User, UserRole } from "@/types/user"; // Import User and UserRole
+import { User, UserRole } from "@/types/user";
 
 interface LoginResult {
   success: boolean;
@@ -13,7 +13,7 @@ interface LoginResult {
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: User | null; // Updated user type
+  user: User | null;
   login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<LoginResult>;
   register: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -22,29 +22,26 @@ interface AuthContextType {
   generateBackupCodes: (email: string) => Promise<string[]>;
   saveBackupCodes: (email: string, codes: string[]) => void;
   disableMfa: () => Promise<boolean>;
-  // New user management functions
   users: User[];
   addUser: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  updateUser: (updatedUser: User) => Promise<boolean>;
+  updateUser: (updatedUser: User & { password?: string }) => Promise<boolean>; // Updated type to include optional password
   deleteUser: (userId: string) => Promise<boolean>;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null); // Updated user type
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
-  // Mock user data for demonstration, in a real app this would come from a backend
   const [mockUsers, setMockUsers] = useState<{ [key: string]: User & { password: string; tempMfaSecret?: string; tempBackupCodes?: string[] } }>({
     "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN },
     "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER },
     "employee@example.com": { id: "u3", email: "employee@example.com", password: "password", mfaEnabled: false, role: UserRole.EMPLOYEE },
   });
 
-  // Convert mockUsers object to an array for easier iteration in UI
   const usersArray = Object.values(mockUsers).map(({ password, tempMfaSecret, tempBackupCodes, ...rest }) => rest);
 
   useEffect(() => {
@@ -139,7 +136,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
         const newUserId = crypto.randomUUID();
         setMockUsers((prev) => ({
           ...prev,
-          [email]: { id: newUserId, email, password, mfaEnabled: false, role: UserRole.EMPLOYEE }, // Default role for new registrations
+          [email]: { id: newUserId, email, password, mfaEnabled: false, role: UserRole.EMPLOYEE },
         }));
         toast.success("Account created successfully! Please log in.");
         resolve(true);
@@ -254,7 +251,6 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
     return true;
   };
 
-  // New User Management Functions
   const addUser = async (email: string, password: string, role: UserRole): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -274,24 +270,29 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
     });
   };
 
-  const updateUser = async (updatedUser: User): Promise<boolean> => {
+  const updateUser = async (updatedUser: User & { password?: string }): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (!mockUsers[updatedUser.email]) {
+        const existingUser = mockUsers[updatedUser.email];
+        if (!existingUser) {
           toast.error("User not found.");
           resolve(false);
           return;
         }
+
+        const newUserData = { ...existingUser, ...updatedUser };
+        if (updatedUser.password) {
+          newUserData.password = updatedUser.password; // Update password if provided
+        }
+
         setMockUsers((prev) => ({
           ...prev,
-          [updatedUser.email]: {
-            ...prev[updatedUser.email],
-            ...updatedUser,
-          },
+          [updatedUser.email]: newUserData,
         }));
+
         // If the current logged-in user is being updated, refresh their session data
         if (user?.id === updatedUser.id) {
-          setUser(updatedUser);
+          setUser(newUserData); // Update the user state with new data
         }
         toast.success(`User ${updatedUser.email} updated successfully.`);
         resolve(true);
@@ -340,7 +341,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
       generateBackupCodes,
       saveBackupCodes,
       disableMfa,
-      users: usersArray, // Provide the array of users
+      users: usersArray,
       addUser,
       updateUser,
       deleteUser,

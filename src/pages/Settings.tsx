@@ -9,13 +9,14 @@ import ReceiptSettingsForm from "@/components/settings/ReceiptSettingsForm";
 import PrinterSettingsForm from "@/components/settings/PrinterSettingsForm";
 import TaxSettingsForm from "@/components/settings/TaxSettingsForm";
 import CategorySettingsForm from "@/components/settings/CategorySettingsForm";
-import UserManagementTable from "@/components/settings/UserManagementTable"; // New import
-import UserForm from "@/components/settings/UserForm"; // New import
-import DeleteUserDialog from "@/components/settings/DeleteUserDialog"; // New import
+import UserManagementTable from "@/components/settings/UserManagementTable";
+import UserForm from "@/components/settings/UserForm";
+import DeleteUserDialog from "@/components/settings/DeleteUserDialog";
+import UserProfileForm from "@/components/settings/UserProfileForm"; // New import
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; // New import for Dialog
-import { PlusCircle } from "lucide-react"; // New import for icon
-import { User, UserRole } from "@/types/user"; // New import for User and UserRole
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PlusCircle } from "lucide-react";
+import { User, UserRole } from "@/types/user";
 
 const Settings = () => {
   const { user, disableMfa, users, addUser, updateUser, deleteUser, hasPermission } = useAuth();
@@ -60,18 +61,12 @@ const Settings = () => {
 
     const updatedUser: User = {
       ...editingUser,
-      email: values.email, // Email might not be editable in a real system, but for mock it's fine
+      email: values.email,
       role: values.role,
     };
 
-    // If password is provided, it means user wants to change it
-    if (values.password) {
-      // In a real app, this would be a separate API call to update password
-      // For mock, we'll just update the mockUsers object directly in AuthContext
-      // This is handled internally by AuthContext's updateUser function
-    }
-
-    return await updateUser(updatedUser);
+    // The AuthContext's updateUser function now handles the password update logic for mockUsers
+    return await updateUser({ ...updatedUser, password: values.password });
   };
 
   const handleDeleteUserClick = (userToDelete: User) => {
@@ -95,10 +90,8 @@ const Settings = () => {
         <CardHeader>
           <CardTitle>User Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <p><strong>Email:</strong> {user?.email}</p>
-          <p><strong>Role:</strong> {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}</p>
-          <p><strong>MFA Status:</strong> {user?.mfaEnabled ? "Enabled" : "Disabled"}</p>
+        <CardContent>
+          <UserProfileForm />
         </CardContent>
       </Card>
 
