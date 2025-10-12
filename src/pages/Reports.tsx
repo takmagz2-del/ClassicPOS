@@ -13,8 +13,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart, // New import
-  Bar, // New import
+  BarChart,
+  Bar,
 } from "recharts";
 import { format, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -22,26 +22,25 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
-import { useProducts } from "@/context/ProductContext"; // New import for products
-import { useCategories } from "@/context/CategoryContext"; // New import for categories
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProducts } from "@/context/ProductContext";
+import { useCategories } from "@/context/CategoryContext";
 
 const Reports = () => {
   const { salesHistory } = useSales();
-  const { products } = useProducts(); // Use products context
-  const { getCategoryName } = useCategories(); // Use getCategoryName from categories context
+  const { products } = useProducts();
+  const { getCategoryName } = useCategories();
   const { currentCurrency } = useCurrency();
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
-    from: new Date(new Date().setMonth(new Date().getMonth() - 1)), // Default to last month
+    from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
-  const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const { totalRevenue, averageSaleValue, dailySalesData, productCategorySales, topSellingProducts } = useMemo(() => {
+  const { totalRevenue, averageSaleValue, dailySalesData, productCategorySales, topSellingProducts, salesByPaymentMethod } = useMemo(() => {
     let filteredTransactions = salesHistory;
 
-    // Apply date range filter
     if (dateRange.from && dateRange.to) {
       filteredTransactions = salesHistory.filter((transaction) => {
         const transactionDate = new Date(transaction.date);
@@ -62,20 +61,15 @@ const Reports = () => {
       });
     }
 
-    // Apply type filter
     if (typeFilter !== "all") {
       filteredTransactions = filteredTransactions.filter((transaction) => transaction.type === typeFilter);
     }
 
-    // Calculate total revenue by summing up all transaction totals (refunds will be negative)
     const total = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
 
-    // For average sale value, we only consider actual sales, not refunds
     const actualSales = filteredTransactions.filter(t => t.type === "sale");
     const average = actualSales.length > 0 ? actualSales.reduce((sum, sale) => sum + sale.total, 0) / actualSales.length : 0;
 
-
-    // Aggregate daily sales (including refunds as negative values)
     const dailySalesMap = new Map<string, number>();
     filteredTransactions.forEach((transaction) => {
       const day = format(new Date(transaction.date), "yyyy-MM-dd");
@@ -89,19 +83,16 @@ const Reports = () => {
         sales: amount,
       }));
 
-    // Calculate Product Sales by Category
     const categorySalesMap = new Map<string, number>();
-    const productSalesCountMap = new Map<string, number>(); // To track quantity sold for top products
+    const productSalesCountMap = new Map<string, number>();
 
     filteredTransactions.filter(t => t.type === "sale").forEach(sale => {
       sale.items.forEach(item => {
         const productDetails = products.find(p => p.id === item.productId);
         if (productDetails) {
-          // Category sales
-          const category = getCategoryName(productDetails.categoryId) || "Uncategorized"; // Use getCategoryName
+          const category = getCategoryName(productDetails.categoryId) || "Uncategorized";
           categorySalesMap.set(category, (categorySalesMap.get(category) || 0) + (item.price * item.quantity));
 
-          // Product sales count
           productSalesCountMap.set(productDetails.name, (productSalesCountMap.get(productDetails.name) || 0) + item.quantity);
         }
       });
@@ -114,7 +105,18 @@ const Reports = () => {
     const topSellingProducts = Array.from(productSalesCountMap.entries())
       .map(([name, quantity]) => ({ name, quantity }))
       .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5); // Top 5 products
+      .slice(0, 5);
+
+    // Calculate Sales by Payment Method
+    const salesByPaymentMethodMap = new Map<string, number>();
+    filteredTransactions.filter(t => t.type === "sale").forEach(sale => {
+      const method = sale.paymentMethod || "Unknown";
+      salesByPaymentMethodMap.set(method, (salesByPaymentMethodMap.get(method) || 0) + sale.total);
+    });
+
+    const salesByPaymentMethod = Array.from(salesByPaymentMethodMap.entries())
+      .map(([method, amount]) => ({ method, sales: amount }))
+      .sort((a, b) => b.sales - a.sales);
 
     return {
       totalRevenue: total,
@@ -122,8 +124,9 @@ const Reports = () => {
       dailySalesData: sortedDailySales,
       productCategorySales,
       topSellingProducts,
+      salesByPaymentMethod,
     };
-  }, [salesHistory, dateRange, typeFilter, products, getCategoryName]); // Added getCategoryName to dependencies
+  }, [salesHistory, dateRange, typeFilter, products, getCategoryName]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,7 +170,6 @@ const Reports = () => {
           </PopoverContent>
         </Popover>
 
-        {/* New Type Filter */}
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by Type" />
@@ -285,6 +287,37 @@ const Reports = () => {
               </div>
             ) : (
               <p className="text-center text-muted-foreground">No top selling products for the selected period.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Sales by Payment Method</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {salesByPaymentMethod.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={salesByPaymentMethod}
+                    margin={{
+                      top: 5,
+                      right: 10,
+                      left: 10,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="method" />
+                    <YAxis tickFormatter={(value) => formatCurrency(value, currentCurrency)} />
+                    <Tooltip formatter={(value: number) => formatCurrency(value, currentCurrency)} />
+                    <Bar dataKey="sales" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground">No sales by payment method for the selected period.</p>
             )}
           </CardContent>
         </Card>
