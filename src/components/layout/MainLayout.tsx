@@ -5,7 +5,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useIsMobile } from "@/hooks/use-mobile";
-import BrandLogo from "@/components/layout/BrandLogo"; // Import BrandLogo
+import BrandLogo from "@/components/layout/BrandLogo";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -23,7 +23,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
               <BrandLogo />
             </div>
-            <Sidebar />
+            <Sidebar className="flex-1" /> {/* Added flex-1 to Sidebar */}
           </div>
         </div>
       )}

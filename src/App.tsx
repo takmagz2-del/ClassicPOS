@@ -7,13 +7,17 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
 
 function App() {
+  // Find the Login component from the routesConfig
+  const LoginRoute = routesConfig.find(r => r.path === "/login");
+  const LoginComponent = LoginRoute?.component;
+
   return (
     <BrowserRouter>
       <AuthProvider>
         <SaleProvider>
           <Routes>
             {/* Public route for login */}
-            <Route path="/login" element={<routesConfig.find(r => r.path === "/login")?.component />} />
+            <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
 
             {/* Protected routes */}
             <Route path="/" element={<ProtectedRoute />}>
