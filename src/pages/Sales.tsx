@@ -8,6 +8,7 @@ import { Sale, SaleItem } from "@/types/sale";
 import ProductSelector from "@/components/sales/ProductSelector";
 import SaleCart from "@/components/sales/SaleCart";
 import SaleSummary from "@/components/sales/SaleSummary";
+import GiftCardInput from "@/components/sales/GiftCardInput"; // Import GiftCardInput
 import { toast } from "sonner";
 
 // Mock products (should ideally come from a global state or API)
@@ -29,10 +30,17 @@ const Sales = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts); // Using mock products for now
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [salesHistory, setSalesHistory] = useState<Sale[]>([]);
+  const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0); // New state for gift card
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
+
+  const currentSubtotal = calculateSubtotal(cartItems);
+  const currentTax = currentSubtotal * TAX_RATE;
+  const currentTotalBeforeGiftCard = currentSubtotal + currentTax;
+  const currentFinalTotal = Math.max(0, currentTotalBeforeGiftCard - appliedGiftCardAmount);
+
 
   const handleAddProductToCart = (product: Product, quantity: number) => {
     const existingItemIndex = cartItems.findIndex((item) => item.productId === product.id);
@@ -58,6 +66,7 @@ const Sales = () => {
       setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, quantity }]);
     }
     toast.success(`${quantity}x ${product.name} added to cart.`);
+    setAppliedGiftCardAmount(0); // Reset gift card on cart change
   };
 
   const handleUpdateCartItemQuantity = (productId: string, newQuantity: number) => {
@@ -78,16 +87,25 @@ const Sales = () => {
         item.productId === productId ? { ...item, quantity: newQuantity } : item
       )
     );
+    setAppliedGiftCardAmount(0); // Reset gift card on cart change
   };
 
   const handleRemoveCartItem = (productId: string) => {
     setCartItems((prev) => prev.filter((item) => item.productId !== productId));
     toast.info("Item removed from cart.");
+    setAppliedGiftCardAmount(0); // Reset gift card on cart change
   };
 
   const handleClearCart = () => {
     setCartItems([]);
+    setAppliedGiftCardAmount(0); // Reset gift card when cart is cleared
     toast.info("Cart cleared.");
+  };
+
+  const handleApplyGiftCard = (code: string, amount: number) => {
+    // In a real app, you'd validate the code and deduct from its balance
+    // For now, we just apply the amount to the current sale.
+    setAppliedGiftCardAmount((prev) => prev + amount);
   };
 
   const handleCheckout = () => {
@@ -96,18 +114,20 @@ const Sales = () => {
       return;
     }
 
-    const subtotal = calculateSubtotal(cartItems);
-    const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+    if (currentFinalTotal < 0) {
+      toast.error("Gift card amount exceeds total. Please adjust.");
+      return;
+    }
 
     const newSale: Sale = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       items: cartItems,
-      subtotal,
-      tax,
-      total,
+      subtotal: currentSubtotal,
+      tax: currentTax,
+      total: currentFinalTotal, // Use the final total after gift card
       status: "completed",
+      giftCardAmountUsed: appliedGiftCardAmount, // Record gift card usage
     };
 
     setSalesHistory((prev) => [...prev, newSale]);
@@ -123,10 +143,8 @@ const Sales = () => {
     setProducts(updatedProducts);
 
     handleClearCart();
-    toast.success(`Sale #${newSale.id.substring(0, 8)} completed! Total: $${total.toFixed(2)}`);
+    toast.success(`Sale #${newSale.id.substring(0, 8)} completed! Total: $${newSale.total.toFixed(2)}`);
   };
-
-  const currentSubtotal = calculateSubtotal(cartItems);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -147,12 +165,18 @@ const Sales = () => {
             onUpdateQuantity={handleUpdateCartItemQuantity}
             onRemoveItem={handleRemoveCartItem}
           />
+          <GiftCardInput
+            onApplyGiftCard={handleApplyGiftCard}
+            currentSaleTotal={currentTotalBeforeGiftCard}
+            appliedGiftCardAmount={appliedGiftCardAmount}
+          />
           <SaleSummary
             subtotal={currentSubtotal}
             taxRate={TAX_RATE}
             onCheckout={handleCheckout}
             onClearCart={handleClearCart}
             hasItemsInCart={cartItems.length > 0}
+            giftCardAmountUsed={appliedGiftCardAmount}
           />
         </div>
       </div>

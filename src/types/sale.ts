@@ -13,4 +13,5 @@ export interface Sale {
   tax: number;
   total: number;
   status: "pending" | "completed" | "cancelled";
+  giftCardAmountUsed?: number; // Added for gift card functionality
 }
