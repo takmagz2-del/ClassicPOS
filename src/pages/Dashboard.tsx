@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/components/auth/AuthContext";
-import { Button } from "@/components/ui/button";
+// Removed useAuth as logout button is removed
+// Removed Button as it is no longer used
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react"; // Import icons
 
 const Dashboard = () => {
-  const { logout } = useAuth();
+  // Removed logout as the button was removed
   const { salesHistory } = useSales();
   const { products } = useProducts();
   const { customers } = useCustomers();
