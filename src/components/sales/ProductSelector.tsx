@@ -54,8 +54,8 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
           className="mt-2"
         />
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-280px)] pr-4"> {/* Adjust height based on header/footer */}
+      <CardContent className="flex-1 flex flex-col overflow-hidden"> {/* Added flex and overflow-hidden */}
+        <ScrollArea className="flex-1 pr-4"> {/* Changed to flex-1 to fill available space */}
           <div className="grid gap-4">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
