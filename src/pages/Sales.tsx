@@ -19,15 +19,16 @@ import CustomerSelector from "@/components/sales/CustomerSelector";
 import { useCustomers } from "@/context/CustomerContext";
 import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog";
 import DiscountInput from "@/components/sales/DiscountInput";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog"; // New import
 
 const Sales = () => {
   const { logout } = useAuth();
   const { addSale } = useSales();
   const { products, updateProductStock } = useProducts();
   const { customers } = useCustomers();
-  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+  const { currentCurrency } = useCurrency();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
@@ -35,6 +36,8 @@ const Sales = () => {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
   const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false); // New state for receipt dialog
+  const [lastSale, setLastSale] = useState<Sale | null>(null); // New state to store last sale for receipt
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -155,6 +158,9 @@ const Sales = () => {
       }
     });
 
+    setLastSale(newSale); // Store the new sale for the receipt dialog
+    setIsReceiptDialogOpen(true); // Open the receipt dialog
+
     handleClearCart();
     toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
     if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
@@ -247,6 +253,15 @@ const Sales = () => {
             discountAmount: calculatedDiscountAmount,
           }}
           paymentMethod={paymentMethodToConfirm}
+        />
+      )}
+
+      {lastSale && (
+        <ReceiptPreviewDialog
+          isOpen={isReceiptDialogOpen}
+          onClose={() => setIsReceiptDialogOpen(false)}
+          sale={lastSale}
+          customer={customers.find(c => c.id === selectedCustomerId)}
         />
       )}
     </div>
