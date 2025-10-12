@@ -6,8 +6,7 @@ import ProductTable from "@/components/products/ProductTable";
 import { Product } from "@/types/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import ProductForm from "@/components/products/ProductForm";
-import EditProductForm from "@/components/products/EditProductForm";
+import ProductUpsertForm from "@/components/products/ProductUpsertForm"; // Updated import
 import DeleteProductDialog from "@/components/products/DeleteProductDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -21,17 +20,17 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
-  const handleAddProduct = (newProduct: Product) => {
-    addProduct(newProduct);
+  const handleProductSubmit = (product: Product) => {
+    if (products.some(p => p.id === product.id)) {
+      updateProduct(product);
+    } else {
+      addProduct(product);
+    }
   };
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setIsEditDialogOpen(true);
-  };
-
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    updateProduct(updatedProduct);
   };
 
   const handleDeleteProduct = (product: Product) => {
@@ -60,7 +59,7 @@ const Products = () => {
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
               </DialogHeader>
-              <ProductForm onProductAdd={handleAddProduct} onClose={() => setIsAddDialogOpen(false)} />
+              <ProductUpsertForm onProductSubmit={handleProductSubmit} onClose={() => setIsAddDialogOpen(false)} />
             </DialogContent>
           </Dialog>
 
@@ -70,9 +69,9 @@ const Products = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Product</DialogTitle>
                 </DialogHeader>
-                <EditProductForm
+                <ProductUpsertForm
                   initialProduct={editingProduct}
-                  onProductUpdate={handleUpdateProduct}
+                  onProductSubmit={handleProductSubmit}
                   onClose={() => setIsEditDialogOpen(false)}
                 />
               </DialogContent>

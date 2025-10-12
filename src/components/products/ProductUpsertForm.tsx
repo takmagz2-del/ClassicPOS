@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form"; // Corrected import for useForm
+import { zodResolver } from "@hookform/resolvers/zod"; // Added import for zodResolver
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,17 +39,19 @@ const formSchema = z.object({
 
 type ProductFormValues = z.infer<typeof formSchema>;
 
-interface ProductFormProps {
-  onProductAdd: (product: Product) => void;
+interface ProductUpsertFormProps {
+  initialProduct?: Product; // Optional: if provided, it's an edit operation
+  onProductSubmit: (product: Product) => void;
   onClose: () => void;
 }
 
-const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
+const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: ProductUpsertFormProps) => {
   const { categories } = useCategories();
+  const isEditMode = !!initialProduct;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialProduct || {
       name: "",
       categoryId: "",
       price: 0,
@@ -58,13 +60,42 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
     },
   });
 
+  // Reset form with new initialProduct if it changes (e.g., when editing a different product)
+  useEffect(() => {
+    form.reset(initialProduct || {
+      name: "",
+      categoryId: "",
+      price: 0,
+      stock: 0,
+      sku: "",
+    });
+  }, [initialProduct, form]);
+
   const onSubmit = (values: ProductFormValues) => {
-    const newProduct: Product = {
-      id: crypto.randomUUID(), // Generate a unique ID
-      ...values,
-    } as Product; // Explicitly cast to Product
-    onProductAdd(newProduct);
-    toast.success("Product added successfully!");
+    let productToSubmit: Product;
+
+    if (isEditMode) {
+      productToSubmit = {
+        id: initialProduct!.id, // Ensure ID is from initialProduct
+        name: values.name,
+        categoryId: values.categoryId,
+        price: values.price,
+        stock: values.stock,
+        sku: values.sku,
+      };
+    } else {
+      productToSubmit = {
+        id: crypto.randomUUID(), // Generate new ID for add
+        name: values.name,
+        categoryId: values.categoryId,
+        price: values.price,
+        stock: values.stock,
+        sku: values.sku,
+      };
+    }
+
+    onProductSubmit(productToSubmit);
+    toast.success(`Product ${isEditMode ? "updated" : "added"} successfully!`);
     onClose();
     form.reset();
   };
@@ -91,7 +122,7 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -148,10 +179,12 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Add Product</Button>
+        <Button type="submit" className="w-full">
+          {isEditMode ? "Save Changes" : "Add Product"}
+        </Button>
       </form>
     </Form>
   );
 };
 
-export default ProductForm;
+export default ProductUpsertForm;
