@@ -1,7 +1,5 @@
 "use client";
 
-// Removed useAuth as logout button is removed
-// Removed Button as it is no longer used
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
@@ -13,7 +11,6 @@ import { format } from "date-fns";
 import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react"; // Import icons
 
 const Dashboard = () => {
-  // Removed logout as the button was removed
   const { salesHistory } = useSales();
   const { products } = useProducts();
   const { customers } = useCustomers();
@@ -27,7 +24,7 @@ const Dashboard = () => {
   useEffect(() => {
     // Calculate Total Revenue (subtract refunds)
     const revenue = salesHistory.reduce((sum, sale) => {
-      return sum + (sale.type === "sale" ? sale.total : sale.total); // Refunds have negative total, so just add
+      return sum + sale.total; // Refunds have negative total, so just add
     }, 0);
     setTotalRevenue(revenue);
 
@@ -38,7 +35,7 @@ const Dashboard = () => {
       const saleDate = new Date(sale.date);
       saleDate.setHours(0, 0, 0, 0);
       return saleDate.getTime() === today.getTime();
-    }).reduce((sum, sale) => sum + (sale.type === "sale" ? sale.total : sale.total), 0); // Refunds have negative total
+    }).reduce((sum, sale) => sum + sale.total, 0); // Refunds have negative total
     setSalesToday(salesForToday);
 
     // Calculate Products in Stock
@@ -59,7 +56,6 @@ const Dashboard = () => {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        {/* Removed the redundant Logout button */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
