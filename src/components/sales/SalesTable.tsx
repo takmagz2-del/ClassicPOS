@@ -11,20 +11,22 @@ import {
 } from "@/components/ui/table";
 import { Sale } from "@/types/sale";
 import { format } from "date-fns";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
-import { Button } from "@/components/ui/button"; // Import Button
-import { Printer, Undo2, CheckCircle2 } from "lucide-react"; // Import Printer, Undo2, and CheckCircle2 icons
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Printer, Undo2, CheckCircle2 } from "lucide-react";
+import { usePaymentMethods } from "@/context/PaymentMethodContext"; // New import
 
 interface SalesTableProps {
   sales: Sale[];
   onViewReceipt: (sale: Sale) => void;
   onRefundSale: (sale: Sale) => void;
-  onSettleCreditSale: (sale: Sale) => void; // New prop for settling a credit sale
+  onSettleCreditSale: (sale: Sale) => void;
 }
 
 const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: SalesTableProps) => {
-  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+  const { currentCurrency } = useCurrency();
+  const { getPaymentMethodName } = usePaymentMethods(); // Use getPaymentMethodName from context
 
   return (
     <div className="rounded-md border">
@@ -38,7 +40,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
             <TableHead className="text-right">Tax</TableHead>
             <TableHead className="text-right">Gift Card</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="text-center">Payment Method</TableHead>
+            <TableHead className="text-center">Payment Method</TableHead> {/* New TableHead */}
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Type</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -63,7 +65,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
                   {sale.giftCardAmountUsed ? `-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}` : formatCurrency(0, currentCurrency)}
                 </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
-                <TableCell className="text-center capitalize">{sale.paymentMethod || "N/A"}</TableCell>
+                <TableCell className="text-center capitalize">{sale.paymentMethod ? getPaymentMethodName(sale.paymentMethod) : "N/A"}</TableCell> {/* Display payment method name */}
                 <TableCell className="text-center capitalize">
                   <span className={sale.status === "pending" ? "text-orange-500 font-semibold" : ""}>
                     {sale.status}
