@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
 import MfaSetup from "@/components/auth/MfaSetup";
+import ReceiptSettingsForm from "@/components/settings/ReceiptSettingsForm";
 import { toast } from "sonner";
 
 const Settings = () => {
@@ -64,6 +65,15 @@ const Settings = () => {
               )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Receipt Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReceiptSettingsForm />
         </CardContent>
       </Card>
     </div>
