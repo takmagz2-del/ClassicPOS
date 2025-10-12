@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useCustomers } from "@/context/CustomerContext";
-import { format } from "date-fns";
-import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react"; // Import icons
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
+import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -20,23 +20,69 @@ const Dashboard = () => {
   const [salesToday, setSalesToday] = useState<number>(0);
   const [productsInStock, setProductsInStock] = useState<number>(0);
   const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
+  const [totalRevenueChange, setTotalRevenueChange] = useState<string>("0%");
+  const [salesTodayChange, setSalesTodayChange] = useState<string>("0%");
 
   useEffect(() => {
-    // Calculate Total Revenue (subtract refunds)
-    const revenue = salesHistory.reduce((sum, sale) => {
-      return sum + sale.total; // Refunds have negative total, so just add
-    }, 0);
-    setTotalRevenue(revenue);
+    const now = new Date();
 
-    // Calculate Sales Today (subtract refunds)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day
-    const salesForToday = salesHistory.filter(sale => {
-      const saleDate = new Date(sale.date);
-      saleDate.setHours(0, 0, 0, 0);
-      return saleDate.getTime() === today.getTime();
-    }).reduce((sum, sale) => sum + sale.total, 0); // Refunds have negative total
-    setSalesToday(salesForToday);
+    // Date ranges for calculations
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+
+    const thisMonthStart = startOfMonth(now);
+    const thisMonthEnd = endOfMonth(now);
+
+    const lastMonthDate = subMonths(now, 1);
+    const lastMonthStart = startOfMonth(lastMonthDate);
+    const lastMonthEnd = endOfMonth(lastMonthDate);
+
+    const sameDayLastMonthStart = startOfDay(lastMonthDate);
+    const sameDayLastMonthEnd = endOfDay(lastMonthDate);
+
+    // Calculate Total Revenue (all time, net of refunds)
+    const calculatedTotalRevenue = salesHistory.reduce((sum, sale) => sum + sale.total, 0);
+    setTotalRevenue(calculatedTotalRevenue);
+
+    // Calculate Sales Today (net of refunds for today)
+    const calculatedSalesToday = salesHistory
+      .filter(sale => isWithinInterval(new Date(sale.date), { start: todayStart, end: todayEnd }))
+      .reduce((sum, sale) => sum + sale.total, 0);
+    setSalesToday(calculatedSalesToday);
+
+    // Calculate Total Revenue for This Month
+    const revenueThisMonth = salesHistory
+      .filter(sale => isWithinInterval(new Date(sale.date), { start: thisMonthStart, end: thisMonthEnd }))
+      .reduce((sum, sale) => sum + sale.total, 0);
+
+    // Calculate Total Revenue for Last Month
+    const revenueLastMonth = salesHistory
+      .filter(sale => isWithinInterval(new Date(sale.date), { start: lastMonthStart, end: lastMonthEnd }))
+      .reduce((sum, sale) => sum + sale.total, 0);
+
+    // Calculate Sales Today (same day) Last Month
+    const salesSameDayLastMonth = salesHistory
+      .filter(sale => isWithinInterval(new Date(sale.date), { start: sameDayLastMonthStart, end: sameDayLastMonthEnd }))
+      .reduce((sum, sale) => sum + sale.total, 0);
+
+    // Calculate Percentage Changes
+    if (revenueLastMonth !== 0) {
+      const change = ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100;
+      setTotalRevenueChange(`${change >= 0 ? "+" : ""}${change.toFixed(1)}% from last month`);
+    } else if (revenueThisMonth > 0) {
+      setTotalRevenueChange("+100% from last month");
+    } else {
+      setTotalRevenueChange("0% from last month");
+    }
+
+    if (salesSameDayLastMonth !== 0) {
+      const change = ((calculatedSalesToday - salesSameDayLastMonth) / salesSameDayLastMonth) * 100;
+      setSalesTodayChange(`${change >= 0 ? "+" : ""}${change.toFixed(1)}% from last month`);
+    } else if (calculatedSalesToday > 0) {
+      setSalesTodayChange("+100% from last month");
+    } else {
+      setSalesTodayChange("0% from last month");
+    }
 
     // Calculate Products in Stock
     const stock = products.reduce((sum, product) => sum + product.stock, 0);
@@ -66,7 +112,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <p className="text-xs text-muted-foreground">{totalRevenueChange}</p>
           </CardContent>
         </Card>
         <Card>
@@ -76,7 +122,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(salesToday, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+            <p className="text-xs text-muted-foreground">{salesTodayChange}</p>
           </CardContent>
         </Card>
         <Card>
@@ -86,7 +132,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeCustomersCount}</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
+            <p className="text-xs text-muted-foreground">+19% from last month</p> {/* This remains static for now */}
           </CardContent>
         </Card>
         <Card>
@@ -96,7 +142,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{productsInStock}</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p>
+            <p className="text-xs text-muted-foreground">+5% from last month</p> {/* This remains static for now */}
           </CardContent>
         </Card>
       </div>
