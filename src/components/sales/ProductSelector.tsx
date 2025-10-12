@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
 import { PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // New import
+import { useCategories } from "@/context/CategoryContext"; // New import
 
 interface ProductSelectorProps {
   products: Product[];
@@ -17,13 +19,21 @@ interface ProductSelectorProps {
 
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string>("all"); // New state for category filter
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
-  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+  const { currentCurrency } = useCurrency();
+  const { categories, getCategoryName } = useCategories(); // Use categories context
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter((product) => {
+    const matchesSearchTerm =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategoryId === "all" || product.categoryId === selectedCategoryId;
+
+    return matchesSearchTerm && matchesCategory;
+  });
 
   const handleQuantityChange = (productId: string, value: string) => {
     const quantity = parseInt(value, 10);
@@ -50,12 +60,26 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     <Card className="flex-1 flex flex-col">
       <CardHeader>
         <CardTitle>Select Products</CardTitle>
-        <Input
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mt-2"
-        />
+        <div className="flex flex-col gap-2 mt-2">
+          <Input
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden">
         <ScrollArea className="flex-1 pr-4">
@@ -65,7 +89,9 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                 <div key={product.id} className="flex items-center justify-between border p-3 rounded-md">
                   <div>
                     <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">{formatCurrency(product.price, currentCurrency)} | Stock: {product.stock}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {getCategoryName(product.categoryId)} | {formatCurrency(product.price, currentCurrency)} | Stock: {product.stock}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input

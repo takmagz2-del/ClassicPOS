@@ -16,13 +16,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories } from "@/context/CategoryContext";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Product name must be at least 2 characters.",
   }),
-  category: z.string().min(2, {
-    message: "Category must be at least 2 characters.",
+  categoryId: z.string().min(1, {
+    message: "Please select a category.",
   }),
   price: z.coerce.number().min(0.01, {
     message: "Price must be a positive number.",
@@ -43,11 +45,13 @@ interface ProductFormProps {
 }
 
 const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
+  const { categories } = useCategories();
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      category: "",
+      categoryId: "",
       price: 0,
       stock: 0,
       sku: "",
@@ -55,10 +59,9 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
   });
 
   const onSubmit = (values: ProductFormValues) => {
-    // Type assertion to ensure 'values' is treated as having all required properties of ProductFormValues
     const newProduct: Product = {
       id: crypto.randomUUID(), // Generate a unique ID
-      ...(values as Required<ProductFormValues>), // Assert values as Required
+      ...values,
     };
     onProductAdd(newProduct);
     toast.success("Product added successfully!");
@@ -84,13 +87,24 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
         />
         <FormField
           control={form.control}
-          name="category"
+          name="categoryId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Electronics" {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

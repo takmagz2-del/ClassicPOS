@@ -16,13 +16,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories } from "@/context/CategoryContext";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Product name must be at least 2 characters.",
   }),
-  category: z.string().min(2, {
-    message: "Category must be at least 2 characters.",
+  categoryId: z.string().min(1, {
+    message: "Please select a category.",
   }),
   price: z.coerce.number().min(0.01, {
     message: "Price must be a positive number.",
@@ -44,6 +46,8 @@ interface EditProductFormProps {
 }
 
 const EditProductForm = ({ initialProduct, onProductUpdate, onClose }: EditProductFormProps) => {
+  const { categories } = useCategories();
+
   const form = useForm<EditProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialProduct, // Pre-fill form with initial product data
@@ -82,13 +86,24 @@ const EditProductForm = ({ initialProduct, onProductUpdate, onClose }: EditProdu
         />
         <FormField
           control={form.control}
-          name="category"
+          name="categoryId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Electronics" {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

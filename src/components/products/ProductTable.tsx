@@ -12,8 +12,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
 import { Edit, Trash2 } from "lucide-react";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { useCategories } from "@/context/CategoryContext"; // New import
 
 interface ProductTableProps {
   products: Product[];
@@ -22,7 +23,8 @@ interface ProductTableProps {
 }
 
 const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTableProps) => {
-  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+  const { currentCurrency } = useCurrency();
+  const { getCategoryName } = useCategories(); // Use getCategoryName from context
 
   return (
     <div className="rounded-md border">
@@ -30,7 +32,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Category</TableHead>
+            <TableHead>Category</TableHead> {/* This will now display the category name */}
             <TableHead>SKU</TableHead>
             <TableHead className="text-right">Price</TableHead>
             <TableHead className="text-right">Stock</TableHead>
@@ -42,7 +44,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
             products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
+                <TableCell>{getCategoryName(product.categoryId)}</TableCell> {/* Display category name */}
                 <TableCell>{product.sku}</TableCell>
                 <TableCell className="text-right">{formatCurrency(product.price, currentCurrency)}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
