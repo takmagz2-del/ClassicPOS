@@ -118,13 +118,17 @@ const SalesHistory = () => {
   const handleConfirmRefund = (refundItems: SaleItem[], refundTotal: number) => {
     if (!selectedSaleForRefund) return;
 
+    // Calculate refund tax based on the original sale's tax rate and the new refund total
+    const originalTaxRate = selectedSaleForRefund.taxRateApplied !== undefined ? selectedSaleForRefund.taxRateApplied : 0;
+    const calculatedRefundTax = refundTotal * originalTaxRate;
+
     const newRefundTransaction: Sale = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       items: refundItems.map(item => ({ ...item, quantity: -item.quantity })), // Negative quantities for refund
       subtotal: -refundTotal, // Negative subtotal
-      tax: -(selectedSaleForRefund.taxRateApplied || 0) * refundTotal, // Proportionate tax based on original tax rate
-      total: -refundTotal, // Negative total
+      tax: -calculatedRefundTax, // Negative tax based on calculated refund total
+      total: -(refundTotal + calculatedRefundTax), // Negative total including tax
       status: "completed", // Refund is a completed transaction
       type: "refund", // Set type to "refund"
       originalSaleId: selectedSaleForRefund.id,
@@ -142,7 +146,7 @@ const SalesHistory = () => {
       increaseProductStock(item.productId, item.quantity);
     });
 
-    toast.success(`Refund processed for Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}. Total: ${formatCurrency(refundTotal, currentCurrency)}`);
+    toast.success(`Refund processed for Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}. Total: ${formatCurrency(newRefundTransaction.total, currentCurrency)}`);
     setIsRefundDialogOpen(false);
     setSelectedSaleForRefund(null);
   };
