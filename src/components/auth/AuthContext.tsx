@@ -335,12 +335,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Handle password change
         if (newPassword) {
-          if (!currentPassword || existingUser.password !== currentPassword) {
-            toast.error("Incorrect current password.");
-            stopLoading();
-            resolve(false);
-            return;
+          // If the logged-in user is updating their own password, require currentPassword
+          if (user?.id === userId) {
+            if (!currentPassword || existingUser.password !== currentPassword) {
+              toast.error("Incorrect current password.");
+              stopLoading();
+              resolve(false);
+              return;
+            }
           }
+          // For admin updating another user, or if it's the current user and currentPassword was correct
           existingUser.password = newPassword;
         }
 
