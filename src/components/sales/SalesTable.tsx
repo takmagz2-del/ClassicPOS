@@ -14,15 +14,16 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
 import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 import { Button } from "@/components/ui/button"; // Import Button
-import { Printer, Undo2 } from "lucide-react"; // Import Printer and Undo2 icons
+import { Printer, Undo2, CheckCircle2 } from "lucide-react"; // Import Printer, Undo2, and CheckCircle2 icons
 
 interface SalesTableProps {
   sales: Sale[];
   onViewReceipt: (sale: Sale) => void;
-  onRefundSale: (sale: Sale) => void; // New prop for refunding a sale
+  onRefundSale: (sale: Sale) => void;
+  onSettleCreditSale: (sale: Sale) => void; // New prop for settling a credit sale
 }
 
-const SalesTable = ({ sales, onViewReceipt, onRefundSale }: SalesTableProps) => {
+const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: SalesTableProps) => {
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   return (
@@ -37,7 +38,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale }: SalesTableProps) => 
             <TableHead className="text-right">Tax</TableHead>
             <TableHead className="text-right">Gift Card</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="text-center">Payment Method</TableHead> {/* New TableHead */}
+            <TableHead className="text-center">Payment Method</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Type</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -62,7 +63,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale }: SalesTableProps) => 
                   {sale.giftCardAmountUsed ? `-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}` : formatCurrency(0, currentCurrency)}
                 </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
-                <TableCell className="text-center capitalize">{sale.paymentMethod || "N/A"}</TableCell> {/* Display payment method */}
+                <TableCell className="text-center capitalize">{sale.paymentMethod || "N/A"}</TableCell>
                 <TableCell className="text-center capitalize">
                   <span className={sale.status === "pending" ? "text-orange-500 font-semibold" : ""}>
                     {sale.status}
@@ -78,19 +79,24 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale }: SalesTableProps) => 
                     <Printer className="h-4 w-4" />
                     <span className="sr-only">View/Print Receipt</span>
                   </Button>
-                  {sale.type === "sale" && sale.status === "completed" && ( // Only show refund button for completed sales
+                  {sale.type === "sale" && sale.status === "completed" && (
                     <Button variant="ghost" size="icon" onClick={() => onRefundSale(sale)}>
                       <Undo2 className="h-4 w-4 text-destructive" />
                       <span className="sr-only">Refund Sale</span>
                     </Button>
                   )}
-                  {/* TODO: Add a "Settle Credit Sale" button for pending sales */}
+                  {sale.type === "sale" && sale.status === "pending" && (
+                    <Button variant="ghost" size="icon" onClick={() => onSettleCreditSale(sale)}>
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <span className="sr-only">Settle Credit Sale</span>
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={11} className="h-24 text-center"> {/* Updated colSpan */}
+              <TableCell colSpan={11} className="h-24 text-center">
                 No sales recorded yet.
               </TableCell>
             </TableRow>

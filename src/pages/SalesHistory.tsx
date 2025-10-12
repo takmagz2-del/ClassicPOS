@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Sale, SaleItem } from "@/types/sale";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import RefundDialog from "@/components/sales/RefundDialog"; // Import RefundDialog
+import SettleCreditSaleDialog from "@/components/sales/SettleCreditSaleDialog"; // New import
 import { useCustomers } from "@/context/CustomerContext";
 import { Customer } from "@/types/customer";
 import { useProducts } from "@/context/ProductContext"; // Import useProducts
@@ -24,7 +25,7 @@ import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
 import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 const SalesHistory = () => {
-  const { salesHistory, refundSale } = useSales();
+  const { salesHistory, refundSale, settleSale } = useSales();
   const { customers } = useCustomers();
   const { increaseProductStock } = useProducts(); // Use increaseProductStock
   const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
@@ -40,8 +41,11 @@ const SalesHistory = () => {
   const [selectedSaleForReceipt, setSelectedSaleForReceipt] = useState<Sale | null>(null);
   const [selectedCustomerForReceipt, setSelectedCustomerForReceipt] = useState<Customer | undefined>(undefined);
 
-  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState<boolean>(false); // New state for refund dialog
-  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null); // New state for selected sale to refund
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState<boolean>(false);
+  const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null);
+
+  const [isSettleCreditSaleDialogOpen, setIsSettleCreditSaleDialogOpen] = useState<boolean>(false); // New state
+  const [selectedSaleForSettle, setSelectedSaleForSettle] = useState<Sale | null>(null); // New state
 
   const filteredAndSortedSales = useMemo(() => {
     let filteredSales = salesHistory;
@@ -98,7 +102,7 @@ const SalesHistory = () => {
     });
 
     return sortedSales;
-  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, sortKey, sortOrder]); // Added typeFilter to dependencies
+  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, sortKey, sortOrder]);
 
   const handleViewReceipt = (sale: Sale) => {
     setSelectedSaleForReceipt(sale);
@@ -118,30 +122,28 @@ const SalesHistory = () => {
   const handleConfirmRefund = (refundItems: SaleItem[], refundTotal: number) => {
     if (!selectedSaleForRefund) return;
 
-    // Calculate refund tax based on the original sale's tax rate and the new refund total
     const originalTaxRate = selectedSaleForRefund.taxRateApplied !== undefined ? selectedSaleForRefund.taxRateApplied : 0;
     const calculatedRefundTax = refundTotal * originalTaxRate;
 
     const newRefundTransaction: Sale = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
-      items: refundItems.map(item => ({ ...item, quantity: -item.quantity })), // Negative quantities for refund
-      subtotal: -refundTotal, // Negative subtotal
-      tax: -calculatedRefundTax, // Negative tax based on calculated refund total
-      total: -(refundTotal + calculatedRefundTax), // Negative total including tax
-      status: "completed", // Refund is a completed transaction
-      type: "refund", // Set type to "refund"
+      items: refundItems.map(item => ({ ...item, quantity: -item.quantity })),
+      subtotal: -refundTotal,
+      tax: -calculatedRefundTax,
+      total: -(refundTotal + calculatedRefundTax),
+      status: "completed",
+      type: "refund",
       originalSaleId: selectedSaleForRefund.id,
       customerId: selectedSaleForRefund.customerId,
       customerName: selectedSaleForRefund.customerName,
       discountPercentage: selectedSaleForRefund.discountPercentage,
       discountAmount: selectedSaleForRefund.discountAmount,
-      taxRateApplied: selectedSaleForRefund.taxRateApplied, // Carry over original tax rate
+      taxRateApplied: selectedSaleForRefund.taxRateApplied,
     };
 
-    refundSale(newRefundTransaction); // Add the refund transaction to sales history
+    refundSale(newRefundTransaction);
 
-    // Increase product stock for refunded items
     refundItems.forEach(item => {
       increaseProductStock(item.productId, item.quantity);
     });
@@ -149,6 +151,18 @@ const SalesHistory = () => {
     toast.success(`Refund processed for Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}. Total: ${formatCurrency(newRefundTransaction.total, currentCurrency)}`);
     setIsRefundDialogOpen(false);
     setSelectedSaleForRefund(null);
+  };
+
+  const handleSettleCreditSale = (sale: Sale) => {
+    setSelectedSaleForSettle(sale);
+    setIsSettleCreditSaleDialogOpen(true);
+  };
+
+  const confirmSettleCreditSale = (saleId: string) => {
+    settleSale(saleId);
+    toast.success(`Credit Sale ID: ${saleId.substring(0, 8)} settled successfully!`);
+    setIsSettleCreditSaleDialogOpen(false);
+    setSelectedSaleForSettle(null);
   };
 
   return (
@@ -219,7 +233,6 @@ const SalesHistory = () => {
               </SelectContent>
             </Select>
 
-            {/* New Type Filter */}
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by Type" />
@@ -251,7 +264,12 @@ const SalesHistory = () => {
               </SelectContent>
             </Select>
           </div>
-          <SalesTable sales={filteredAndSortedSales} onViewReceipt={handleViewReceipt} onRefundSale={handleRefundSale} />
+          <SalesTable
+            sales={filteredAndSortedSales}
+            onViewReceipt={handleViewReceipt}
+            onRefundSale={handleRefundSale}
+            onSettleCreditSale={handleSettleCreditSale} // Pass the new prop
+          />
         </CardContent>
       </Card>
 
@@ -270,6 +288,15 @@ const SalesHistory = () => {
           onClose={() => setIsRefundDialogOpen(false)}
           sale={selectedSaleForRefund}
           onRefundConfirm={handleConfirmRefund}
+        />
+      )}
+
+      {selectedSaleForSettle && (
+        <SettleCreditSaleDialog
+          isOpen={isSettleCreditSaleDialogOpen}
+          onClose={() => setIsSettleCreditSaleDialogOpen(false)}
+          sale={selectedSaleForSettle}
+          onConfirmSettle={confirmSettleCreditSale}
         />
       )}
     </div>
