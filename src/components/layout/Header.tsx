@@ -18,44 +18,11 @@ import CurrencySelector from "@/components/common/CurrencySelector";
 import UserNav from "@/components/layout/UserNav"; // Import UserNav
 
 const Header = () => {
-  const { salesHistory } = useSales();
-  const { products } = useProducts();
-  const { customers } = useCustomers();
-  const { currentCurrency } = useCurrency();
+  // Removed salesHistory, products, customers, totalRevenue, salesToday, productsInStock, activeCustomersCount states and their useEffect.
+  // These metrics are now handled and displayed exclusively on the Dashboard page.
+
   const pageTitle = usePageTitle(); // Use the hook to get the current page title
-
-  const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [salesToday, setSalesToday] = useState<number>(0);
-  const [productsInStock, setProductsInStock] = useState<number>(0);
-  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
-
-  useEffect(() => {
-    // Calculate Total Revenue (subtract refunds)
-    const revenue = salesHistory.reduce((sum, sale) => {
-      // Refunds have negative total, so just add them to sum
-      return sum + sale.total;
-    }, 0);
-    setTotalRevenue(revenue);
-
-    // Calculate Sales Today (subtract refunds)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day
-    const salesForToday = salesHistory.filter(sale => {
-      const saleDate = new Date(sale.date);
-      saleDate.setHours(0, 0, 0, 0);
-      return saleDate.getTime() === today.getTime();
-    }).reduce((sum, sale) => sum + sale.total, 0); // Refunds have negative total
-    setSalesToday(salesForToday);
-
-    // Calculate Products in Stock
-    const stock = products.reduce((sum, product) => sum + product.stock, 0);
-    setProductsInStock(stock);
-
-    // Set Active Customers Count
-    setActiveCustomersCount(customers.length);
-
-  }, [salesHistory, products, customers]);
 
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6 z-10">
