@@ -76,7 +76,7 @@ const Sales = () => {
         toast.error(`Cannot add more than available stock for ${product.name}. Available: ${product.stock}`);
         return;
       }
-      setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, quantity }]);
+      setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, cost: product.cost, quantity }]);
     }
     toast.success(`${quantity}x ${product.name} added to cart.`);
     setAppliedGiftCardAmount(0);

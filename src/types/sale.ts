@@ -2,6 +2,7 @@ export interface SaleItem {
   productId: string;
   name: string;
   price: number;
+  cost: number;
   quantity: number;
 }
 
