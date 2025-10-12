@@ -24,43 +24,69 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  phone: z.string().min(10, {
-    message: "Phone number must be at least 10 characters.",
-  }).optional().or(z.literal("")),
-  address: z.string().min(5, {
-    message: "Address must be at least 5 characters.",
-  }).optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
+  address: z.string().optional().or(z.literal("")),
   loyaltyPoints: z.coerce.number().int().min(0, {
     message: "Loyalty points must be a non-negative integer.",
-  }), // New: Loyalty points field
+  }).default(0),
 });
 
-type EditCustomerFormValues = z.infer<typeof formSchema>;
+type CustomerFormValues = z.infer<typeof formSchema>;
 
-interface EditCustomerFormProps {
-  initialCustomer: Customer;
-  onCustomerUpdate: (updatedCustomer: Customer) => void;
+interface CustomerUpsertFormProps {
+  initialCustomer?: Customer; // Optional: if provided, it's an edit operation
+  onCustomerSubmit: (customer: Customer) => void;
   onClose: () => void;
 }
 
-const EditCustomerForm = ({ initialCustomer, onCustomerUpdate, onClose }: EditCustomerFormProps) => {
-  const form = useForm<EditCustomerFormValues>({
+const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: CustomerUpsertFormProps) => {
+  const isEditMode = !!initialCustomer;
+
+  const form = useForm<CustomerFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialCustomer,
+    defaultValues: initialCustomer || {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      loyaltyPoints: 0,
+    },
   });
 
+  // Reset form with new initialCustomer if it changes
   useEffect(() => {
-    form.reset(initialCustomer);
+    form.reset(initialCustomer || {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      loyaltyPoints: 0,
+    });
   }, [initialCustomer, form]);
 
-  const onSubmit = (values: EditCustomerFormValues) => {
-    const updatedCustomer: Customer = {
-      ...initialCustomer,
-      ...values,
-    };
-    onCustomerUpdate(updatedCustomer);
-    toast.success("Customer updated successfully!");
+  const onSubmit = (values: CustomerFormValues) => {
+    const customerToSubmit: Customer = isEditMode
+      ? { // Explicitly construct the object for edit mode
+          id: initialCustomer!.id,
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          address: values.address,
+          loyaltyPoints: values.loyaltyPoints,
+        }
+      : { // Explicitly construct the object for add mode
+          id: crypto.randomUUID(),
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          address: values.address,
+          loyaltyPoints: values.loyaltyPoints,
+        };
+
+    onCustomerSubmit(customerToSubmit);
+    toast.success(`Customer ${isEditMode ? "updated" : "added"} successfully!`);
     onClose();
+    form.reset();
   };
 
   return (
@@ -131,10 +157,12 @@ const EditCustomerForm = ({ initialCustomer, onCustomerUpdate, onClose }: EditCu
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Save Changes</Button>
+        <Button type="submit" className="w-full">
+          {isEditMode ? "Save Changes" : "Add Customer"}
+        </Button>
       </form>
     </Form>
   );
 };
 
-export default EditCustomerForm;
+export default CustomerUpsertForm;

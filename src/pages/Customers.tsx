@@ -6,8 +6,7 @@ import { Customer } from "@/types/customer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import CustomerTable from "@/components/customers/CustomerTable";
-import CustomerForm from "@/components/customers/CustomerForm";
-import EditCustomerForm from "@/components/customers/EditCustomerForm";
+import CustomerUpsertForm from "@/components/customers/CustomerUpsertForm"; // Updated import
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -21,17 +20,17 @@ const Customers = () => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
 
-  const handleAddCustomer = (newCustomer: Customer) => {
-    addCustomer(newCustomer);
+  const handleCustomerSubmit = (customer: Customer) => {
+    if (customers.some(c => c.id === customer.id)) {
+      updateCustomer(customer);
+    } else {
+      addCustomer(customer);
+    }
   };
 
   const handleEditCustomer = (customer: Customer) => {
     setEditingCustomer(customer);
     setIsEditDialogOpen(true);
-  };
-
-  const handleUpdateCustomer = (updatedCustomer: Customer) => {
-    updateCustomer(updatedCustomer);
   };
 
   const handleDeleteCustomer = (customer: Customer) => {
@@ -60,7 +59,7 @@ const Customers = () => {
               <DialogHeader>
                 <DialogTitle>Add New Customer</DialogTitle>
               </DialogHeader>
-              <CustomerForm onCustomerAdd={handleAddCustomer} onClose={() => setIsAddDialogOpen(false)} />
+              <CustomerUpsertForm onCustomerSubmit={handleCustomerSubmit} onClose={() => setIsAddDialogOpen(false)} />
             </DialogContent>
           </Dialog>
 
@@ -70,9 +69,9 @@ const Customers = () => {
                 <DialogHeader>
                   <DialogTitle>Edit Customer</DialogTitle>
                 </DialogHeader>
-                <EditCustomerForm
+                <CustomerUpsertForm
                   initialCustomer={editingCustomer}
-                  onCustomerUpdate={handleUpdateCustomer}
+                  onCustomerSubmit={handleCustomerSubmit}
                   onClose={() => setIsEditDialogOpen(false)}
                 />
               </DialogContent>
