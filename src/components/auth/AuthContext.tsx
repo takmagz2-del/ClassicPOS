@@ -14,6 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: { email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null;
   login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<LoginResult>;
+  register: (email: string, password: string) => Promise<boolean>; // Added register function
   logout: () => void;
   generateMfaSecret: (email: string) => Promise<{ secret: string; qrCodeUrl: string }>;
   verifyMfaSetup: (secret: string, totpCode: string) => Promise<boolean>;
@@ -110,6 +111,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast.success("Login successful!");
         navigate("/");
         resolve({ success: true });
+      }, 1000);
+    });
+  };
+
+  const register = async (email: string, password: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (mockUsers[email]) {
+          toast.error("Account with this email already exists.");
+          resolve(false);
+          return;
+        }
+
+        setMockUsers((prev) => ({
+          ...prev,
+          [email]: { password, mfaEnabled: false },
+        }));
+        toast.success("Account created successfully! Please log in.");
+        resolve(true);
       }, 1000);
     });
   };
@@ -223,7 +243,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, generateMfaSecret, verifyMfaSetup, generateBackupCodes, saveBackupCodes, disableMfa }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, register, logout, generateMfaSecret, verifyMfaSetup, generateBackupCodes, saveBackupCodes, disableMfa }}>
       {children}
     </AuthContext.Provider>
   );

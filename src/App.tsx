@@ -12,6 +12,9 @@ function App() {
   const LoginRoute = routesConfig.find(r => r.path === "/login");
   const LoginComponent = LoginRoute?.component;
 
+  const SignupRoute = routesConfig.find(r => r.path === "/signup"); // Find Signup route
+  const SignupComponent = SignupRoute?.component; // Get Signup component
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -19,10 +22,11 @@ function App() {
           <Toaster richColors position="top-right" /> {/* Render Toaster here */}
           <Routes>
             <Route path="/login" element={LoginComponent ? <LoginComponent /> : null} />
+            <Route path="/signup" element={SignupComponent ? <SignupComponent /> : null} /> {/* Added Signup route */}
 
             <Route path="/" element={<ProtectedRoute />}>
               {routesConfig.map((route) => {
-                if (route.path !== "/login") {
+                if (route.path !== "/login" && route.path !== "/signup") { // Exclude signup from protected routes
                   const Component = route.component;
                   return (
                     <Route

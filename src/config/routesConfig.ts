@@ -8,6 +8,7 @@ import Accounting from "@/pages/Accounting";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
+import Signup from "@/pages/Signup"; // Import Signup component
 import Index from "@/pages/Index"; // Assuming Index is the default for "/"
 
 export const routesConfig = [
@@ -21,4 +22,5 @@ export const routesConfig = [
   { path: "/reports", title: "Reports", component: Reports },
   { path: "/settings", title: "Settings", component: Settings },
   { path: "/login", title: "Login", component: Login },
+  { path: "/signup", title: "Sign Up", component: Signup }, // Added Signup route
 ];
