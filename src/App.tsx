@@ -11,7 +11,7 @@ import { PrinterSettingsProvider } from "@/context/PrinterSettingsContext";
 import { TaxProvider } from "@/context/TaxContext";
 import { CategoryProvider } from "@/context/CategoryContext";
 import { LoadingProvider } from "@/context/LoadingContext";
-import { PaymentMethodProvider } from "@/context/PaymentMethodContext"; // New import
+import { PaymentMethodProvider } from "@/context/PaymentMethodContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
@@ -37,7 +37,7 @@ function App() {
                     <ReceiptSettingsProvider>
                       <PrinterSettingsProvider>
                         <TaxProvider>
-                          <PaymentMethodProvider> {/* Wrap with PaymentMethodProvider */}
+                          <PaymentMethodProvider>
                             <Toaster richColors position="top-right" />
                             <GlobalLoader />
                             <Routes>
@@ -50,10 +50,12 @@ function App() {
                                     return null;
                                   }
                                   const Component = route.component;
+                                  // Adjust path for parameterized routes
+                                  const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
                                   return (
                                     <Route
                                       key={route.path}
-                                      path={route.path === "/" ? "" : route.path.substring(1)}
+                                      path={path}
                                       index={route.path === "/"}
                                       element={<Component />}
                                     />
