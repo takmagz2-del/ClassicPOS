@@ -22,6 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
+import { Printer } from "lucide-react"; // Import Printer icon
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -34,12 +35,13 @@ const Sales = () => {
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
-  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<PaymentMethod | null>(null); // Changed to PaymentMethod object
+  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<PaymentMethod | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
   const [appliedLoyaltyPoints, setAppliedLoyaltyPoints] = useState<number>(0);
   const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
+  const [showReprintButton, setShowReprintButton] = useState<boolean>(false); // New state for reprint button
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -122,6 +124,7 @@ const Sales = () => {
     setDiscountPercentage(0);
     setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
+    setShowReprintButton(false); // Hide reprint button on clear
     toast.info("Cart cleared.");
   };
 
@@ -149,7 +152,7 @@ const Sales = () => {
     setLoyaltyPointsDiscountAmount(0);
   };
 
-  const finalizeSale = (paymentMethodId: string, cashReceived?: number) => { // Changed to paymentMethodId
+  const finalizeSale = (paymentMethodId: string, cashReceived?: number) => {
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
@@ -161,7 +164,7 @@ const Sales = () => {
     }
 
     // For credit sales, a customer must be selected
-    if (paymentMethodToConfirm?.isCredit && !selectedCustomer) { // Use paymentMethodToConfirm object
+    if (paymentMethodToConfirm?.isCredit && !selectedCustomer) {
       toast.error("A customer must be selected for a credit sale.");
       return;
     }
@@ -173,7 +176,7 @@ const Sales = () => {
       subtotal: currentSubtotal,
       tax: currentTax,
       total: currentFinalTotal,
-      status: paymentMethodToConfirm?.isCredit ? "pending" : "completed", // Use paymentMethodToConfirm object
+      status: paymentMethodToConfirm?.isCredit ? "pending" : "completed",
       type: "sale",
       giftCardAmountUsed: appliedGiftCardAmount,
       customerId: selectedCustomer?.id,
@@ -182,7 +185,7 @@ const Sales = () => {
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
       loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
       taxRateApplied: defaultTaxRate.rate,
-      paymentMethodId: paymentMethodId, // Use paymentMethodId
+      paymentMethodId: paymentMethodId,
     };
 
     addSale(newSale);
@@ -208,9 +211,10 @@ const Sales = () => {
 
     setLastSale(newSale);
     setIsReceiptDialogOpen(true);
+    setShowReprintButton(true); // Show the reprint button after sale
 
     handleClearCart();
-    toast.success(`${paymentMethodToConfirm?.isCredit ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethodToConfirm?.name}! Total: ${formatCurrency(newSale.total, currentCurrency)}`); // Use paymentMethodToConfirm.name
+    toast.success(`${paymentMethodToConfirm?.isCredit ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethodToConfirm?.name}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
     if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
       const change = cashReceived - currentFinalTotal;
       toast.info(`Change due: ${formatCurrency(change, currentCurrency)}`);
@@ -223,14 +227,27 @@ const Sales = () => {
       toast.error("Cart is empty. Add items before checking out.");
       return;
     }
-    setPaymentMethodToConfirm(method); // Pass the full PaymentMethod object
+    setPaymentMethodToConfirm(method);
     setIsConfirmationDialogOpen(true);
+  };
+
+  // Function to handle reprinting the last receipt
+  const handleReprintReceipt = () => {
+    if (lastSale) {
+      setIsReceiptDialogOpen(true);
+    }
   };
 
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
+        {/* Re-print Receipt Button */}
+        {showReprintButton && lastSale && (
+          <Button onClick={handleReprintReceipt} variant="outline">
+            <Printer className="mr-2 h-4 w-4" /> Re-print Receipt
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 overflow-y-auto">
@@ -253,7 +270,7 @@ const Sales = () => {
             currentDiscountPercentage={discountPercentage}
             currentSaleSubtotal={currentSubtotal}
           />
-          {selectedCustomer && ( // Conditionally render LoyaltyPointsInput
+          {selectedCustomer && (
             <LoyaltyPointsInput
               availablePoints={selectedCustomer.loyaltyPoints}
               onApplyPoints={handleApplyLoyaltyPoints}
@@ -301,7 +318,7 @@ const Sales = () => {
             loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount,
             taxRateApplied: defaultTaxRate.rate,
           }}
-          paymentMethod={paymentMethodToConfirm} // Pass the full PaymentMethod object
+          paymentMethod={paymentMethodToConfirm}
         />
       )}
 
