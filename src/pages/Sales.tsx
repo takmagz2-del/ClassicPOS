@@ -180,7 +180,7 @@ const Sales = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
-        <div className="md:col-span-1 flex flex-col gap-4">
+        <div className="md:col-span-1 flex flex-col gap-4 flex-1"> {/* Added flex flex-col flex-1 */}
           <CustomerSelector
             customers={customers}
             selectedCustomerId={selectedCustomerId}
@@ -188,7 +188,7 @@ const Sales = () => {
           />
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
-        <div className="md:col-span-2 flex flex-col gap-4">
+        <div className="md:col-span-2 flex flex-col gap-4 flex-1"> {/* Added flex flex-col flex-1 */}
           <SaleCart
             cartItems={cartItems}
             onUpdateQuantity={handleUpdateCartItemQuantity}
