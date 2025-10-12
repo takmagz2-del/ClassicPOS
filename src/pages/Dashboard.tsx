@@ -11,6 +11,8 @@ import { format, startOfDay, endOfDay, isWithinInterval, subDays, eachDayOfInter
 import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import LowStockProducts from "@/components/dashboard/LowStockProducts";
+import TopCustomers from "@/components/dashboard/TopCustomers";
+import CategorySalesChart from "@/components/dashboard/CategorySalesChart";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -185,6 +187,11 @@ const Dashboard = () => {
         <div className="lg:col-span-3">
           <LowStockProducts products={products} />
         </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <TopCustomers />
+        <CategorySalesChart />
       </div>
     </div>
   );
