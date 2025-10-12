@@ -16,12 +16,12 @@ interface SaleCartProps {
 
 const SaleCart = ({ cartItems, onUpdateQuantity, onRemoveItem }: SaleCartProps) => {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="flex-1 flex flex-col"> {/* Changed from h-full to flex-1 */}
       <CardHeader>
         <CardTitle>Current Sale</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col overflow-hidden"> {/* Added flex and overflow-hidden */}
-        <ScrollArea className="flex-1"> {/* Changed to flex-1 to fill available space */}
+      <CardContent className="flex-1 flex flex-col overflow-hidden">
+        <ScrollArea className="flex-1">
           <Table>
             <TableHeader>
               <TableRow>
