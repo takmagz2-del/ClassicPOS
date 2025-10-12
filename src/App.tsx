@@ -11,7 +11,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
-import Dashboard from "@/pages/Dashboard"; // Explicitly import Dashboard
+// Removed explicit import of Dashboard as it's handled by routesConfig
 
 function App() {
   const LoginRoute = routesConfig.find(r => r.path === "/login");
