@@ -32,7 +32,7 @@ interface AuthContextType {
   disableMfa: () => Promise<boolean>;
   users: User[];
   addUser: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  updateUser: (updatedUser: Partial<User>, currentPassword?: string, newPassword?: string) => Promise<boolean>;
+  updateUser: (userId: string, updatedUser: Partial<User>, currentPassword?: string, newPassword?: string) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
@@ -308,20 +308,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updateUser = async (updatedUser: Partial<User>, currentPassword?: string, newPassword?: string): Promise<boolean> => {
+  const updateUser = async (userId: string, updatedUser: Partial<User>, currentPassword?: string, newPassword?: string): Promise<boolean> => {
     startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (!user?.email) {
-          toast.error("No user logged in.");
+        // Find the user to update by ID
+        const userToUpdateEntry = Object.entries(mockUsers).find(([, u]) => u.id === userId);
+
+        if (!userToUpdateEntry) {
+          toast.error("User not found.");
           stopLoading();
           resolve(false);
           return;
         }
 
-        const existingUser = mockUsers[user.email];
-        if (!existingUser) {
-          toast.error("User not found.");
+        const [oldEmailKey, existingUser] = userToUpdateEntry;
+        let newEmailKey = updatedUser.email || oldEmailKey;
+
+        // Check if the new email already exists for another user
+        if (newEmailKey !== oldEmailKey && mockUsers[newEmailKey] && mockUsers[newEmailKey].id !== userId) {
+          toast.error("Another user with this email already exists.");
           stopLoading();
           resolve(false);
           return;
@@ -338,21 +344,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           existingUser.password = newPassword;
         }
 
-        // Update other user properties
+        // Create the updated user data
         const newUserData: InternalMockUser = {
           ...existingUser,
           ...updatedUser,
-          email: updatedUser.email || existingUser.email, // Ensure email is not undefined
+          email: newEmailKey, // Ensure email is updated
           role: updatedUser.role || existingUser.role, // Ensure role is not undefined
         };
 
-        setMockUsers((prev) => ({
-          ...prev,
-          [newUserData.email]: newUserData,
-        }));
+        setMockUsers((prev) => {
+          const newMockUsers = { ...prev };
+          // If email changed, delete the old entry
+          if (oldEmailKey !== newEmailKey) {
+            delete newMockUsers[oldEmailKey];
+          }
+          newMockUsers[newEmailKey] = newUserData; // Add/overwrite with new email as key
+          return newMockUsers;
+        });
 
-        // If the current logged-in user is being updated
-        if (user.id === newUserData.id) {
+        // If the currently logged-in user is being updated
+        if (user?.id === userId) {
           setUser({
             id: newUserData.id,
             email: newUserData.email,
@@ -361,7 +372,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             backupCodes: newUserData.backupCodes,
             role: newUserData.role,
           });
-          // If email changed, update localStorage
+          // Update localStorage if the logged-in user's email changed
           if (user.email !== newUserData.email) {
             localStorage.setItem("userEmail", newUserData.email);
           }

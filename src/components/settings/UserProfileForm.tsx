@@ -75,7 +75,8 @@ const UserProfileForm = () => {
       email: values.email,
     };
 
-    const success = await updateUser(
+    const success = await updateUser( // Pass user.id here
+      user.id,
       updatedFields,
       values.currentPassword || undefined,
       values.newPassword || undefined

@@ -65,8 +65,8 @@ const Settings = () => {
       role: values.role,
     };
 
-    // Pass the new password as the third argument to updateUser
-    return await updateUser(updatedUserFields, undefined, values.password || undefined);
+    // Pass the editingUser.id as the first argument
+    return await updateUser(editingUser.id, updatedUserFields, undefined, values.password || undefined);
   };
 
   const handleDeleteUserClick = (userToDelete: User) => {
