@@ -12,11 +12,11 @@ import EditProductForm from "@/components/products/EditProductForm";
 import DeleteProductDialog from "@/components/products/DeleteProductDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-import { mockProducts } from "@/data/mockProducts"; // Import mock products
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
 
 const Products = () => {
   const { logout } = useAuth();
-  const [products, setProducts] = useState<Product[]>(mockProducts); // Use imported mock data
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts(); // Use products and functions from context
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -24,7 +24,7 @@ const Products = () => {
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
   const handleAddProduct = (newProduct: Product) => {
-    setProducts((prevProducts) => [...prevProducts, newProduct]);
+    addProduct(newProduct);
   };
 
   const handleEditProduct = (product: Product) => {
@@ -33,9 +33,7 @@ const Products = () => {
   };
 
   const handleUpdateProduct = (updatedProduct: Product) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
+    updateProduct(updatedProduct);
   };
 
   const handleDeleteProduct = (product: Product) => {
@@ -44,7 +42,7 @@ const Products = () => {
   };
 
   const confirmDeleteProduct = (productId: string) => {
-    setProducts((prevProducts) => prevProducts.filter((p) => p.id !== productId));
+    deleteProduct(productId);
     toast.success("Product deleted successfully!");
     setDeletingProduct(null);
   };

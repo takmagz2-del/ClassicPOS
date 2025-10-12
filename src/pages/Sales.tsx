@@ -13,13 +13,13 @@ import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
 import BNPLButtons from "@/components/sales/BNPLButtons";
 import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
-import { mockProducts } from "@/data/mockProducts"; // Re-written import
-import { TAX_RATE } from "@/config/constants"; // Import TAX_RATE
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { TAX_RATE } from "@/config/constants";
 
 const Sales = () => {
   const { logout } = useAuth();
   const { addSale } = useSales();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const { products, updateProductStock } = useProducts(); // Use products and updateProductStock from context
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
 
@@ -121,14 +121,13 @@ const Sales = () => {
 
     addSale(newSale);
 
-    const updatedProducts = products.map(p => {
-      const soldItem = cartItems.find(item => item.productId === p.id);
-      if (soldItem) {
-        return { ...p, stock: p.stock - soldItem.quantity };
+    // Update product stock in the global context
+    cartItems.forEach(soldItem => {
+      const product = products.find(p => p.id === soldItem.productId);
+      if (product) {
+        updateProductStock(product.id, product.stock - soldItem.quantity);
       }
-      return p;
     });
-    setProducts(updatedProducts);
 
     handleClearCart();
     toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: $${newSale.total.toFixed(2)}`);
@@ -141,7 +140,6 @@ const Sales = () => {
       return;
     }
     toast.info("Initiating Apple Pay...");
-    // In a real app, you'd integrate with Apple Pay SDK here
     processSale("Apple Pay");
   };
   const handleGooglePay = () => {
@@ -150,7 +148,6 @@ const Sales = () => {
       return;
     }
     toast.info("Initiating Google Pay...");
-    // In a real app, you'd integrate with Google Pay SDK here
     processSale("Google Pay");
   };
 
@@ -160,7 +157,6 @@ const Sales = () => {
       return;
     }
     toast.info("Initiating Afterpay...");
-    // Integrate Afterpay SDK here
     processSale("Afterpay");
   };
 
@@ -170,7 +166,6 @@ const Sales = () => {
       return;
     }
     toast.info("Initiating Klarna...");
-    // Integrate Klarna SDK here
     processSale("Klarna");
   };
 

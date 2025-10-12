@@ -2,10 +2,40 @@
 
 import { useAuth } from "@/components/auth/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Added Card components for dashboard layout
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSales } from "@/context/SaleContext"; // Import useSales
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const { logout } = useAuth();
+  const { salesHistory } = useSales();
+  const { products } = useProducts();
+
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [salesToday, setSalesToday] = useState<number>(0);
+  const [productsInStock, setProductsInStock] = useState<number>(0);
+
+  useEffect(() => {
+    // Calculate Total Revenue
+    const revenue = salesHistory.reduce((sum, sale) => sum + sale.total, 0);
+    setTotalRevenue(revenue);
+
+    // Calculate Sales Today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    const salesForToday = salesHistory.filter(sale => {
+      const saleDate = new Date(sale.date);
+      saleDate.setHours(0, 0, 0, 0);
+      return saleDate.getTime() === today.getTime();
+    }).reduce((sum, sale) => sum + sale.total, 0);
+    setSalesToday(salesForToday);
+
+    // Calculate Products in Stock
+    const stock = products.reduce((sum, product) => sum + product.stock, 0);
+    setProductsInStock(stock);
+
+  }, [salesHistory, products]);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -23,8 +53,8 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
         <Card>
@@ -33,8 +63,8 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+            <div className="text-2xl font-bold">${salesToday.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">+180.1% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
         <Card>
@@ -43,8 +73,8 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
+            <div className="text-2xl font-bold">+12,234</div> {/* Static for now */}
+            <p className="text-xs text-muted-foreground">+19% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
         <Card>
@@ -53,8 +83,8 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p>
+            <div className="text-2xl font-bold">{productsInStock}</div>
+            <p className="text-xs text-muted-foreground">+5% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
       </div>
