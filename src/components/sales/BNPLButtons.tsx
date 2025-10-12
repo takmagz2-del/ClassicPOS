@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CreditCard } from "lucide-react"; // Using a generic card icon for BNPL for now
+import { CreditCard } from "lucide-react";
 
 interface BNPLButtonsProps {
   onAfterpay: () => void;

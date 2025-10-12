@@ -13,15 +13,23 @@ import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
 import BNPLButtons from "@/components/sales/BNPLButtons";
 import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
-import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useProducts } from "@/context/ProductContext";
 import { TAX_RATE } from "@/config/constants";
+import CustomerSelector from "@/components/sales/CustomerSelector"; // New import
+import { useCustomers } from "@/context/CustomerContext"; // New import
+import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog"; // New import
 
 const Sales = () => {
   const { logout } = useAuth();
   const { addSale } = useSales();
-  const { products, updateProductStock } = useProducts(); // Use products and updateProductStock from context
+  const { products, updateProductStock } = useProducts();
+  const { customers } = useCustomers(); // Use customers from context
+
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null); // New state for selected customer
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false); // New state for confirmation dialog
+  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null); // New state for payment method
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -90,6 +98,7 @@ const Sales = () => {
   const handleClearCart = () => {
     setCartItems([]);
     setAppliedGiftCardAmount(0);
+    setSelectedCustomerId(null); // Clear selected customer
     toast.info("Cart cleared.");
   };
 
@@ -97,7 +106,7 @@ const Sales = () => {
     setAppliedGiftCardAmount((prev) => prev + amount);
   };
 
-  const processSale = (paymentMethod: string) => {
+  const finalizeSale = (paymentMethod: string, cashReceived?: number) => {
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
@@ -108,6 +117,8 @@ const Sales = () => {
       return;
     }
 
+    const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+
     const newSale: Sale = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
@@ -117,6 +128,8 @@ const Sales = () => {
       total: currentFinalTotal,
       status: "completed",
       giftCardAmountUsed: appliedGiftCardAmount,
+      customerId: selectedCustomer?.id, // Add customer ID
+      customerName: selectedCustomer?.name, // Add customer name
     };
 
     addSale(newSale);
@@ -131,55 +144,38 @@ const Sales = () => {
 
     handleClearCart();
     toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: $${newSale.total.toFixed(2)}`);
+    if (cashReceived !== undefined && cashReceived > currentFinalTotal) {
+      const change = cashReceived - currentFinalTotal;
+      toast.info(`Change due: $${change.toFixed(2)}`);
+    }
+    setIsConfirmationDialogOpen(false); // Close dialog after finalizing
   };
 
-  const handleProcessSale = () => processSale("Cash/Card");
-  const handleApplePay = () => {
+  const openConfirmationDialog = (method: string) => {
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
     }
-    toast.info("Initiating Apple Pay...");
-    processSale("Apple Pay");
-  };
-  const handleGooglePay = () => {
-    if (cartItems.length === 0) {
-      toast.error("Cart is empty. Add items before checking out.");
-      return;
-    }
-    toast.info("Initiating Google Pay...");
-    processSale("Google Pay");
-  };
-
-  const handleAfterpay = () => {
-    if (cartItems.length === 0) {
-      toast.error("Cart is empty. Add items before checking out.");
-      return;
-    }
-    toast.info("Initiating Afterpay...");
-    processSale("Afterpay");
-  };
-
-  const handleKlarna = () => {
-    if (cartItems.length === 0) {
-      toast.error("Cart is empty. Add items before checking out.");
-      return;
-    }
-    toast.info("Initiating Klarna...");
-    processSale("Klarna");
+    setPaymentMethodToConfirm(method);
+    setIsConfirmationDialogOpen(true);
   };
 
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Sales Terminal</h1>
+        <h1 className="text-3xl font-bold">New Sale</h1> {/* Updated title */}
         <Button onClick={logout} variant="destructive">
           Logout
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 flex flex-col gap-4">
+          <CustomerSelector
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={setSelectedCustomerId}
+          />
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
         <div className="md:col-span-2 flex flex-col gap-4">
@@ -199,21 +195,38 @@ const Sales = () => {
             giftCardAmountUsed={appliedGiftCardAmount}
           />
           <PaymentMethodButtons
-            onProcessSale={handleProcessSale}
-            onApplePay={handleApplePay}
-            onGooglePay={handleGooglePay}
+            onProcessSale={() => openConfirmationDialog("Cash/Card")}
+            onApplePay={() => openConfirmationDialog("Apple Pay")}
+            onGooglePay={() => openConfirmationDialog("Google Pay")}
             onClearCart={handleClearCart}
             hasItemsInCart={cartItems.length > 0}
             finalTotal={currentFinalTotal}
           />
           <BNPLButtons
-            onAfterpay={handleAfterpay}
-            onKlarna={handleKlarna}
+            onAfterpay={() => openConfirmationDialog("Afterpay")}
+            onKlarna={() => openConfirmationDialog("Klarna")}
             hasItemsInCart={cartItems.length > 0}
             finalTotal={currentFinalTotal}
           />
         </div>
       </div>
+
+      {isConfirmationDialogOpen && paymentMethodToConfirm && (
+        <SaleConfirmationDialog
+          isOpen={isConfirmationDialogOpen}
+          onClose={() => setIsConfirmationDialogOpen(false)}
+          onConfirmSale={finalizeSale}
+          saleDetails={{
+            items: cartItems,
+            subtotal: currentSubtotal,
+            tax: currentTax,
+            total: currentFinalTotal,
+            giftCardAmountUsed: appliedGiftCardAmount,
+            customer: customers.find(c => c.id === selectedCustomerId),
+          }}
+          paymentMethod={paymentMethodToConfirm}
+        />
+      )}
     </div>
   );
 };

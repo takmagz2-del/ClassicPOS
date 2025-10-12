@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import Dashboard from "@/pages/Dashboard";
+import { Navigate } from "react-router-dom";
 
 const Index = () => {
-  return <Dashboard />;
+  return <Navigate to="/sales" replace />;
 };
 
 export default Index;

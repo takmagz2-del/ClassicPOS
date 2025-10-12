@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Apple, CreditCard } from "lucide-react"; // Removed Chrome, keeping CreditCard
+import { Apple, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PaymentMethodButtonsProps {
@@ -33,7 +33,7 @@ const PaymentMethodButtons = ({
         <Apple className="mr-2 h-4 w-4" /> Pay with Apple Pay
       </Button>
       <Button onClick={onGooglePay} className={cn("w-full bg-blue-600 text-white hover:bg-blue-700", isDisabled && "opacity-50 cursor-not-allowed")} disabled={isDisabled}>
-        <CreditCard className="mr-2 h-4 w-4" /> Pay with Google Pay {/* Changed to CreditCard */}
+        <CreditCard className="mr-2 h-4 w-4" /> Pay with Google Pay
       </Button>
       <Button onClick={onClearCart} variant="outline" className="w-full" disabled={!hasItemsInCart}>
         Clear Cart

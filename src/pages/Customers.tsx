@@ -12,11 +12,11 @@ import EditCustomerForm from "@/components/customers/EditCustomerForm";
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-import { mockCustomers } from "@/data/mockCustomers"; // Import mock customers
+import { useCustomers } from "@/context/CustomerContext"; // Use useCustomers hook
 
 const Customers = () => {
   const { logout } = useAuth();
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers); // Use imported mock data
+  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers(); // Use context functions
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -24,7 +24,7 @@ const Customers = () => {
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
 
   const handleAddCustomer = (newCustomer: Customer) => {
-    setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
+    addCustomer(newCustomer); // Use context function
   };
 
   const handleEditCustomer = (customer: Customer) => {
@@ -33,9 +33,7 @@ const Customers = () => {
   };
 
   const handleUpdateCustomer = (updatedCustomer: Customer) => {
-    setCustomers((prevCustomers) =>
-      prevCustomers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c))
-    );
+    updateCustomer(updatedCustomer); // Use context function
   };
 
   const handleDeleteCustomer = (customer: Customer) => {
@@ -44,7 +42,7 @@ const Customers = () => {
   };
 
   const confirmDeleteCustomer = (customerId: string) => {
-    setCustomers((prevCustomers) => prevCustomers.filter((c) => c.id !== customerId));
+    deleteCustomer(customerId); // Use context function
     toast.success("Customer deleted successfully!");
     setDeletingCustomer(null);
   };

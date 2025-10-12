@@ -14,4 +14,6 @@ export interface Sale {
   total: number;
   status: "pending" | "completed" | "cancelled";
   giftCardAmountUsed?: number; // Added for gift card functionality
+  customerId?: string; // New: Optional customer ID
+  customerName?: string; // New: Optional customer name
 }
