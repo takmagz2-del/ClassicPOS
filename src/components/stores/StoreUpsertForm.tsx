@@ -53,7 +53,7 @@ const StoreUpsertForm = ({ initialStore, onStoreSubmit, onClose }: StoreUpsertFo
       const updatedStore: Store = { ...initialStore!, ...values };
       onStoreSubmit(updatedStore);
     } else {
-      onStoreSubmit(values);
+      onStoreSubmit(values as Omit<Store, "id">);
     }
     onClose();
   };
