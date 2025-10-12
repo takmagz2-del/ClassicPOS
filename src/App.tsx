@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider, useAuth } from "./components/auth/AuthContext";
 import { ReactNode } from "react";
+import MainLayout from "@/components/layout/MainLayout"; // Corrected import path
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  return children;
+  return <MainLayout>{children}</MainLayout>; // Wrap children with MainLayout
 };
 
 const App = () => (
