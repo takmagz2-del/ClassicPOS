@@ -14,7 +14,7 @@ import Settings from "@/pages/Settings";
 import SalesHistory from "@/pages/SalesHistory";
 import Stores from "@/pages/Stores";
 import Accounting from "@/pages/Accounting";
-import Dashboard from "@/pages/Dashboard"; // Import the new Dashboard component
+import Dashboard from "@/pages/Dashboard";
 
 function App() {
   return (
@@ -32,10 +32,10 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Dashboard />} /> {/* Changed to Dashboard */}
+              <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
               <Route path="customers" element={<Customers />} />
-              <Route path="sales" element={<Sales />} /> {/* Added Sales route explicitly */}
+              <Route path="sales" element={<Sales />} />
               <Route path="sales-history" element={<SalesHistory />} />
               <Route path="stores" element={<Stores />} />
               <Route path="accounting" element={<Accounting />} />
