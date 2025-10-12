@@ -1,20 +1,16 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface SaleSummaryProps {
   subtotal: number;
   taxRate: number;
-  onCheckout: () => void;
-  onClearCart: () => void;
-  hasItemsInCart: boolean;
-  giftCardAmountUsed: number; // New prop for gift card amount
+  giftCardAmountUsed: number;
 }
 
-const SaleSummary = ({ subtotal, taxRate, onCheckout, onClearCart, hasItemsInCart, giftCardAmountUsed }: SaleSummaryProps) => {
+const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed }: SaleSummaryProps) => {
   const tax = subtotal * taxRate;
   let total = subtotal + tax;
 
@@ -48,14 +44,6 @@ const SaleSummary = ({ subtotal, taxRate, onCheckout, onClearCart, hasItemsInCar
           <span>${finalTotal.toFixed(2)}</span>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2">
-        <Button onClick={onCheckout} className="w-full" disabled={!hasItemsInCart || finalTotal < 0}>
-          Process Sale
-        </Button>
-        <Button onClick={onClearCart} variant="outline" className="w-full" disabled={!hasItemsInCart}>
-          Clear Cart
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

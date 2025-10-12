@@ -9,8 +9,9 @@ import ProductSelector from "@/components/sales/ProductSelector";
 import SaleCart from "@/components/sales/SaleCart";
 import SaleSummary from "@/components/sales/SaleSummary";
 import GiftCardInput from "@/components/sales/GiftCardInput";
+import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons"; // Import the new component
 import { toast } from "sonner";
-import { useSales } from "@/context/SaleContext"; // Ensure this uses the alias
+import { useSales } from "@/context/SaleContext";
 
 // Mock products (should ideally come from a global state or API)
 const mockProducts: Product[] = [
@@ -107,7 +108,7 @@ const Sales = () => {
     setAppliedGiftCardAmount((prev) => prev + amount);
   };
 
-  const handleCheckout = () => {
+  const processSale = (paymentMethod: string) => {
     if (cartItems.length === 0) {
       toast.error("Cart is empty. Add items before checking out.");
       return;
@@ -141,7 +142,27 @@ const Sales = () => {
     setProducts(updatedProducts);
 
     handleClearCart();
-    toast.success(`Sale #${newSale.id.substring(0, 8)} completed! Total: $${newSale.total.toFixed(2)}`);
+    toast.success(`Sale #${newSale.id.substring(0, 8)} completed via ${paymentMethod}! Total: $${newSale.total.toFixed(2)}`);
+  };
+
+  const handleProcessSale = () => processSale("Cash/Card");
+  const handleApplePay = () => {
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty. Add items before checking out.");
+      return;
+    }
+    toast.info("Initiating Apple Pay...");
+    // In a real app, you'd integrate with Apple Pay SDK here
+    processSale("Apple Pay");
+  };
+  const handleGooglePay = () => {
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty. Add items before checking out.");
+      return;
+    }
+    toast.info("Initiating Google Pay...");
+    // In a real app, you'd integrate with Google Pay SDK here
+    processSale("Google Pay");
   };
 
   return (
@@ -171,10 +192,15 @@ const Sales = () => {
           <SaleSummary
             subtotal={currentSubtotal}
             taxRate={TAX_RATE}
-            onCheckout={handleCheckout}
+            giftCardAmountUsed={appliedGiftCardAmount}
+          />
+          <PaymentMethodButtons
+            onProcessSale={handleProcessSale}
+            onApplePay={handleApplePay}
+            onGooglePay={handleGooglePay}
             onClearCart={handleClearCart}
             hasItemsInCart={cartItems.length > 0}
-            giftCardAmountUsed={appliedGiftCardAmount}
+            finalTotal={currentFinalTotal}
           />
         </div>
       </div>
