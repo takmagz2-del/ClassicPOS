@@ -3,6 +3,7 @@
 import { Sale } from "@/types/sale";
 import { Customer } from "@/types/customer";
 import { ReceiptSettings } from "@/types/receipt";
+import { PrinterSettings } from "@/types/printer"; // New import
 import { toast } from "sonner";
 
 /**
@@ -14,11 +15,13 @@ export const sendPrintJobToBackend = async (
   sale: Sale,
   customer: Customer | undefined,
   receiptSettings: ReceiptSettings,
+  printerSettings: PrinterSettings, // New parameter
 ) => {
   console.log("Simulating sending print job to backend...");
   console.log("Sale Data:", sale);
   console.log("Customer Data:", customer);
   console.log("Receipt Settings:", receiptSettings);
+  console.log("Printer Settings:", printerSettings); // Log printer settings
 
   // Simulate network request delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -30,7 +33,7 @@ export const sendPrintJobToBackend = async (
   //     headers: {
   //       'Content-Type': 'application/json',
   //     },
-  //     body: JSON.stringify({ sale, customer, receiptSettings }),
+  //     body: JSON.stringify({ sale, customer, receiptSettings, printerSettings }), // Include printerSettings
   //   });
   //
   //   if (!response.ok) {

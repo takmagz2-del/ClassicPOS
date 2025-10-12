@@ -19,7 +19,8 @@ import { useReceiptSettings } from "@/context/ReceiptSettingsContext";
 import { Printer } from "lucide-react";
 import { format } from "date-fns";
 import { useProducts } from "@/context/ProductContext";
-import { sendPrintJobToBackend } from "@/services/printService"; // Import the new service
+import { sendPrintJobToBackend } from "@/services/printService";
+import { usePrinterSettings } from "@/context/PrinterSettingsContext"; // New import
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -31,11 +32,12 @@ interface ReceiptPreviewDialogProps {
 const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPreviewDialogProps) => {
   const { currentCurrency } = useCurrency();
   const { receiptSettings } = useReceiptSettings();
+  const { printerSettings } = usePrinterSettings(); // Use printer settings
   const { products } = useProducts();
 
   const handlePrint = async () => {
-    // Call the simulated backend service
-    await sendPrintJobToBackend(sale, customer, receiptSettings);
+    // Call the simulated backend service, now passing printerSettings
+    await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
     onClose(); // Close the dialog after sending the print job
   };
 
