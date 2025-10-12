@@ -136,6 +136,17 @@ const Sales = () => {
   const handleApplyLoyaltyPoints = (points: number, equivalentAmount: number) => {
     setAppliedLoyaltyPoints(points);
     setLoyaltyPointsDiscountAmount(equivalentAmount);
+    if (points === 0) { // Explicitly reset if 0 points are applied
+      setAppliedLoyaltyPoints(0);
+      setLoyaltyPointsDiscountAmount(0);
+    }
+  };
+
+  const handleSelectCustomer = (customerId: string | null) => {
+    setSelectedCustomerId(customerId);
+    // Reset loyalty points when customer changes
+    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsDiscountAmount(0);
   };
 
   const finalizeSale = (paymentMethod: string, cashReceived?: number) => {
@@ -227,7 +238,7 @@ const Sales = () => {
           <CustomerSelector
             customers={customers}
             selectedCustomerId={selectedCustomerId}
-            onSelectCustomer={setSelectedCustomerId}
+            onSelectCustomer={handleSelectCustomer}
           />
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
@@ -242,7 +253,7 @@ const Sales = () => {
             currentDiscountPercentage={discountPercentage}
             currentSaleSubtotal={currentSubtotal}
           />
-          {selectedCustomer && (
+          {selectedCustomer && ( // Conditionally render LoyaltyPointsInput
             <LoyaltyPointsInput
               availablePoints={selectedCustomer.loyaltyPoints}
               onApplyPoints={handleApplyLoyaltyPoints}
