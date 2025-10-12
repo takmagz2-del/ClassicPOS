@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/table";
 import { Customer } from "@/types/customer";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
 
 interface CustomerTableProps {
   customers: Customer[];
+  onEditCustomer: (customer: Customer) => void;
+  onDeleteCustomer: (customer: Customer) => void;
 }
 
-const CustomerTable = ({ customers }: CustomerTableProps) => {
+const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: CustomerTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -27,6 +31,7 @@ const CustomerTable = ({ customers }: CustomerTableProps) => {
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
             <TableHead className="text-right">Loyalty Points</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -42,11 +47,21 @@ const CustomerTable = ({ customers }: CustomerTableProps) => {
                 <TableCell>{customer.phone || "N/A"}</TableCell>
                 <TableCell>{customer.address || "N/A"}</TableCell>
                 <TableCell className="text-right">{customer.loyaltyPoints}</TableCell>
+                <TableCell className="text-center flex justify-center items-center space-x-1">
+                  <Button variant="ghost" size="icon" onClick={() => onEditCustomer(customer)}>
+                    <Edit className="h-4 w-4" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDeleteCustomer(customer)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 No customers found.
               </TableCell>
             </TableRow>
