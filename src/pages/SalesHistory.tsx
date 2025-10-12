@@ -32,6 +32,7 @@ const SalesHistory = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
   const [sortKey, setSortKey] = useState<keyof Sale>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -79,7 +80,12 @@ const SalesHistory = () => {
       filteredSales = filteredSales.filter((sale) => sale.status === statusFilter);
     }
 
-    // 4. Sort
+    // 4. Filter by type (Sale/Refund)
+    if (typeFilter !== "all") {
+      filteredSales = filteredSales.filter((sale) => sale.type === typeFilter);
+    }
+
+    // 5. Sort
     const sortedSales = [...filteredSales].sort((a, b) => {
       let compareValue = 0;
       if (sortKey === "date") {
@@ -91,7 +97,7 @@ const SalesHistory = () => {
     });
 
     return sortedSales;
-  }, [salesHistory, searchTerm, dateRange, statusFilter, sortKey, sortOrder]);
+  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, sortKey, sortOrder]); // Added typeFilter to dependencies
 
   const handleViewReceipt = (sale: Sale) => {
     setSelectedSaleForReceipt(sale);
@@ -204,6 +210,18 @@ const SalesHistory = () => {
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* New Type Filter */}
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="sale">Sale</SelectItem>
+                <SelectItem value="refund">Refund</SelectItem>
               </SelectContent>
             </Select>
 
