@@ -13,6 +13,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  BarChart, // New import
+  Bar, // New import
 } from "recharts";
 import { format, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -21,9 +23,11 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
+import { useProducts } from "@/context/ProductContext"; // New import for products
 
 const Reports = () => {
   const { salesHistory } = useSales();
+  const { products } = useProducts(); // Use products context
   const { currentCurrency } = useCurrency();
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
@@ -32,7 +36,7 @@ const Reports = () => {
   });
   const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
 
-  const { totalRevenue, averageSaleValue, dailySalesData } = useMemo(() => {
+  const { totalRevenue, averageSaleValue, dailySalesData, productCategorySales, topSellingProducts } = useMemo(() => {
     let filteredTransactions = salesHistory;
 
     // Apply date range filter
@@ -50,7 +54,7 @@ const Reports = () => {
         return transactionDate >= startOfDay(dateRange.from!);
       });
     } else if (dateRange.to) {
-      filteredTransactions = salesHistory.filter((transaction) => {
+      filteredTransactions = filteredTransactions.filter((transaction) => {
         const transactionDate = new Date(transaction.date);
         return transactionDate <= endOfDay(dateRange.to!);
       });
@@ -83,12 +87,41 @@ const Reports = () => {
         sales: amount,
       }));
 
+    // Calculate Product Sales by Category
+    const categorySalesMap = new Map<string, number>();
+    const productSalesCountMap = new Map<string, number>(); // To track quantity sold for top products
+
+    filteredTransactions.filter(t => t.type === "sale").forEach(sale => {
+      sale.items.forEach(item => {
+        const productDetails = products.find(p => p.id === item.productId);
+        if (productDetails) {
+          // Category sales
+          const category = productDetails.category || "Uncategorized";
+          categorySalesMap.set(category, (categorySalesMap.get(category) || 0) + (item.price * item.quantity));
+
+          // Product sales count
+          productSalesCountMap.set(productDetails.name, (productSalesCountMap.get(productDetails.name) || 0) + item.quantity);
+        }
+      });
+    });
+
+    const productCategorySales = Array.from(categorySalesMap.entries())
+      .map(([category, amount]) => ({ category, sales: amount }))
+      .sort((a, b) => b.sales - a.sales);
+
+    const topSellingProducts = Array.from(productSalesCountMap.entries())
+      .map(([name, quantity]) => ({ name, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5); // Top 5 products
+
     return {
       totalRevenue: total,
       averageSaleValue: average,
       dailySalesData: sortedDailySales,
+      productCategorySales,
+      topSellingProducts,
     };
-  }, [salesHistory, dateRange, typeFilter]); // Added typeFilter to dependencies
+  }, [salesHistory, dateRange, typeFilter, products]); // Added products to dependencies
 
   return (
     <div className="flex flex-col gap-4">
@@ -201,6 +234,59 @@ const Reports = () => {
           )}
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Product Sales by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {productCategorySales.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={productCategorySales}
+                    margin={{
+                      top: 5,
+                      right: 10,
+                      left: 10,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="category" />
+                    <YAxis tickFormatter={(value) => formatCurrency(value, currentCurrency)} />
+                    <Tooltip formatter={(value: number) => formatCurrency(value, currentCurrency)} />
+                    <Bar dataKey="sales" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground">No product sales by category for the selected period.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top 5 Selling Products (by Quantity)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topSellingProducts.length > 0 ? (
+              <div className="space-y-2">
+                {topSellingProducts.map((product, index) => (
+                  <div key={product.name} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
+                    <p className="font-medium">{index + 1}. {product.name}</p>
+                    <span className="text-muted-foreground">{product.quantity} units</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground">No top selling products for the selected period.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
