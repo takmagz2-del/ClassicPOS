@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import * as OTPAuth from "otpauth"; // Corrected import: import as namespace
+import { TOTP, Secret } from "otpauth"; // Corrected import: using named exports
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<{ email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null>(null);
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userData.mfaEnabled) {
           if (totpCode) {
             // Verify TOTP code
-            const otp = new OTPAuth.TOTP({ secret: userData.mfaSecret });
+            const otp = new TOTP({ secret: userData.mfaSecret }); // Updated usage
             const isValid = otp.validate({ token: totpCode });
 
             if (isValid === null) {
@@ -116,13 +116,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const generateMfaSecret = useCallback(async (email: string) => {
-    const otp = new OTPAuth.TOTP({
+    const otp = new TOTP({ // Updated usage
       issuer: "ClassicPOS",
       label: email,
       algorithm: "SHA1",
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.randomKey(),
+      secret: Secret.randomKey(), // Updated usage
     });
 
     const secret = otp.secret.base32;
@@ -142,7 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyMfaSetup = async (secret: string, totpCode: string): Promise<boolean> => {
     if (!user?.email) return false;
 
-    const otp = new OTPAuth.TOTP({ secret });
+    const otp = new TOTP({ secret }); // Updated usage
     const isValid = otp.validate({ token: totpCode });
 
     if (isValid !== null) {

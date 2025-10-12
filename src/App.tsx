@@ -1,89 +1,45 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Products from "./pages/Products";
-import Customers from "./pages/Customers";
-import Sales from "./pages/Sales";
-import SalesHistory from "./pages/SalesHistory";
-import { AuthProvider, useAuth } from "./components/auth/AuthContext";
-import { SaleProvider } from "@/context/SaleContext"; // Ensure this uses the alias
-import { ReactNode } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+"use client";
 
-const queryClient = new QueryClient();
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/components/auth/AuthContext";
+import { SaleProvider } from "@/components/sale/SaleContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Login from "@/pages/Login";
+import Sales from "@/pages/Sales";
+import Products from "@/pages/Products";
+import Customers from "@/pages/Customers";
+import Reports from "@/pages/Reports";
+import Settings from "@/pages/Settings";
+import Layout from "@/components/layout/Layout";
 
-// ProtectedRoute component to guard routes
-const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  return <MainLayout>{children}</MainLayout>;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <SaleProvider>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <ProtectedRoute>
-                    <Products />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/customers"
-                element={
-                  <ProtectedRoute>
-                    <Customers />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales"
-                element={
-                  <ProtectedRoute>
-                    <Sales />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/sales-history"
-                element={
-                  <ProtectedRoute>
-                    <SalesHistory />
-                  </ProtectedRoute>
-                }
-              />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SaleProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <BrowserRouter>
+      <Toaster richColors position="top-right" />
+      <AuthProvider>
+        <SaleProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Sales />} />
+              <Route path="products" element={<Products />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </SaleProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 export default App;
