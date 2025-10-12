@@ -6,9 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Products from "./pages/Products"; // Import the new Products page
 import { AuthProvider, useAuth } from "./components/auth/AuthContext";
 import { ReactNode } from "react";
-import MainLayout from "@/components/layout/MainLayout"; // Corrected import path
+import MainLayout from "@/components/layout/MainLayout";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute>
+                  <Products />
                 </ProtectedRoute>
               }
             />
