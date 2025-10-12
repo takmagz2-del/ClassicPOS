@@ -4,7 +4,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react"; // Removed Package2 as it's no longer used directly in Header
+import { Menu, Package2 } from "lucide-react"; // Added Package2 for mobile branding
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -56,13 +56,20 @@ const Header = () => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="sm:max-w-xs p-0">
-            {/* The Sidebar component already contains the logo and title */}
+            {/* Sidebar is rendered here without its own branding */}
             <Sidebar onLinkClick={handleLinkClick} />
           </SheetContent>
         </Sheet>
       )}
-      {/* This h1 will display the current page title */}
-      <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
+      {/* Display branding on mobile when sheet is closed, otherwise display page title */}
+      {isMobile && !isSheetOpen ? (
+        <Link to="/" className="flex items-center gap-2 font-semibold ml-auto md:ml-0">
+          <Package2 className="h-6 w-6" />
+          <span className="">ClassicPOS</span>
+        </Link>
+      ) : (
+        <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
+      )}
     </header>
   );
 };
