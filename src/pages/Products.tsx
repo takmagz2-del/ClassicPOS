@@ -8,8 +8,10 @@ import { Product } from "@/types/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ProductForm from "@/components/products/ProductForm";
-import EditProductForm from "@/components/products/EditProductForm"; // Import the new EditProductForm
+import EditProductForm from "@/components/products/EditProductForm";
+import DeleteProductDialog from "@/components/products/DeleteProductDialog"; // Import the new DeleteProductDialog
 import { PlusCircle } from "lucide-react";
+import { toast } from "sonner"; // Ensure toast is imported for success messages
 
 const initialMockProducts: Product[] = [
   { id: "1", name: "Laptop Pro", category: "Electronics", price: 1200.00, stock: 15, sku: "LP-001" },
@@ -24,7 +26,9 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>(initialMockProducts);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for delete dialog
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null); // State for product to delete
 
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
@@ -39,6 +43,17 @@ const Products = () => {
     setProducts((prevProducts) =>
       prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
     );
+  };
+
+  const handleDeleteProduct = (product: Product) => {
+    setDeletingProduct(product);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteProduct = (productId: string) => {
+    setProducts((prevProducts) => prevProducts.filter((p) => p.id !== productId));
+    toast.success("Product deleted successfully!");
+    setDeletingProduct(null);
   };
 
   return (
@@ -75,6 +90,15 @@ const Products = () => {
             </Dialog>
           )}
 
+          {deletingProduct && (
+            <DeleteProductDialog
+              product={deletingProduct}
+              isOpen={isDeleteDialogOpen}
+              onClose={() => setIsDeleteDialogOpen(false)}
+              onConfirm={confirmDeleteProduct}
+            />
+          )}
+
           <Button onClick={logout} variant="destructive">
             Logout
           </Button>
@@ -86,7 +110,11 @@ const Products = () => {
           <CardTitle>Product List</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProductTable products={products} onEditProduct={handleEditProduct} />
+          <ProductTable
+            products={products}
+            onEditProduct={handleEditProduct}
+            onDeleteProduct={handleDeleteProduct} // Pass the new delete handler
+          />
         </CardContent>
       </Card>
     </div>
