@@ -55,9 +55,12 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
       currentSubtotal += item.price * (quantities[item.productId] || 0);
     });
 
-    const currentDiscountAmount = sale.discountPercentage ? currentSubtotal * (sale.discountPercentage / 100) : 0;
-    const subtotalAfterDiscount = currentSubtotal - currentDiscountAmount;
-    const currentTax = subtotalAfterDiscount * originalTaxRate; // Use originalTaxRate
+    // Apply original discount percentage to the current subtotal of items being refunded
+    const calculatedDiscountAmount = sale.discountPercentage ? currentSubtotal * (sale.discountPercentage / 100) : 0;
+    const subtotalAfterDiscount = currentSubtotal - calculatedDiscountAmount;
+
+    // Calculate tax on the subtotal after discount
+    const currentTax = subtotalAfterDiscount * originalTaxRate;
     const currentTotal = subtotalAfterDiscount + currentTax;
 
     setRefundSubtotal(currentSubtotal);
@@ -65,7 +68,7 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
     setRefundTotal(currentTotal);
   };
 
-  const handleQuantityChange = (productId: string, value: string) => {
+  const handleQuantityChange = (value: string, productId: string) => {
     const quantity = parseInt(value, 10);
     const originalItem = sale.items.find(item => item.productId === productId);
 
