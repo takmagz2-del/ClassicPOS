@@ -28,6 +28,8 @@ interface SaleConfirmationDialogProps {
     total: number;
     giftCardAmountUsed: number;
     customer?: Customer;
+    discountPercentage?: number; // New prop
+    discountAmount?: number; // New prop
   };
   paymentMethod: string;
 }
@@ -39,10 +41,10 @@ const SaleConfirmationDialog = ({
   saleDetails,
   paymentMethod,
 }: SaleConfirmationDialogProps) => {
-  const { items, subtotal, tax, total, giftCardAmountUsed, customer } = saleDetails;
+  const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount } = saleDetails;
   const [cashReceived, setCashReceived] = useState<string>("");
 
-  const isCashPayment = paymentMethod === "Cash/Card"; // Assuming "Cash/Card" implies cash option
+  const isCashPayment = paymentMethod === "Cash/Card";
   const parsedCashReceived = parseFloat(cashReceived);
   const changeDue = isCashPayment && !isNaN(parsedCashReceived) ? parsedCashReceived - total : 0;
 
@@ -53,6 +55,8 @@ const SaleConfirmationDialog = ({
     }
     onConfirmSale(paymentMethod, isCashPayment ? parsedCashReceived : undefined);
   };
+
+  const subtotalAfterDiscount = subtotal - (discountAmount || 0);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -82,6 +86,18 @@ const SaleConfirmationDialog = ({
             <span>Subtotal:</span>
             <span className="font-medium">${subtotal.toFixed(2)}</span>
           </div>
+          {discountPercentage && discountAmount && discountPercentage > 0 && (
+            <div className="flex justify-between text-red-600 dark:text-red-400">
+              <span>Discount ({discountPercentage}%):</span>
+              <span className="font-medium">-${discountAmount.toFixed(2)}</span>
+            </div>
+          )}
+          {discountPercentage && discountPercentage > 0 && (
+            <div className="flex justify-between">
+              <span>Subtotal (after discount):</span>
+              <span className="font-medium">${subtotalAfterDiscount.toFixed(2)}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Tax:</span>
             <span className="font-medium">${tax.toFixed(2)}</span>

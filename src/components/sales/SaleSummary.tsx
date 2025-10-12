@@ -8,15 +8,17 @@ interface SaleSummaryProps {
   subtotal: number;
   taxRate: number;
   giftCardAmountUsed: number;
+  discountPercentage: number; // New prop
+  discountAmount: number; // New prop
 }
 
-const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed }: SaleSummaryProps) => {
-  const tax = subtotal * taxRate;
-  let total = subtotal + tax;
+const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage, discountAmount }: SaleSummaryProps) => {
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const tax = subtotalAfterDiscount * taxRate;
+  let totalBeforeGiftCard = subtotalAfterDiscount + tax;
 
-  // Apply gift card discount
-  const finalTotal = Math.max(0, total - giftCardAmountUsed);
-  const giftCardDisplayAmount = Math.min(giftCardAmountUsed, total); // Show only up to the total amount
+  const finalTotal = Math.max(0, totalBeforeGiftCard - giftCardAmountUsed);
+  const giftCardDisplayAmount = Math.min(giftCardAmountUsed, totalBeforeGiftCard);
 
   return (
     <Card>
@@ -27,6 +29,16 @@ const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed }: SaleSummaryProps
         <div className="flex justify-between">
           <span>Subtotal:</span>
           <span className="font-medium">${subtotal.toFixed(2)}</span>
+        </div>
+        {discountPercentage > 0 && (
+          <div className="flex justify-between text-red-600 dark:text-red-400">
+            <span>Discount ({discountPercentage}%):</span>
+            <span className="font-medium">-${discountAmount.toFixed(2)}</span>
+          </div>
+        )}
+        <div className="flex justify-between">
+          <span>Subtotal (after discount):</span>
+          <span className="font-medium">${subtotalAfterDiscount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Tax ({taxRate * 100}%):</span>

@@ -15,29 +15,33 @@ import { toast } from "sonner";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
 import { TAX_RATE } from "@/config/constants";
-import CustomerSelector from "@/components/sales/CustomerSelector"; // New import
-import { useCustomers } from "@/context/CustomerContext"; // New import
-import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog"; // New import
+import CustomerSelector from "@/components/sales/CustomerSelector";
+import { useCustomers } from "@/context/CustomerContext";
+import SaleConfirmationDialog from "@/components/sales/SaleConfirmationDialog";
+import DiscountInput from "@/components/sales/DiscountInput"; // New import
 
 const Sales = () => {
   const { logout } = useAuth();
   const { addSale } = useSales();
   const { products, updateProductStock } = useProducts();
-  const { customers } = useCustomers(); // Use customers from context
+  const { customers } = useCustomers();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null); // New state for selected customer
-  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false); // New state for confirmation dialog
-  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null); // New state for payment method
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
+  const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<string | null>(null);
+  const [discountPercentage, setDiscountPercentage] = useState<number>(0); // New state for discount
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const currentSubtotal = calculateSubtotal(cartItems);
-  const currentTax = currentSubtotal * TAX_RATE;
-  const currentTotalBeforeGiftCard = currentSubtotal + currentTax;
+  const calculatedDiscountAmount = currentSubtotal * (discountPercentage / 100);
+  const subtotalAfterDiscount = currentSubtotal - calculatedDiscountAmount;
+  const currentTax = subtotalAfterDiscount * TAX_RATE;
+  const currentTotalBeforeGiftCard = subtotalAfterDiscount + currentTax;
   const currentFinalTotal = Math.max(0, currentTotalBeforeGiftCard - appliedGiftCardAmount);
 
 
@@ -98,12 +102,17 @@ const Sales = () => {
   const handleClearCart = () => {
     setCartItems([]);
     setAppliedGiftCardAmount(0);
-    setSelectedCustomerId(null); // Clear selected customer
+    setSelectedCustomerId(null);
+    setDiscountPercentage(0); // Clear discount
     toast.info("Cart cleared.");
   };
 
   const handleApplyGiftCard = (code: string, amount: number) => {
     setAppliedGiftCardAmount((prev) => prev + amount);
+  };
+
+  const handleApplyDiscount = (percentage: number) => {
+    setDiscountPercentage(percentage);
   };
 
   const finalizeSale = (paymentMethod: string, cashReceived?: number) => {
@@ -128,13 +137,14 @@ const Sales = () => {
       total: currentFinalTotal,
       status: "completed",
       giftCardAmountUsed: appliedGiftCardAmount,
-      customerId: selectedCustomer?.id, // Add customer ID
-      customerName: selectedCustomer?.name, // Add customer name
+      customerId: selectedCustomer?.id,
+      customerName: selectedCustomer?.name,
+      discountPercentage: discountPercentage > 0 ? discountPercentage : undefined, // Include discount
+      discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined, // Include discount amount
     };
 
     addSale(newSale);
 
-    // Update product stock in the global context
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
       if (product) {
@@ -148,7 +158,7 @@ const Sales = () => {
       const change = cashReceived - currentFinalTotal;
       toast.info(`Change due: $${change.toFixed(2)}`);
     }
-    setIsConfirmationDialogOpen(false); // Close dialog after finalizing
+    setIsConfirmationDialogOpen(false);
   };
 
   const openConfirmationDialog = (method: string) => {
@@ -163,7 +173,7 @@ const Sales = () => {
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">New Sale</h1> {/* Updated title */}
+        <h1 className="text-3xl font-bold">New Sale</h1>
         <Button onClick={logout} variant="destructive">
           Logout
         </Button>
@@ -184,6 +194,11 @@ const Sales = () => {
             onUpdateQuantity={handleUpdateCartItemQuantity}
             onRemoveItem={handleRemoveCartItem}
           />
+          <DiscountInput
+            onApplyDiscount={handleApplyDiscount}
+            currentDiscountPercentage={discountPercentage}
+            currentSaleSubtotal={currentSubtotal}
+          />
           <GiftCardInput
             onApplyGiftCard={handleApplyGiftCard}
             currentSaleTotal={currentTotalBeforeGiftCard}
@@ -193,6 +208,8 @@ const Sales = () => {
             subtotal={currentSubtotal}
             taxRate={TAX_RATE}
             giftCardAmountUsed={appliedGiftCardAmount}
+            discountPercentage={discountPercentage} // Pass discount
+            discountAmount={calculatedDiscountAmount} // Pass calculated discount amount
           />
           <PaymentMethodButtons
             onProcessSale={() => openConfirmationDialog("Cash/Card")}
@@ -223,6 +240,8 @@ const Sales = () => {
             total: currentFinalTotal,
             giftCardAmountUsed: appliedGiftCardAmount,
             customer: customers.find(c => c.id === selectedCustomerId),
+            discountPercentage: discountPercentage, // Pass discount
+            discountAmount: calculatedDiscountAmount, // Pass calculated discount amount
           }}
           paymentMethod={paymentMethodToConfirm}
         />
