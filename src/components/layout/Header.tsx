@@ -1,20 +1,45 @@
 "use client";
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar"; // Corrected import path
+import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Header = () => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const location = useLocation(); // Get current location
 
   const handleLinkClick = () => {
     if (isMobile) {
       setIsSheetOpen(false);
+    }
+  };
+
+  // Function to get page title based on path
+  const getPageTitle = (pathname: string) => {
+    switch (pathname) {
+      case "/":
+        return "Dashboard";
+      case "/products":
+        return "Products";
+      case "/customers":
+        return "Customers";
+      case "/sales":
+        return "Sales Terminal";
+      case "/stores":
+        return "Multi-Store";
+      case "/accounting":
+        return "Accounting";
+      case "/reports":
+        return "Reports";
+      case "/settings":
+        return "Settings";
+      default:
+        return "ClassicPOS";
     }
   };
 
@@ -50,7 +75,7 @@ const Header = () => {
         <Package2 className="h-6 w-6" />
         <span className="sr-only">ClassicPOS</span>
       </Link>
-      <h1 className="text-xl font-semibold ml-auto">Dashboard</h1> {/* Placeholder for page title */}
+      <h1 className="text-xl font-semibold ml-auto">{getPageTitle(location.pathname)}</h1> {/* Dynamic page title */}
     </header>
   );
 };
