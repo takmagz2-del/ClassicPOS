@@ -8,7 +8,7 @@ import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePageTitle } from "@/hooks/use-page-title";
-// Removed BrandLogo import as it's now in Sidebar
+import CurrencySelector from "@/components/common/CurrencySelector"; // New import
 
 const Header = () => {
   const isMobile = useIsMobile();
@@ -38,6 +38,9 @@ const Header = () => {
       )}
       {/* Always display the page title in the header */}
       <h1 className="text-xl font-semibold ml-auto md:ml-0">{pageTitle}</h1>
+      <div className="ml-auto flex items-center gap-2"> {/* Added a div to group items on the right */}
+        <CurrencySelector /> {/* Integrated CurrencySelector */}
+      </div>
     </header>
   );
 };
