@@ -35,13 +35,15 @@ const formSchema = z.object({
   }),
 });
 
+type ProductFormValues = z.infer<typeof formSchema>;
+
 interface ProductFormProps {
   onProductAdd: (product: Product) => void;
   onClose: () => void;
 }
 
 const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -52,14 +54,11 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: ProductFormValues) => {
+    // Type assertion to ensure 'values' is treated as having all required properties of ProductFormValues
     const newProduct: Product = {
       id: crypto.randomUUID(), // Generate a unique ID
-      name: values.name,
-      category: values.category,
-      price: values.price,
-      stock: values.stock,
-      sku: values.sku,
+      ...(values as Required<ProductFormValues>), // Assert values as Required
     };
     onProductAdd(newProduct);
     toast.success("Product added successfully!");

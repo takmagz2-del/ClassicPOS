@@ -32,13 +32,15 @@ const formSchema = z.object({
   }).optional().or(z.literal("")), // Make address optional
 });
 
+type CustomerFormValues = z.infer<typeof formSchema>;
+
 interface CustomerFormProps {
   onCustomerAdd: (customer: Customer) => void;
   onClose: () => void;
 }
 
 const CustomerForm = ({ onCustomerAdd, onClose }: CustomerFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<CustomerFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -48,13 +50,11 @@ const CustomerForm = ({ onCustomerAdd, onClose }: CustomerFormProps) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: CustomerFormValues) => {
+    // Type assertion to ensure 'values' is treated as having all required properties of CustomerFormValues
     const newCustomer: Customer = {
       id: crypto.randomUUID(), // Generate a unique ID
-      name: values.name,
-      email: values.email,
-      phone: values.phone || "", // Provide default empty string if undefined
-      address: values.address || "", // Provide default empty string if undefined
+      ...(values as Required<CustomerFormValues>), // Assert values as Required
     };
     onCustomerAdd(newCustomer);
     toast.success("Customer added successfully!");

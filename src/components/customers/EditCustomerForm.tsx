@@ -32,6 +32,8 @@ const formSchema = z.object({
   }).optional().or(z.literal("")),
 });
 
+type EditCustomerFormValues = z.infer<typeof formSchema>;
+
 interface EditCustomerFormProps {
   initialCustomer: Customer;
   onCustomerUpdate: (updatedCustomer: Customer) => void;
@@ -39,7 +41,7 @@ interface EditCustomerFormProps {
 }
 
 const EditCustomerForm = ({ initialCustomer, onCustomerUpdate, onClose }: EditCustomerFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<EditCustomerFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialCustomer,
   });
@@ -48,7 +50,7 @@ const EditCustomerForm = ({ initialCustomer, onCustomerUpdate, onClose }: EditCu
     form.reset(initialCustomer);
   }, [initialCustomer, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: EditCustomerFormValues) => {
     const updatedCustomer: Customer = {
       ...initialCustomer,
       ...values,

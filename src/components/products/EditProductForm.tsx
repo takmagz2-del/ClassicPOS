@@ -35,6 +35,8 @@ const formSchema = z.object({
   }),
 });
 
+type EditProductFormValues = z.infer<typeof formSchema>;
+
 interface EditProductFormProps {
   initialProduct: Product;
   onProductUpdate: (updatedProduct: Product) => void;
@@ -42,7 +44,7 @@ interface EditProductFormProps {
 }
 
 const EditProductForm = ({ initialProduct, onProductUpdate, onClose }: EditProductFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<EditProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialProduct, // Pre-fill form with initial product data
   });
@@ -52,7 +54,7 @@ const EditProductForm = ({ initialProduct, onProductUpdate, onClose }: EditProdu
     form.reset(initialProduct);
   }, [initialProduct, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: EditProductFormValues) => {
     const updatedProduct: Product = {
       ...initialProduct, // Keep the original ID
       ...values,
