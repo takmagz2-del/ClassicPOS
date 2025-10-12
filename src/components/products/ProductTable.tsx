@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, ImageIcon } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
-import { useCategories } from "@/context/CategoryContext"; // New import
+import { useCategories } from "@/context/CategoryContext";
 
 interface ProductTableProps {
   products: Product[];
@@ -24,15 +24,16 @@ interface ProductTableProps {
 
 const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTableProps) => {
   const { currentCurrency } = useCurrency();
-  const { getCategoryName } = useCategories(); // Use getCategoryName from context
+  const { getCategoryName } = useCategories();
 
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[80px]">Image</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Category</TableHead> {/* This will now display the category name */}
+            <TableHead>Category</TableHead>
             <TableHead>SKU</TableHead>
             <TableHead className="text-right">Price</TableHead>
             <TableHead className="text-right">Stock</TableHead>
@@ -43,8 +44,17 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
           {products.length > 0 ? (
             products.map((product) => (
               <TableRow key={product.id}>
+                <TableCell>
+                  <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-md overflow-hidden">
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{getCategoryName(product.categoryId)}</TableCell> {/* Display category name */}
+                <TableCell>{getCategoryName(product.categoryId)}</TableCell>
                 <TableCell>{product.sku}</TableCell>
                 <TableCell className="text-right">{formatCurrency(product.price, currentCurrency)}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
@@ -62,7 +72,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={7} className="h-24 text-center">
                 No products found.
               </TableCell>
             </TableRow>
