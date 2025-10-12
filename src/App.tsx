@@ -14,7 +14,7 @@ import Settings from "@/pages/Settings";
 import SalesHistory from "@/pages/SalesHistory";
 import Stores from "@/pages/Stores";
 import Accounting from "@/pages/Accounting";
-import Dashboard from "@/pages/Dashboard";
+import Index from "@/pages/Index"; // Import the new Index page
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Dashboard />} />
+              <Route index element={<Index />} /> {/* Route to Index component */}
               <Route path="products" element={<Products />} />
               <Route path="customers" element={<Customers />} />
               <Route path="sales" element={<Sales />} />
