@@ -5,7 +5,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useIsMobile } from "@/hooks/use-mobile";
-import BrandLogo from "@/components/layout/BrandLogo";
+// Removed BrandLogo import as it's now in Sidebar
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,11 +19,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {!isMobile && (
         <div className="hidden border-r bg-muted/40 md:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
-            {/* Branding for desktop sidebar */}
-            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <BrandLogo />
-            </div>
-            <Sidebar className="flex-1" /> {/* Added flex-1 to Sidebar */}
+            {/* BrandLogo is now inside Sidebar */}
+            <Sidebar className="flex-1" />
           </div>
         </div>
       )}

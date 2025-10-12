@@ -7,13 +7,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { usePageTitle } from "@/hooks/use-page-title"; // Import the new hook
-import BrandLogo from "@/components/layout/BrandLogo";
+import { usePageTitle } from "@/hooks/use-page-title";
+// Removed BrandLogo import as it's now in Sidebar
 
 const Header = () => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-  const pageTitle = usePageTitle(); // Use the new hook
+  const pageTitle = usePageTitle();
 
   const handleLinkClick = () => {
     if (isMobile) {
@@ -36,12 +36,8 @@ const Header = () => {
           </SheetContent>
         </Sheet>
       )}
-      {/* Display branding on mobile when sheet is closed, otherwise display page title */}
-      {isMobile && !isSheetOpen ? (
-        <BrandLogo />
-      ) : (
-        <h1 className="text-xl font-semibold ml-auto md:ml-0">{pageTitle}</h1>
-      )}
+      {/* Always display the page title in the header */}
+      <h1 className="text-xl font-semibold ml-auto md:ml-0">{pageTitle}</h1>
     </header>
   );
 };
