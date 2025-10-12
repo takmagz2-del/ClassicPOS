@@ -7,7 +7,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
+import { routesConfig } from "@/config/routesConfig";
+import BrandLogo from "@/components/layout/BrandLogo"; // Import BrandLogo
 
 const Header = () => {
   const isMobile = useIsMobile();
@@ -43,10 +44,7 @@ const Header = () => {
       )}
       {/* Display branding on mobile when sheet is closed, otherwise display page title */}
       {isMobile && !isSheetOpen ? (
-        <Link to="/" className="flex items-center gap-2 font-semibold ml-auto md:ml-0">
-          <Package2 className="h-6 w-6" />
-          <span className="">ClassicPOS</span>
-        </Link>
+        <BrandLogo />
       ) : (
         <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
       )}
