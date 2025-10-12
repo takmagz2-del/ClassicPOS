@@ -7,7 +7,8 @@ import ProductTable from "@/components/products/ProductTable";
 import { Product } from "@/types/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import ProductForm from "@/components/products/ProductForm"; // Import the new ProductForm
+import ProductForm from "@/components/products/ProductForm";
+import EditProductForm from "@/components/products/EditProductForm"; // Import the new EditProductForm
 import { PlusCircle } from "lucide-react";
 
 const initialMockProducts: Product[] = [
@@ -21,10 +22,23 @@ const initialMockProducts: Product[] = [
 const Products = () => {
   const { logout } = useAuth();
   const [products, setProducts] = useState<Product[]>(initialMockProducts);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const handleAddProduct = (newProduct: Product) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
   };
 
   return (
@@ -32,7 +46,7 @@ const Products = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Products</h1>
         <div className="flex items-center gap-2">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Product
@@ -42,9 +56,25 @@ const Products = () => {
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
               </DialogHeader>
-              <ProductForm onProductAdd={handleAddProduct} onClose={() => setIsDialogOpen(false)} />
+              <ProductForm onProductAdd={handleAddProduct} onClose={() => setIsAddDialogOpen(false)} />
             </DialogContent>
           </Dialog>
+
+          {editingProduct && (
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Product</DialogTitle>
+                </DialogHeader>
+                <EditProductForm
+                  initialProduct={editingProduct}
+                  onProductUpdate={handleUpdateProduct}
+                  onClose={() => setIsEditDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+
           <Button onClick={logout} variant="destructive">
             Logout
           </Button>
@@ -56,7 +86,7 @@ const Products = () => {
           <CardTitle>Product List</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProductTable products={products} />
+          <ProductTable products={products} onEditProduct={handleEditProduct} />
         </CardContent>
       </Card>
     </div>
