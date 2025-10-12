@@ -18,6 +18,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useReceiptSettings } from "@/context/ReceiptSettingsContext";
 import { Printer } from "lucide-react";
 import { format } from "date-fns";
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ interface ReceiptPreviewDialogProps {
 const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPreviewDialogProps) => {
   const { currentCurrency } = useCurrency();
   const { receiptSettings } = useReceiptSettings();
+  const { products } = useProducts(); // Use products context
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
@@ -89,14 +91,19 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
                 <span class="total">Total</span>
               </div>
               <div class="separator"></div>
-              ${sale.items.map(item => `
+              ${sale.items.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                return `
                 <div class="item-row">
                   <span class="name">${item.name}</span>
                   <span class="qty">${item.quantity}</span>
                   <span class="price">${formatCurrency(item.price, currentCurrency)}</span>
                   <span class="total">${formatCurrency(item.price * item.quantity, currentCurrency)}</span>
                 </div>
-              `).join("")}
+                ${receiptSettings.showSku && product?.sku ? `<div class="item-row" style="font-size: 0.7em; color: #777; margin-left: 10px;">SKU: ${product.sku}</div>` : ""}
+                ${receiptSettings.showCategory && product?.category ? `<div class="item-row" style="font-size: 0.7em; color: #777; margin-left: 10px;">Category: ${product.category}</div>` : ""}
+              `;
+              }).join("")}
               <div class="separator"></div>
 
               <div class="summary-row">
@@ -188,20 +195,25 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
           <Separator className="my-2" />
 
           <p className="font-semibold text-xs mb-1">Items:</p>
-          {sale.items.map((item) => (
-            <div key={item.productId} className="grid grid-cols-4 gap-2 text-xs mb-1">
-              <span className="col-span-2">{item.name}</span>
-              <span className="text-center">{item.quantity}x</span>
-              <span className="text-right">{formatCurrency(item.price, currentCurrency)}</span>
-              <span className="text-right font-medium">{formatCurrency(item.price * item.quantity, currentCurrency)}</span>
-              {receiptSettings.showSku && (
-                <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2">SKU: {sale.items.find(p => p.productId === item.productId)?.productId}</span>
-              )}
-              {receiptSettings.showCategory && (
-                <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2">Category: {sale.items.find(p => p.productId === item.productId)?.name}</span>
-              )}
-            </div>
-          ))}
+          {sale.items.map((item) => {
+            const product = products.find(p => p.id === item.productId);
+            return (
+              <React.Fragment key={item.productId}>
+                <div className="grid grid-cols-4 gap-2 text-xs mb-1">
+                  <span className="col-span-2">{item.name}</span>
+                  <span className="text-center">{item.quantity}x</span>
+                  <span className="text-right">{formatCurrency(item.price, currentCurrency)}</span>
+                  <span className="text-right font-medium">{formatCurrency(item.price * item.quantity, currentCurrency)}</span>
+                </div>
+                {receiptSettings.showSku && product?.sku && (
+                  <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2 block">SKU: {product.sku}</span>
+                )}
+                {receiptSettings.showCategory && product?.category && (
+                  <span className="col-span-4 text-muted-foreground text-[0.65rem] ml-2 block">Category: {product.category}</span>
+                )}
+              </React.Fragment>
+            );
+          })}
 
           <Separator className="my-2" />
 
