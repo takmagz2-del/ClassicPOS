@@ -70,40 +70,28 @@ const UserProfileForm = () => {
     if (!user) return;
 
     setIsLoading(true);
-    const updatedUser = { ...user, email: values.email }; // For mock, email can be updated
 
-    // In a real application, password change would be a separate API call
-    // and would require verifying the current password on the backend.
-    // For this mock, we'll simulate it.
-    const passwordChanged = !!values.newPassword;
-    let success = true;
+    const updatedFields: Partial<typeof user> = {
+      email: values.email,
+    };
 
-    if (passwordChanged) {
-      // Simulate current password verification
-      // In a real app, this would be handled by the backend's updateUser function
-      // For now, we'll assume the current password is correct if provided.
-      if (values.currentPassword === "password") { // Mock check for current password
-        // The updateUser in AuthContext will handle the password update logic for mockUsers
-        success = await updateUser({ ...updatedUser, password: values.newPassword });
-      } else {
-        toast.error("Incorrect current password.");
-        success = false;
-      }
-    } else {
-      success = await updateUser(updatedUser);
-    }
+    const success = await updateUser(
+      updatedFields,
+      values.currentPassword || undefined,
+      values.newPassword || undefined
+    );
 
     setIsLoading(false);
     if (success) {
       toast.success("Profile updated successfully!");
       form.reset({
-        email: user.email, // Keep current email
+        email: values.email, // Keep current email
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
       });
     } else {
-      toast.error("Failed to update profile.");
+      // Error message is already handled by AuthContext
     }
   };
 

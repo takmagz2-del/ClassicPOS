@@ -60,14 +60,13 @@ const Settings = () => {
   const handleUpdateUserSubmit = async (values: { email: string; password?: string; role: UserRole }) => {
     if (!editingUser) return false;
 
-    const updatedUser: User = {
-      ...editingUser,
+    const updatedUserFields: Partial<User> = {
       email: values.email,
       role: values.role,
     };
 
-    // The AuthContext's updateUser function now handles the password update logic for mockUsers
-    return await updateUser({ ...updatedUser, password: values.password });
+    // Pass the new password as the third argument to updateUser
+    return await updateUser(updatedUserFields, undefined, values.password || undefined);
   };
 
   const handleDeleteUserClick = (userToDelete: User) => {

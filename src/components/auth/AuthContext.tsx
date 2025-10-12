@@ -5,11 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { TOTP, Secret } from "otpauth";
 import { User, UserRole } from "@/types/user";
-import { useLoading } from "@/context/LoadingContext"; // New import
+import { useLoading } from "@/context/LoadingContext";
 
 interface LoginResult {
   success: boolean;
   mfaRequired?: boolean;
+}
+
+// Define a type for the internal mock user data, including password and temporary MFA/backup codes
+interface InternalMockUser extends User {
+  password: string;
+  tempMfaSecret?: string;
+  tempBackupCodes?: string[];
 }
 
 interface AuthContextType {
@@ -25,7 +32,7 @@ interface AuthContextType {
   disableMfa: () => Promise<boolean>;
   users: User[];
   addUser: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  updateUser: (updatedUser: User & { password?: string }) => Promise<boolean>;
+  updateUser: (updatedUser: Partial<User>, currentPassword?: string, newPassword?: string) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
@@ -36,9 +43,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
-  const { startLoading, stopLoading } = useLoading(); // Use loading context
+  const { startLoading, stopLoading } = useLoading();
 
-  const [mockUsers, setMockUsers] = useState<{ [key: string]: User & { password: string; tempMfaSecret?: string; tempBackupCodes?: string[] } }>({
+  const [mockUsers, setMockUsers] = useState<{ [key: string]: InternalMockUser }>({
     "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN },
     "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER },
     "employee@example.com": { id: "u3", email: "employee@example.com", password: "password", mfaEnabled: false, role: UserRole.EMPLOYEE },
@@ -51,13 +58,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedUserEmail = localStorage.getItem("userEmail");
     if (token && storedUserEmail && mockUsers[storedUserEmail]) {
       setIsAuthenticated(true);
+      const storedUser = mockUsers[storedUserEmail];
       setUser({
-        id: mockUsers[storedUserEmail].id,
-        email: storedUserEmail,
-        mfaEnabled: mockUsers[storedUserEmail].mfaEnabled,
-        mfaSecret: mockUsers[storedUserEmail].mfaSecret,
-        backupCodes: mockUsers[storedUserEmail].backupCodes,
-        role: mockUsers[storedUserEmail].role,
+        id: storedUser.id,
+        email: storedUser.email,
+        mfaEnabled: storedUser.mfaEnabled,
+        mfaSecret: storedUser.mfaSecret,
+        backupCodes: storedUser.backupCodes,
+        role: storedUser.role,
       });
     }
   }, [mockUsers]);
@@ -300,11 +308,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updateUser = async (updatedUser: User & { password?: string }): Promise<boolean> => {
+  const updateUser = async (updatedUser: Partial<User>, currentPassword?: string, newPassword?: string): Promise<boolean> => {
     startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
-        const existingUser = mockUsers[updatedUser.email];
+        if (!user?.email) {
+          toast.error("No user logged in.");
+          stopLoading();
+          resolve(false);
+          return;
+        }
+
+        const existingUser = mockUsers[user.email];
         if (!existingUser) {
           toast.error("User not found.");
           stopLoading();
@@ -312,20 +327,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        const newUserData = { ...existingUser, ...updatedUser };
-        if (updatedUser.password) {
-          newUserData.password = updatedUser.password;
+        // Handle password change
+        if (newPassword) {
+          if (!currentPassword || existingUser.password !== currentPassword) {
+            toast.error("Incorrect current password.");
+            stopLoading();
+            resolve(false);
+            return;
+          }
+          existingUser.password = newPassword;
         }
+
+        // Update other user properties
+        const newUserData: InternalMockUser = {
+          ...existingUser,
+          ...updatedUser,
+          email: updatedUser.email || existingUser.email, // Ensure email is not undefined
+          role: updatedUser.role || existingUser.role, // Ensure role is not undefined
+        };
 
         setMockUsers((prev) => ({
           ...prev,
-          [updatedUser.email]: newUserData,
+          [newUserData.email]: newUserData,
         }));
 
-        if (user?.id === updatedUser.id) {
-          setUser(newUserData);
+        // If the current logged-in user is being updated
+        if (user.id === newUserData.id) {
+          setUser({
+            id: newUserData.id,
+            email: newUserData.email,
+            mfaEnabled: newUserData.mfaEnabled,
+            mfaSecret: newUserData.mfaSecret,
+            backupCodes: newUserData.backupCodes,
+            role: newUserData.role,
+          });
+          // If email changed, update localStorage
+          if (user.email !== newUserData.email) {
+            localStorage.setItem("userEmail", newUserData.email);
+          }
         }
-        toast.success(`User ${updatedUser.email} updated successfully.`);
+        toast.success(`User ${newUserData.email} updated successfully.`);
         stopLoading();
         resolve(true);
       }, 500);
