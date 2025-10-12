@@ -6,4 +6,5 @@ export interface Product {
   cost: number; // New: The cost of the product
   stock: number;
   sku: string;
+  imageUrl?: string; // New: Optional image URL for the product
 }

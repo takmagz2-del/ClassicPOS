@@ -38,6 +38,7 @@ const formSchema = z.object({
   sku: z.string().min(3, {
     message: "SKU must be at least 3 characters.",
   }),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -61,6 +62,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       cost: 0,
       stock: 0,
       sku: "",
+      imageUrl: "",
     },
   });
 
@@ -73,6 +75,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       cost: 0,
       stock: 0,
       sku: "",
+      imageUrl: "",
     });
   }, [initialProduct, form]);
 
@@ -88,6 +91,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         cost: values.cost,
         stock: values.stock,
         sku: values.sku,
+        imageUrl: values.imageUrl,
       };
     } else {
       productToSubmit = {
@@ -98,6 +102,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         cost: values.cost,
         stock: values.stock,
         sku: values.sku,
+        imageUrl: values.imageUrl,
       };
     }
 
@@ -194,6 +199,19 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
               <FormLabel>SKU</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., LP-001" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/image.png" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
