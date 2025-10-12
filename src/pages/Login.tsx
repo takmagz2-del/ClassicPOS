@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { toast } from "sonner";
+import { Link } from "react-router-dom"; // Import Link
 
 const Login = () => {
   const [email, setEmail] = useState<string>("");
@@ -113,6 +114,12 @@ const Login = () => {
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-primary hover:underline">
+              Sign Up
+            </Link>
+          </p>
         </CardContent>
       </Card>
       <MadeWithDyad />
