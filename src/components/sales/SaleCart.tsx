@@ -20,7 +20,7 @@ const SaleCart = ({ cartItems, onUpdateQuantity, onRemoveItem }: SaleCartProps) 
       <CardHeader>
         <CardTitle>Current Sale</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col overflow-hidden">
+      <CardContent className="flex-1 flex flex-col overflow-hidden"> {/* Added flex-1 and flex flex-col overflow-hidden */}
         <ScrollArea className="flex-1">
           <Table>
             <TableHeader>
