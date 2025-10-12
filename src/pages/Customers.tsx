@@ -12,16 +12,11 @@ import EditCustomerForm from "@/components/customers/EditCustomerForm";
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
-
-const initialMockCustomers: Customer[] = [
-  { id: "c1", name: "Alice Smith", email: "alice@example.com", phone: "555-111-2222", address: "123 Oak Ave" },
-  { id: "c2", name: "Bob Johnson", email: "bob@example.com", phone: "555-333-4444", address: "456 Pine St" },
-  { id: "c3", name: "Charlie Brown", email: "charlie@example.com", phone: "555-555-6666", address: "789 Elm Rd" },
-];
+import { mockCustomers } from "@/data/mockCustomers"; // Import mock customers
 
 const Customers = () => {
   const { logout } = useAuth();
-  const [customers, setCustomers] = useState<Customer[]>(initialMockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers); // Use imported mock data
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
