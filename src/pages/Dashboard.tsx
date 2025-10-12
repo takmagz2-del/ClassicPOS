@@ -6,18 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSales } from "@/context/SaleContext";
 import { useProducts } from "@/context/ProductContext";
 import { useEffect, useState } from "react";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { useCustomers } from "@/context/CustomerContext"; // New import for customers
+import { format } from "date-fns"; // New import for date formatting
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const { salesHistory } = useSales();
   const { products } = useProducts();
-  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+  const { customers } = useCustomers(); // Use customers context
+  const { currentCurrency } = useCurrency();
 
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [salesToday, setSalesToday] = useState<number>(0);
   const [productsInStock, setProductsInStock] = useState<number>(0);
+  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0); // New state for active customers
 
   useEffect(() => {
     // Calculate Total Revenue
@@ -38,7 +42,15 @@ const Dashboard = () => {
     const stock = products.reduce((sum, product) => sum + product.stock, 0);
     setProductsInStock(stock);
 
-  }, [salesHistory, products]);
+    // Set Active Customers Count
+    setActiveCustomersCount(customers.length);
+
+  }, [salesHistory, products, customers]);
+
+  // Get recent sales for display
+  const recentSales = [...salesHistory]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -76,7 +88,7 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div> {/* Static for now */}
+            <div className="text-2xl font-bold">{activeCustomersCount}</div>
             <p className="text-xs text-muted-foreground">+19% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
@@ -94,10 +106,29 @@ const Dashboard = () => {
 
       <Card className="flex-1">
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>Recent Sales</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Recent sales and system events will appear here.</p>
+          {recentSales.length > 0 ? (
+            <div className="space-y-4">
+              {recentSales.map((sale) => (
+                <div key={sale.id} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
+                  <div>
+                    <p className="font-medium">Sale ID: {sale.id.substring(0, 8)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {sale.customerName ? `Customer: ${sale.customerName}` : "Walk-in Customer"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(sale.date), "MMM dd, yyyy HH:mm")}
+                    </p>
+                  </div>
+                  <span className="font-semibold text-lg">{formatCurrency(sale.total, currentCurrency)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">No recent sales to display.</p>
+          )}
         </CardContent>
       </Card>
     </div>
