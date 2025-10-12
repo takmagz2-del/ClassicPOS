@@ -5,7 +5,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useIsMobile } from "@/hooks/use-mobile";
-// Removed BrandLogo import as it's now in Sidebar
+// Removed BrandLogo import as it's now in Sidebar // This line is being removed
 
 interface MainLayoutProps {
   children: ReactNode;
