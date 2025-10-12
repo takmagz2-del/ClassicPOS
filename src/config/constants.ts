@@ -1,0 +1,1 @@
+export const TAX_RATE = 0.08; // 8% tax rate
