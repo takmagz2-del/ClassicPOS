@@ -22,6 +22,7 @@ const MfaSetup = ({ onSetupComplete }: MfaSetupProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mfaSetupVerified, setMfaSetupVerified] = useState<boolean>(false);
   const [isBackupCodesDialogOpen, setIsBackupCodesDialogOpen] = useState<boolean>(false);
+  const [generatedBackupCodes, setGeneratedBackupCodes] = useState<string[]>([]); // State to hold generated codes
 
   useEffect(() => {
     const setupNewSecret = async () => {
@@ -54,17 +55,18 @@ const MfaSetup = ({ onSetupComplete }: MfaSetupProps) => {
     }
   };
 
-  const handleBackupCodesGenerated = async () => {
+  const handleGenerateAndSaveBackupCodes = async () => {
     if (user?.email) {
       const codes = await generateBackupCodes(user.email);
+      setGeneratedBackupCodes(codes); // Store the generated codes
       return codes;
     }
     return [];
   };
 
   const handleBackupCodesSaved = () => {
-    if (user?.email && (useAuth() as any).mockUsers[user.email]?.tempBackupCodes) {
-      saveBackupCodes(user.email, (useAuth() as any).mockUsers[user.email].tempBackupCodes);
+    if (user?.email && generatedBackupCodes.length > 0) {
+      saveBackupCodes(user.email, generatedBackupCodes); // Use the stored generated codes
     }
     setIsBackupCodesDialogOpen(false);
     onSetupComplete(); // Call onSetupComplete after backup codes are handled
@@ -125,7 +127,7 @@ const MfaSetup = ({ onSetupComplete }: MfaSetupProps) => {
       <BackupCodesDialog
         isOpen={isBackupCodesDialogOpen}
         onClose={handleBackupCodesSaved}
-        onGenerateAndSave={handleBackupCodesGenerated}
+        onGenerateAndSave={handleGenerateAndSaveBackupCodes}
       />
     </>
   );
