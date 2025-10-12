@@ -4,7 +4,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Package2 } from "lucide-react";
+import { Menu } from "lucide-react"; // Removed Package2 as it's no longer used directly in Header
 import Sidebar from "@/components/layout/Sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -61,7 +61,6 @@ const Header = () => {
           </SheetContent>
         </Sheet>
       )}
-      {/* On desktop, the sidebar already shows the app title. On mobile, the sheet shows it. */}
       {/* This h1 will display the current page title */}
       <h1 className="text-xl font-semibold ml-auto md:ml-0">{getPageTitle(location.pathname)}</h1>
     </header>
