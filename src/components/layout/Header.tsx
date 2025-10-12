@@ -23,14 +23,14 @@ const Header = () => {
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
       case "/":
-        return "Dashboard";
+        return "Dashboard"; // Updated for the new Dashboard page
       case "/products":
         return "Products";
       case "/customers":
         return "Customers";
       case "/sales":
         return "Sales Terminal";
-      case "/sales-history": // Added new case for Sales History
+      case "/sales-history":
         return "Sales History";
       case "/stores":
         return "Multi-Store";
