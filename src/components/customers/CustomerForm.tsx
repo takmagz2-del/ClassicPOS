@@ -51,7 +51,10 @@ const CustomerForm = ({ onCustomerAdd, onClose }: CustomerFormProps) => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const newCustomer: Customer = {
       id: crypto.randomUUID(), // Generate a unique ID
-      ...values,
+      name: values.name,
+      email: values.email,
+      phone: values.phone || "", // Provide default empty string if undefined
+      address: values.address || "", // Provide default empty string if undefined
     };
     onCustomerAdd(newCustomer);
     toast.success("Customer added successfully!");

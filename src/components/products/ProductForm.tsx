@@ -55,7 +55,11 @@ const ProductForm = ({ onProductAdd, onClose }: ProductFormProps) => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const newProduct: Product = {
       id: crypto.randomUUID(), // Generate a unique ID
-      ...values,
+      name: values.name,
+      category: values.category,
+      price: values.price,
+      stock: values.stock,
+      sku: values.sku,
     };
     onProductAdd(newProduct);
     toast.success("Product added successfully!");
