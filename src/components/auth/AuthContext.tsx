@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { TOTP, Secret } from "otpauth"; // Corrected import: using named exports
+import { TOTP, Secret } from "otpauth";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<{ email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null>(null);
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
         backupCodes: mockUsers[storedUserEmail].backupCodes,
       });
     }
-  }, [mockUsers]); // Depend on mockUsers to re-evaluate if user data changes
+  }, [mockUsers]);
 
   const login = async (email: string, password: string, totpCode?: string, backupCode?: string): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
         if (userData.mfaEnabled) {
           if (totpCode) {
             // Verify TOTP code
-            const otp = new TOTP({ secret: userData.mfaSecret }); // Updated usage
+            const otp = new TOTP({ secret: userData.mfaSecret });
             const isValid = otp.validate({ token: totpCode });
 
             if (isValid === null) {
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
             }
           } else {
             toast.info("MFA required. Please enter your TOTP code or a backup code.");
-            resolve(false); // Indicate that MFA is required
+            resolve(false);
             return;
           }
         }
@@ -116,13 +116,17 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
   };
 
   const generateMfaSecret = useCallback(async (email: string) => {
-    const otp = new TOTP({ // Updated usage
+    // Generate a random Uint8Array for the secret
+    const randomBytes = crypto.getRandomValues(new Uint8Array(20)); // 20 bytes for SHA1
+    const secretInstance = new Secret(randomBytes); // Create a Secret instance from random bytes
+
+    const otp = new TOTP({
       issuer: "ClassicPOS",
       label: email,
       algorithm: "SHA1",
       digits: 6,
       period: 30,
-      secret: Secret.randomKey(), // Updated usage
+      secret: secretInstance.base32, // Use the base32 string from the generated secret instance
     });
 
     const secret = otp.secret.base32;
@@ -142,7 +146,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
   const verifyMfaSetup = async (secret: string, totpCode: string): Promise<boolean> => {
     if (!user?.email) return false;
 
-    const otp = new TOTP({ secret }); // Updated usage
+    const otp = new TOTP({ secret });
     const isValid = otp.validate({ token: totpCode });
 
     if (isValid !== null) {
@@ -162,13 +166,10 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
   };
 
   const generateBackupCodes = useCallback(async (email: string): Promise<string[]> => {
-    // In a real app, these would be generated securely on the backend
-    // and hashed before storage.
     const codes: string[] = [];
     for (let i = 0; i < 10; i++) {
       codes.push(crypto.randomUUID().substring(0, 8).toUpperCase());
     }
-    // Temporarily store them until the user confirms saving
     setMockUsers((prev) => ({
       ...prev,
       [email]: {
@@ -185,7 +186,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
       [email]: {
         ...prev[email],
         backupCodes: codes,
-        tempBackupCodes: undefined, // Clear temporary codes
+        tempBackupCodes: undefined,
       },
     }));
     setUser((prev) => prev ? { ...prev, backupCodes: codes } : null);
@@ -205,7 +206,7 @@ export const AuthProvider = ({ children }: { ReactNode }) => {
         ...prev[user.email],
         mfaEnabled: false,
         mfaSecret: undefined,
-        backupCodes: undefined, // Clear backup codes when MFA is disabled
+        backupCodes: undefined,
       },
     }));
     setUser((prev) => prev ? { ...prev, mfaEnabled: false, mfaSecret: undefined, backupCodes: undefined } : null);

@@ -3,15 +3,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthContext";
-import { SaleProvider } from "@/components/sale/SaleContext";
+import { SaleProvider } from "@/context/SaleContext"; // Corrected import path
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Login from "@/pages/Login";
 import Sales from "@/pages/Sales";
 import Products from "@/pages/Products";
 import Customers from "@/pages/Customers";
-import Reports from "@/pages/Reports";
-import Settings from "@/pages/Settings";
-import Layout from "@/components/layout/Layout";
+import Reports from "@/pages/Reports"; // Added import for Reports
+import Settings from "@/pages/Settings"; // Added import for Settings
+import MainLayout from "@/components/layout/MainLayout"; // Corrected import name
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Layout />
+                  {/* MainLayout is now rendered inside ProtectedRoute */}
                 </ProtectedRoute>
               }
             >
