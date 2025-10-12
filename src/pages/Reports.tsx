@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 
 const Reports = () => {
   const { salesHistory } = useSales();
@@ -29,10 +30,12 @@ const Reports = () => {
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)), // Default to last month
     to: new Date(),
   });
+  const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
 
   const { totalRevenue, averageSaleValue, dailySalesData } = useMemo(() => {
     let filteredTransactions = salesHistory;
 
+    // Apply date range filter
     if (dateRange.from && dateRange.to) {
       filteredTransactions = salesHistory.filter((transaction) => {
         const transactionDate = new Date(transaction.date);
@@ -51,6 +54,11 @@ const Reports = () => {
         const transactionDate = new Date(transaction.date);
         return transactionDate <= endOfDay(dateRange.to!);
       });
+    }
+
+    // Apply type filter
+    if (typeFilter !== "all") {
+      filteredTransactions = filteredTransactions.filter((transaction) => transaction.type === typeFilter);
     }
 
     // Calculate total revenue by summing up all transaction totals (refunds will be negative)
@@ -80,7 +88,7 @@ const Reports = () => {
       averageSaleValue: average,
       dailySalesData: sortedDailySales,
     };
-  }, [salesHistory, dateRange]);
+  }, [salesHistory, dateRange, typeFilter]); // Added typeFilter to dependencies
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,6 +131,18 @@ const Reports = () => {
             />
           </PopoverContent>
         </Popover>
+
+        {/* New Type Filter */}
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="sale">Sale</SelectItem>
+            <SelectItem value="refund">Refund</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
