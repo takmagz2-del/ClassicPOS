@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   categoryId: string; // Changed from 'category: string' to 'categoryId: string'
   price: number;
+  cost: number; // New: The cost of the product
   stock: number;
   sku: string;
 }

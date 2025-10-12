@@ -29,6 +29,9 @@ const formSchema = z.object({
   price: z.coerce.number().min(0.01, {
     message: "Price must be a positive number.",
   }),
+  cost: z.coerce.number().min(0, {
+    message: "Cost must be a non-negative number.",
+  }),
   stock: z.coerce.number().int().min(0, {
     message: "Stock must be a non-negative integer.",
   }),
@@ -55,6 +58,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       name: "",
       categoryId: "",
       price: 0,
+      cost: 0,
       stock: 0,
       sku: "",
     },
@@ -66,6 +70,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       name: "",
       categoryId: "",
       price: 0,
+      cost: 0,
       stock: 0,
       sku: "",
     });
@@ -80,6 +85,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         name: values.name,
         categoryId: values.categoryId,
         price: values.price,
+        cost: values.cost,
         stock: values.stock,
         sku: values.sku,
       };
@@ -89,6 +95,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         name: values.name,
         categoryId: values.categoryId,
         price: values.price,
+        cost: values.cost,
         stock: values.stock,
         sku: values.sku,
       };
@@ -148,6 +155,19 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
               <FormLabel>Price</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="cost"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cost</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" placeholder="e.g., 850.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
