@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { Sale } from "@/types/sale";
 
 const SalesHistory = () => {
-  const { logout } = useAuth();
   const { salesHistory } = useSales();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -80,9 +79,6 @@ const SalesHistory = () => {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Sales History</h1>
-        <Button onClick={logout} variant="destructive">
-          Logout
-        </Button>
       </div>
 
       <Card>

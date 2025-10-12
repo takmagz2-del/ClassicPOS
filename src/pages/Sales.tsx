@@ -24,8 +24,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog"; // New import
 
 const Sales = () => {
-  const { logout } = useAuth();
-  const { addSale } = useSales();
+  const { salesHistory, addSale } = useSales();
   const { products, updateProductStock } = useProducts();
   const { customers } = useCustomers();
   const { currentCurrency } = useCurrency();
@@ -183,9 +182,6 @@ const Sales = () => {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
-        <Button onClick={logout} variant="destructive">
-          Logout
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 overflow-y-auto">

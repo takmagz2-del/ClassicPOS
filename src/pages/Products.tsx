@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { useProducts } from "@/context/ProductContext"; // Import useProducts
 
 const Products = () => {
-  const { logout } = useAuth();
   const { products, addProduct, updateProduct, deleteProduct } = useProducts(); // Use products and functions from context
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -89,10 +88,6 @@ const Products = () => {
               onConfirm={confirmDeleteProduct}
             />
           )}
-
-          <Button onClick={logout} variant="destructive">
-            Logout
-          </Button>
         </div>
       </div>
 

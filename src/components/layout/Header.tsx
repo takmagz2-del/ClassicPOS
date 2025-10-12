@@ -1,48 +1,83 @@
 "use client";
 
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom"; // Corrected import statement
+import { useAuth } from "@/components/auth/AuthContext";
+import { useSales } from "@/context/SaleContext";
+import { useProducts } from "@/context/ProductContext";
+import { useCustomers } from "@/context/CustomerContext";
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { usePageTitle } from "@/hooks/use-page-title"; // Import usePageTitle
+import { DollarSign, TrendingUp, Users, Boxes, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Package2 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { usePageTitle } from "@/hooks/use-page-title";
-import CurrencySelector from "@/components/common/CurrencySelector"; // New import
+import CurrencySelector from "@/components/common/CurrencySelector";
+import UserNav from "@/components/layout/UserNav"; // Import UserNav
 
 const Header = () => {
-  const isMobile = useIsMobile();
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-  const pageTitle = usePageTitle();
+  const { salesHistory } = useSales();
+  const { products } = useProducts();
+  const { customers } = useCustomers();
+  const { currentCurrency } = useCurrency();
+  const pageTitle = usePageTitle(); // Use the hook to get the current page title
 
-  const handleLinkClick = () => {
-    if (isMobile) {
-      setIsSheetOpen(false);
-    }
-  };
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [salesToday, setSalesToday] = useState<number>(0);
+  const [productsInStock, setProductsInStock] = useState<number>(0);
+  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
+
+  useEffect(() => {
+    // Calculate Total Revenue
+    const revenue = salesHistory.reduce((sum, sale) => sum + sale.total, 0);
+    setTotalRevenue(revenue);
+
+    // Calculate Sales Today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    const salesForToday = salesHistory.filter(sale => {
+      const saleDate = new Date(sale.date);
+      saleDate.setHours(0, 0, 0, 0);
+      return saleDate.getTime() === today.getTime();
+    }).reduce((sum, sale) => sum + sale.total, 0);
+    setSalesToday(salesForToday);
+
+    // Calculate Products in Stock
+    const stock = products.reduce((sum, product) => sum + product.stock, 0);
+    setProductsInStock(stock);
+
+    // Set Active Customers Count
+    setActiveCustomersCount(customers.length);
+
+  }, [salesHistory, products, customers]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-      {isMobile && (
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="sm:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="sm:max-w-xs p-0">
-            <Sidebar onLinkClick={handleLinkClick} />
-          </SheetContent>
-        </Sheet>
-      )}
-      {/* Always display the page title in the header */}
-      <h1 className="text-xl font-semibold ml-auto md:ml-0">{pageTitle}</h1>
-      <div className="ml-auto flex items-center gap-2"> {/* Added a div to group items on the right */}
-        <CurrencySelector /> {/* Integrated CurrencySelector */}
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6 z-10">
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className="shrink-0 md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="flex flex-col">
+          <Sidebar onLinkClick={() => setIsSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+      <h1 className="text-xl font-semibold">{pageTitle}</h1> {/* Display dynamic page title */}
+      <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <CurrencySelector />
+        <UserNav />
       </div>
     </header>
   );
 };
 
-export default Header;
+export default Header; // Corrected default export

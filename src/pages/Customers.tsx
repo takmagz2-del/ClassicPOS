@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { useCustomers } from "@/context/CustomerContext"; // Use useCustomers hook
 
 const Customers = () => {
-  const { logout } = useAuth();
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers(); // Use context functions
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -89,10 +88,6 @@ const Customers = () => {
               onConfirm={confirmDeleteCustomer}
             />
           )}
-
-          <Button onClick={logout} variant="destructive">
-            Logout
-          </Button>
         </div>
       </div>
 
