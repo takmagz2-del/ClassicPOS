@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface GiftCardInputProps {
   onApplyGiftCard: (code: string, amount: number) => void;
@@ -17,6 +19,7 @@ const GiftCardInput = ({ onApplyGiftCard, currentSaleTotal, appliedGiftCardAmoun
   const [giftCardCode, setGiftCardCode] = useState<string>("");
   const [amountToApply, setAmountToApply] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   const handleApply = async () => {
     if (!giftCardCode) {
@@ -29,7 +32,7 @@ const GiftCardInput = ({ onApplyGiftCard, currentSaleTotal, appliedGiftCardAmoun
       return;
     }
     if (amount > currentSaleTotal) {
-      toast.error(`Cannot apply more than the current sale total ($${currentSaleTotal.toFixed(2)}).`);
+      toast.error(`Cannot apply more than the current sale total (${formatCurrency(currentSaleTotal, currentCurrency)}).`);
       return;
     }
 
@@ -43,7 +46,7 @@ const GiftCardInput = ({ onApplyGiftCard, currentSaleTotal, appliedGiftCardAmoun
       onApplyGiftCard(giftCardCode, amount);
       setGiftCardCode("");
       setAmountToApply("");
-      toast.success(`$${amount.toFixed(2)} applied from gift card.`);
+      toast.success(`${formatCurrency(amount, currentCurrency)} applied from gift card.`);
     } else {
       toast.error("Invalid gift card code or insufficient balance.");
     }
@@ -74,7 +77,7 @@ const GiftCardInput = ({ onApplyGiftCard, currentSaleTotal, appliedGiftCardAmoun
             id="amount-to-apply"
             type="number"
             step="0.01"
-            placeholder={`Max: ${remainingBalance.toFixed(2)}`}
+            placeholder={`Max: ${formatCurrency(remainingBalance, currentCurrency)}`}
             value={amountToApply}
             onChange={(e) => setAmountToApply(e.target.value)}
             disabled={isLoading}
@@ -86,7 +89,7 @@ const GiftCardInput = ({ onApplyGiftCard, currentSaleTotal, appliedGiftCardAmoun
         </Button>
         {appliedGiftCardAmount > 0 && (
           <p className="text-sm text-muted-foreground text-center">
-            Applied: <span className="font-medium">${appliedGiftCardAmount.toFixed(2)}</span>
+            Applied: <span className="font-medium">{formatCurrency(appliedGiftCardAmount, currentCurrency)}</span>
           </p>
         )}
       </CardContent>

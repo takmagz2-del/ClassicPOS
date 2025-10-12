@@ -3,14 +3,17 @@
 import { useAuth } from "@/components/auth/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSales } from "@/context/SaleContext"; // Import useSales
-import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useSales } from "@/context/SaleContext";
+import { useProducts } from "@/context/ProductContext";
 import { useEffect, useState } from "react";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const { salesHistory } = useSales();
   const { products } = useProducts();
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [salesToday, setSalesToday] = useState<number>(0);
@@ -53,7 +56,7 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalRevenue, currentCurrency)}</div>
             <p className="text-xs text-muted-foreground">+20.1% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>
@@ -63,7 +66,7 @@ const Dashboard = () => {
             {/* Icon placeholder */}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${salesToday.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(salesToday, currentCurrency)}</div>
             <p className="text-xs text-muted-foreground">+180.1% from last month</p> {/* Placeholder */}
           </CardContent>
         </Card>

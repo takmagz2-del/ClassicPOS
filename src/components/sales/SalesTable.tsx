@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/table";
 import { Sale } from "@/types/sale";
 import { format } from "date-fns";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface SalesTableProps {
   sales: Sale[];
 }
 
 const SalesTable = ({ sales }: SalesTableProps) => {
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -41,16 +45,16 @@ const SalesTable = ({ sales }: SalesTableProps) => {
                 <TableCell>
                   {sale.items.map((item) => (
                     <div key={item.productId} className="text-sm text-muted-foreground">
-                      {item.quantity}x {item.name}
+                      {item.quantity}x {item.name} ({formatCurrency(item.price, currentCurrency)})
                     </div>
                   ))}
                 </TableCell>
-                <TableCell className="text-right">${sale.subtotal.toFixed(2)}</TableCell>
-                <TableCell className="text-right">${sale.tax.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(sale.subtotal, currentCurrency)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(sale.tax, currentCurrency)}</TableCell>
                 <TableCell className="text-right">
-                  {sale.giftCardAmountUsed ? `-$${sale.giftCardAmountUsed.toFixed(2)}` : "$0.00"}
+                  {sale.giftCardAmountUsed ? `-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}` : formatCurrency(0, currentCurrency)}
                 </TableCell>
-                <TableCell className="text-right font-semibold">${sale.total.toFixed(2)}</TableCell>
+                <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
                 <TableCell className="text-center capitalize">{sale.status}</TableCell>
               </TableRow>
             ))

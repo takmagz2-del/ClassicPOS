@@ -11,15 +11,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
-import { Edit, Trash2 } from "lucide-react"; // Added Trash2 icon
+import { Edit, Trash2 } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface ProductTableProps {
   products: Product[];
   onEditProduct: (product: Product) => void;
-  onDeleteProduct: (product: Product) => void; // New prop for delete action
+  onDeleteProduct: (product: Product) => void;
 }
 
 const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTableProps) => {
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -40,7 +44,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }: ProductTable
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>
                 <TableCell>{product.sku}</TableCell>
-                <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(product.price, currentCurrency)}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditProduct(product)}>

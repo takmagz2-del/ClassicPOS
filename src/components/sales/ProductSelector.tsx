@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
 import { PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface ProductSelectorProps {
   products: Product[];
@@ -16,6 +18,7 @@ interface ProductSelectorProps {
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [quantities, setQuantities] = React.useState<{ [key: string]: number }>({});
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,7 +47,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   };
 
   return (
-    <Card className="flex-1 flex flex-col"> {/* Changed from h-full to flex-1 */}
+    <Card className="flex-1 flex flex-col">
       <CardHeader>
         <CardTitle>Select Products</CardTitle>
         <Input
@@ -62,7 +65,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                 <div key={product.id} className="flex items-center justify-between border p-3 rounded-md">
                   <div>
                     <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">${product.price.toFixed(2)} | Stock: {product.stock}</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrency(product.price, currentCurrency)} | Stock: {product.stock}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input

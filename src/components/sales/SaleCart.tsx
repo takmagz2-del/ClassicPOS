@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SaleItem } from "@/types/sale";
 import { MinusCircle, PlusCircle, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
+import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface SaleCartProps {
   cartItems: SaleItem[];
@@ -15,12 +17,14 @@ interface SaleCartProps {
 }
 
 const SaleCart = ({ cartItems, onUpdateQuantity, onRemoveItem }: SaleCartProps) => {
+  const { currentCurrency } = useCurrency(); // Use currentCurrency from context
+
   return (
-    <Card className="flex-1 flex flex-col"> {/* Changed from h-full to flex-1 */}
+    <Card className="flex-1 flex flex-col">
       <CardHeader>
         <CardTitle>Current Sale</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col overflow-hidden"> {/* Added flex-1 and flex flex-col overflow-hidden */}
+      <CardContent className="flex-1 flex flex-col overflow-hidden">
         <ScrollArea className="flex-1">
           <Table>
             <TableHeader>
@@ -57,8 +61,8 @@ const SaleCart = ({ cartItems, onUpdateQuantity, onRemoveItem }: SaleCartProps) 
                         </Button>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.price, currentCurrency)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.price * item.quantity, currentCurrency)}</TableCell>
                     <TableCell className="text-center">
                       <Button
                         variant="ghost"
