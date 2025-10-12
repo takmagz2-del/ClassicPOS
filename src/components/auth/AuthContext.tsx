@@ -3,15 +3,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { OTPAuth } from "otpauth"; // Import OTPAuth
+import * as OTPAuth from "otpauth"; // Corrected import: import as namespace
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: { email: string; mfaEnabled: boolean; mfaSecret?: string } | null;
-  login: (email: string, password: string, totpCode?: string) => Promise<boolean>;
+  user: { email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null;
+  login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<boolean>;
   logout: () => void;
   generateMfaSecret: (email: string) => Promise<{ secret: string; qrCodeUrl: string }>;
   verifyMfaSetup: (secret: string, totpCode: string) => Promise<boolean>;
+  generateBackupCodes: (email: string) => Promise<string[]>;
+  saveBackupCodes: (email: string, codes: string[]) => void;
   disableMfa: () => Promise<boolean>;
 }
 
@@ -19,11 +21,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<{ email: string; mfaEnabled: boolean; mfaSecret?: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[] } | null>(null);
   const navigate = useNavigate();
 
   // Mock user data for demonstration, in a real app this would come from a backend
-  const [mockUsers, setMockUsers] = useState<{ [key: string]: { password: string; mfaEnabled: boolean; mfaSecret?: string } }>({
+  const [mockUsers, setMockUsers] = useState<{ [key: string]: { password: string; mfaEnabled: boolean; mfaSecret?: string; backupCodes?: string[]; tempMfaSecret?: string } }>({
     "admin@example.com": { password: "password", mfaEnabled: false },
   });
 
@@ -36,11 +38,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: storedUserEmail,
         mfaEnabled: mockUsers[storedUserEmail].mfaEnabled,
         mfaSecret: mockUsers[storedUserEmail].mfaSecret,
+        backupCodes: mockUsers[storedUserEmail].backupCodes,
       });
     }
   }, [mockUsers]); // Depend on mockUsers to re-evaluate if user data changes
 
-  const login = async (email: string, password: string, totpCode?: string): Promise<boolean> => {
+  const login = async (email: string, password: string, totpCode?: string, backupCode?: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const userData = mockUsers[email];
@@ -51,18 +54,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (userData.mfaEnabled) {
-          if (!totpCode) {
-            toast.info("MFA required. Please enter your TOTP code.");
-            resolve(false); // Indicate that MFA is required
-            return;
-          }
-          // Verify TOTP code
-          const otp = new OTPAuth.TOTP({ secret: userData.mfaSecret });
-          const isValid = otp.validate({ token: totpCode });
+          if (totpCode) {
+            // Verify TOTP code
+            const otp = new OTPAuth.TOTP({ secret: userData.mfaSecret });
+            const isValid = otp.validate({ token: totpCode });
 
-          if (isValid === null) {
-            toast.error("Invalid TOTP code.");
-            resolve(false);
+            if (isValid === null) {
+              toast.error("Invalid TOTP code.");
+              resolve(false);
+              return;
+            }
+          } else if (backupCode) {
+            // Verify backup code
+            const codeIndex = userData.backupCodes?.indexOf(backupCode);
+            if (codeIndex !== undefined && codeIndex > -1) {
+              // Remove used backup code
+              const updatedBackupCodes = userData.backupCodes?.filter((_, index) => index !== codeIndex);
+              setMockUsers((prev) => ({
+                ...prev,
+                [email]: {
+                  ...prev[email],
+                  backupCodes: updatedBackupCodes,
+                },
+              }));
+              toast.success("Backup code used successfully.");
+            } else {
+              toast.error("Invalid or used backup code.");
+              resolve(false);
+              return;
+            }
+          } else {
+            toast.info("MFA required. Please enter your TOTP code or a backup code.");
+            resolve(false); // Indicate that MFA is required
             return;
           }
         }
@@ -72,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email,
           mfaEnabled: userData.mfaEnabled,
           mfaSecret: userData.mfaSecret,
+          backupCodes: userData.backupCodes,
         });
         localStorage.setItem("authToken", "mock-jwt-token");
         localStorage.setItem("userEmail", email);
@@ -92,8 +116,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const generateMfaSecret = useCallback(async (email: string) => {
-    // In a real app, this secret would be generated and stored securely on the backend
-    // and associated with the user. For this mock, we generate it client-side.
     const otp = new OTPAuth.TOTP({
       issuer: "ClassicPOS",
       label: email,
@@ -106,13 +128,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const secret = otp.secret.base32;
     const qrCodeUrl = otp.toString();
 
-    // Temporarily store the secret for verification during setup
-    // In a real app, this would be stored on the backend after verification
     setMockUsers((prev) => ({
       ...prev,
       [email]: {
         ...prev[email],
-        tempMfaSecret: secret, // Use a temporary key
+        tempMfaSecret: secret,
       },
     }));
 
@@ -126,14 +146,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const isValid = otp.validate({ token: totpCode });
 
     if (isValid !== null) {
-      // If valid, enable MFA and store the secret permanently for the mock user
       setMockUsers((prev) => ({
         ...prev,
         [user.email]: {
           ...prev[user.email],
           mfaEnabled: true,
           mfaSecret: secret,
-          tempMfaSecret: undefined, // Clear temporary secret
+          tempMfaSecret: undefined,
         },
       }));
       setUser((prev) => prev ? { ...prev, mfaEnabled: true, mfaSecret: secret } : null);
@@ -142,13 +161,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  const generateBackupCodes = useCallback(async (email: string): Promise<string[]> => {
+    // In a real app, these would be generated securely on the backend
+    // and hashed before storage.
+    const codes: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      codes.push(crypto.randomUUID().substring(0, 8).toUpperCase());
+    }
+    // Temporarily store them until the user confirms saving
+    setMockUsers((prev) => ({
+      ...prev,
+      [email]: {
+        ...prev[email],
+        tempBackupCodes: codes,
+      },
+    }));
+    return codes;
+  }, []);
+
+  const saveBackupCodes = useCallback((email: string, codes: string[]) => {
+    setMockUsers((prev) => ({
+      ...prev,
+      [email]: {
+        ...prev[email],
+        backupCodes: codes,
+        tempBackupCodes: undefined, // Clear temporary codes
+      },
+    }));
+    setUser((prev) => prev ? { ...prev, backupCodes: codes } : null);
+  }, []);
+
   const disableMfa = async (): Promise<boolean> => {
     if (!user?.email) {
       toast.error("No user logged in.");
       return false;
     }
 
-    // Simulate API call to disable MFA
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     setMockUsers((prev) => ({
@@ -157,15 +205,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         ...prev[user.email],
         mfaEnabled: false,
         mfaSecret: undefined,
+        backupCodes: undefined, // Clear backup codes when MFA is disabled
       },
     }));
-    setUser((prev) => prev ? { ...prev, mfaEnabled: false, mfaSecret: undefined } : null);
+    setUser((prev) => prev ? { ...prev, mfaEnabled: false, mfaSecret: undefined, backupCodes: undefined } : null);
     toast.success("MFA disabled successfully.");
     return true;
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, generateMfaSecret, verifyMfaSetup, disableMfa }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, generateMfaSecret, verifyMfaSetup, generateBackupCodes, saveBackupCodes, disableMfa }}>
       {children}
     </AuthContext.Provider>
   );

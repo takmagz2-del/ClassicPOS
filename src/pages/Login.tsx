@@ -13,8 +13,10 @@ const Login = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [totpCode, setTotpCode] = useState<string>("");
+  const [backupCode, setBackupCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mfaRequired, setMfaRequired] = useState<boolean>(false);
+  const [useBackupCode, setUseBackupCode] = useState<boolean>(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,19 +24,15 @@ const Login = () => {
     setIsLoading(true);
     setMfaRequired(false); // Reset MFA requirement on new submission
 
-    const success = await login(email, password, mfaRequired ? totpCode : undefined);
+    const success = await login(email, password, useBackupCode ? undefined : totpCode, useBackupCode ? backupCode : undefined);
     setIsLoading(false);
 
     if (!success) {
       // If login failed and MFA was not yet attempted, check if it's an MFA requirement
-      // This is a simplified check; in a real app, the backend would explicitly tell you
-      // if MFA is required for the given user after password validation.
-      // For this mock, we'll assume if login fails and no TOTP was provided, it might be MFA.
-      // A more robust solution would involve the `login` function returning a specific status.
       const mockUser = (useAuth() as any).mockUsers[email]; // Access mockUsers for demo
-      if (mockUser?.mfaEnabled && !totpCode) {
+      if (mockUser?.mfaEnabled && !totpCode && !backupCode) {
         setMfaRequired(true);
-        toast.info("MFA required. Please enter your TOTP code.");
+        toast.info("MFA required. Please enter your TOTP code or a backup code.");
       }
     }
   };
@@ -73,20 +71,45 @@ const Login = () => {
               />
             </div>
             {mfaRequired && (
-              <div>
-                <Label htmlFor="totp-code">Authenticator Code</Label>
-                <Input
-                  id="totp-code"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  placeholder="Enter 6-digit code"
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="mfa-code">
+                    {useBackupCode ? "Backup Code" : "Authenticator Code"}
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => setUseBackupCode(!useBackupCode)}
+                    className="p-0 h-auto"
+                    disabled={isLoading}
+                  >
+                    {useBackupCode ? "Use Authenticator App" : "Use Backup Code"}
+                  </Button>
+                </div>
+                {useBackupCode ? (
+                  <Input
+                    id="mfa-code"
+                    type="text"
+                    placeholder="Enter backup code"
+                    value={backupCode}
+                    onChange={(e) => setBackupCode(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <Input
+                    id="mfa-code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    placeholder="Enter 6-digit code"
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                )}
               </div>
             )}
             <Button type="submit" className="w-full" disabled={isLoading}>
