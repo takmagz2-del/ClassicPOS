@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
+import { useAuth } from "@/components/auth/AuthContext"; // New import
+import { UserRole } from "@/types/user"; // New import
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean;
@@ -14,16 +16,18 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
+  const { user, hasPermission } = useAuth(); // Use user and hasPermission from AuthContext
+
   const navItems = [
-    { to: "/", icon: Home, label: "Dashboard" }, // Changed to "/"
-    { to: "/products", icon: Boxes, label: "Products" },
-    { to: "/customers", icon: Users, label: "Customers" },
-    { to: "/sales", icon: ShoppingCart, label: "Sales Terminal" },
-    { to: "/sales-history", icon: History, label: "Sales History" },
-    { to: "/stores", icon: Store, label: "Multi-Store" },
-    { to: "/accounting", icon: DollarSign, label: "Accounting" },
-    { to: "/reports", icon: LineChart, label: "Reports" },
-    { to: "/settings", icon: Settings, label: "Settings" },
+    { to: "/", icon: Home, label: "Dashboard", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/products", icon: Boxes, label: "Products", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/customers", icon: Users, label: "Customers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/sales", icon: ShoppingCart, label: "Sales Terminal", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/sales-history", icon: History, label: "Sales History", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/stores", icon: Store, label: "Multi-Store", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/accounting", icon: DollarSign, label: "Accounting", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/reports", icon: LineChart, label: "Reports", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/settings", icon: Settings, label: "Settings", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
   ];
 
   return (
@@ -36,18 +40,21 @@ const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
           <ScrollArea className="h-full">
             <div className="space-y-1">
               {navItems.map((item) => (
-                <Button
-                  key={item.to}
-                  variant="ghost"
-                  className="w-full justify-start"
-                  asChild
-                  onClick={onLinkClick}
-                >
-                  <Link to={item.to}>
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {item.label}
-                  </Link>
-                </Button>
+                // Only render if the user has the required permission
+                (item.requiredRoles && hasPermission(item.requiredRoles)) && (
+                  <Button
+                    key={item.to}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    asChild
+                    onClick={onLinkClick}
+                  >
+                    <Link to={item.to}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  </Button>
+                )
               ))}
             </div>
           </ScrollArea>

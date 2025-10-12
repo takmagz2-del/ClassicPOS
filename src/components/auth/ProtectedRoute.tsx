@@ -1,19 +1,44 @@
 "use client";
 
 import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
-import MainLayout from "@/components/layout/MainLayout"; // Use MainLayout for protected routes
+import MainLayout from "@/components/layout/MainLayout";
+import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
+import { toast } from "sonner"; // Import toast
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasPermission } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Find the current route configuration
+  const currentRoute = routesConfig.find(r => {
+    // Handle root path specifically
+    if (r.path === "/" && location.pathname === "/") {
+      return true;
+    }
+    // For other paths, check if the path starts with the route path
+    // This handles nested routes or dynamic segments if they were implemented
+    return location.pathname.startsWith(r.path) && r.path !== "/";
+  });
+
+  // If route is not found or has no specific role requirements, allow access
+  if (!currentRoute || !currentRoute.requiredRoles) {
+    return <MainLayout>{children || <Outlet />}</MainLayout>;
+  }
+
+  // Check if the user has permission for the current route
+  if (!hasPermission(currentRoute.requiredRoles)) {
+    toast.error("You do not have permission to access this page.");
+    return <Navigate to="/" replace />; // Redirect to dashboard or an access denied page
   }
 
   return <MainLayout>{children || <Outlet />}</MainLayout>;

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth/AuthContext";
 import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import { UserRole } from "@/types/user"; // Import UserRole
 
 const UserNav = () => {
   const { user, logout } = useAuth();
@@ -40,6 +41,9 @@ const UserNav = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user?.role ? `Role: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}` : "No Role"}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.mfaEnabled ? "MFA Enabled" : "MFA Disabled"}
             </p>

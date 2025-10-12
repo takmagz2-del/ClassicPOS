@@ -11,17 +11,18 @@ import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
+import { UserRole } from "@/types/user"; // Import UserRole
 
 export const routesConfig = [
-  { path: "/", title: "Dashboard", component: Dashboard }, // Dashboard is now the root
-  { path: "/products", title: "Products", component: Products },
-  { path: "/customers", title: "Customers", component: Customers },
-  { path: "/sales", title: "New Sale", component: Sales },
-  { path: "/sales-history", title: "Sales History", component: SalesHistory },
-  { path: "/stores", title: "Multi-Store", component: Stores },
-  { path: "/accounting", title: "Accounting", component: Accounting },
-  { path: "/reports", title: "Reports", component: Reports },
-  { path: "/settings", title: "Settings", component: Settings },
+  { path: "/", title: "Dashboard", component: Dashboard, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+  { path: "/products", title: "Products", component: Products, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+  { path: "/customers", title: "Customers", component: Customers, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+  { path: "/sales", title: "New Sale", component: Sales, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+  { path: "/sales-history", title: "Sales History", component: SalesHistory, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+  { path: "/stores", title: "Multi-Store", component: Stores, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+  { path: "/accounting", title: "Accounting", component: Accounting, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+  { path: "/reports", title: "Reports", component: Reports, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+  { path: "/settings", title: "Settings", component: Settings, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] }, // All roles can access settings, but some sections might be restricted
   { path: "/login", title: "Login", component: Login },
   { path: "/signup", title: "Sign Up", component: Signup },
 ];
