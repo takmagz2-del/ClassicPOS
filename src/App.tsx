@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import Products from "./pages/Products"; // Import the new Products page
+import Products from "./pages/Products";
+import Customers from "./pages/Customers"; // Import the new Customers page
 import { AuthProvider, useAuth } from "./components/auth/AuthContext";
 import { ReactNode } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Products />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customers"
+              element={
+                <ProtectedRoute>
+                  <Customers />
                 </ProtectedRoute>
               }
             />
