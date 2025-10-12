@@ -8,20 +8,21 @@ import { useProducts } from "@/context/ProductContext";
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
-import { useCustomers } from "@/context/CustomerContext"; // New import for customers
-import { format } from "date-fns"; // New import for date formatting
+import { useCustomers } from "@/context/CustomerContext";
+import { format } from "date-fns";
+import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react"; // Import icons
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const { salesHistory } = useSales();
   const { products } = useProducts();
-  const { customers } = useCustomers(); // Use customers context
+  const { customers } = useCustomers();
   const { currentCurrency } = useCurrency();
 
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [salesToday, setSalesToday] = useState<number>(0);
   const [productsInStock, setProductsInStock] = useState<number>(0);
-  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0); // New state for active customers
+  const [activeCustomersCount, setActiveCustomersCount] = useState<number>(0);
 
   useEffect(() => {
     // Calculate Total Revenue
@@ -65,41 +66,41 @@ const Dashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            {/* Icon placeholder */}
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sales Today</CardTitle>
-            {/* Icon placeholder */}
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(salesToday, currentCurrency)}</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-            {/* Icon placeholder */}
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeCustomersCount}</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+19% from last month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Products in Stock</CardTitle>
-            {/* Icon placeholder */}
+            <Boxes className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{productsInStock}</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p> {/* Placeholder */}
+            <p className="text-xs text-muted-foreground">+5% from last month</p>
           </CardContent>
         </Card>
       </div>
