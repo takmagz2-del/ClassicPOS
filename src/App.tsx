@@ -35,18 +35,18 @@ function App() {
 
                     <Route path="/" element={<ProtectedRoute />}>
                       {routesConfig.map((route) => {
-                        if (route.path !== "/login" && route.path !== "/signup") {
-                          const Component = route.component;
-                          return (
-                            <Route
-                              key={route.path}
-                              path={route.path === "/" ? undefined : route.path.replace(/^\//, '')} // Handle root path as index
-                              index={route.path === "/"}
-                              element={<Component />}
-                            />
-                          );
+                        if (route.path === "/login" || route.path === "/signup") {
+                          return null; // These are handled outside ProtectedRoute
                         }
-                        return null;
+                        const Component = route.component;
+                        return (
+                          <Route
+                            key={route.path}
+                            path={route.path === "/" ? undefined : route.path.substring(1)} // Use substring(1) for relative paths, undefined for index
+                            index={route.path === "/"} // Mark the root path as the index route
+                            element={<Component />}
+                          />
+                        );
                       })}
                     </Route>
                     <Route path="*" element={<NotFound />} />
