@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/auth/AuthContext";
 import { SaleProvider } from "@/context/SaleContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
+import NotFound from "@/pages/NotFound"; // Import NotFound component
 
 function App() {
   // Find the Login component from the routesConfig
@@ -28,7 +29,7 @@ function App() {
                   return (
                     <Route
                       key={route.path}
-                      path={route.path === "/" ? undefined : route.path.substring(1)} // `index` for "/", `path` for others
+                      path={route.path === "/" ? undefined : route.path.replace(/^\//, '')} // Use `index` for "/", remove leading slash for others
                       index={route.path === "/"}
                       element={<Component />}
                     />
@@ -37,6 +38,8 @@ function App() {
                 return null;
               })}
             </Route>
+            {/* Catch-all route for 404 Not Found */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </SaleProvider>
       </AuthProvider>
