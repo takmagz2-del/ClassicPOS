@@ -20,7 +20,7 @@ import { Printer } from "lucide-react";
 import { format } from "date-fns";
 import { useProducts } from "@/context/ProductContext";
 import { sendPrintJobToBackend } from "@/services/printService";
-import { usePrinterSettings } from "@/context/PrinterSettingsContext"; // New import
+import { usePrinterSettings } from "@/context/PrinterSettingsContext";
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -32,14 +32,18 @@ interface ReceiptPreviewDialogProps {
 const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPreviewDialogProps) => {
   const { currentCurrency } = useCurrency();
   const { receiptSettings } = useReceiptSettings();
-  const { printerSettings } = usePrinterSettings(); // Use printer settings
+  const { printerSettings } = usePrinterSettings();
   const { products } = useProducts();
 
   const handlePrint = async () => {
-    // Call the simulated backend service, now passing printerSettings
     await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
-    onClose(); // Close the dialog after sending the print job
+    onClose();
   };
+
+  // Calculate loyalty points discount amount for display on receipt
+  const loyaltyPointsDiscountAmount = sale.loyaltyPointsUsed ? sale.loyaltyPointsUsed / 100 : 0; // Assuming 100 points = 1 unit of currency
+
+  const subtotalAfterAllDiscounts = sale.subtotal - (sale.discountAmount || 0) - loyaltyPointsDiscountAmount;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -84,6 +88,10 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
                 <span>Email:</span>
                 <span>{customer.email}</span>
               </div>
+              <div className="flex justify-between text-xs">
+                <span>Loyalty Points:</span>
+                <span>{customer.loyaltyPoints + (sale.loyaltyPointsUsed || 0) - Math.floor(subtotalAfterAllDiscounts)}</span> {/* Display points after this transaction */}
+              </div>
             </>
           )}
 
@@ -122,8 +130,14 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
               <span className="font-medium">-{formatCurrency(sale.discountAmount, currentCurrency)}</span>
             </div>
           )}
+          {loyaltyPointsDiscountAmount > 0 && (
+            <div className="flex justify-between text-xs mb-1 text-red-600 dark:text-red-400">
+              <span>Loyalty Points Discount:</span>
+              <span className="font-medium">-{formatCurrency(loyaltyPointsDiscountAmount, currentCurrency)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-xs mb-1">
-            <span>Tax ({(sale.taxRateApplied !== undefined ? sale.taxRateApplied * 100 : 0).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
+            <span>Tax ({(sale.taxRateApplied !== undefined ? sale.taxRateApplied * 100 : 0).toFixed(2)}%):</span>
             <span className="font-medium">{formatCurrency(sale.tax, currentCurrency)}</span>
           </div>
           {sale.giftCardAmountUsed && sale.giftCardAmountUsed > 0 && (
@@ -139,6 +153,17 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             <span>TOTAL:</span>
             <span>{formatCurrency(sale.total, currentCurrency)}</span>
           </div>
+
+          {sale.loyaltyPointsUsed && sale.loyaltyPointsUsed > 0 && (
+            <div className="text-center text-xs text-muted-foreground mb-1">
+              <p>Redeemed {sale.loyaltyPointsUsed} loyalty points.</p>
+            </div>
+          )}
+          {customer && (
+            <div className="text-center text-xs text-muted-foreground mb-1">
+              <p>Earned {Math.floor(subtotalAfterAllDiscounts)} loyalty points on this purchase.</p>
+            </div>
+          )}
 
           <div className="text-center text-xs text-muted-foreground">
             <p>{receiptSettings.thankYouMessage}</p>

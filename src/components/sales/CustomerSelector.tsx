@@ -13,6 +13,8 @@ interface CustomerSelectorProps {
 }
 
 const CustomerSelector = ({ customers, selectedCustomerId, onSelectCustomer }: CustomerSelectorProps) => {
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+
   return (
     <Card>
       <CardHeader>
@@ -31,11 +33,16 @@ const CustomerSelector = ({ customers, selectedCustomerId, onSelectCustomer }: C
             <SelectItem value="none">No Customer (Walk-in)</SelectItem>
             {customers.map((customer) => (
               <SelectItem key={customer.id} value={customer.id}>
-                {customer.name} ({customer.email})
+                {customer.name} ({customer.email}) - {customer.loyaltyPoints} pts
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {selectedCustomer && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Available Loyalty Points: <span className="font-medium">{selectedCustomer.loyaltyPoints}</span>
+          </p>
+        )}
       </CardContent>
     </Card>
   );

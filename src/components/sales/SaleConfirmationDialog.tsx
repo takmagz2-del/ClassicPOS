@@ -32,7 +32,9 @@ interface SaleConfirmationDialogProps {
     customer?: Customer;
     discountPercentage?: number;
     discountAmount?: number;
-    taxRateApplied?: number; // New: The tax rate applied to this sale
+    loyaltyPointsUsed?: number; // New: Loyalty points used
+    loyaltyPointsDiscountAmount?: number; // New: Loyalty points discount amount
+    taxRateApplied?: number;
   };
   paymentMethod: string;
 }
@@ -44,7 +46,7 @@ const SaleConfirmationDialog = ({
   saleDetails,
   paymentMethod,
 }: SaleConfirmationDialogProps) => {
-  const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount, taxRateApplied } = saleDetails;
+  const { items, subtotal, tax, total, giftCardAmountUsed, customer, discountPercentage, discountAmount, loyaltyPointsUsed, loyaltyPointsDiscountAmount, taxRateApplied } = saleDetails;
   const [cashReceived, setCashReceived] = useState<string>("");
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
@@ -61,7 +63,7 @@ const SaleConfirmationDialog = ({
     onConfirmSale(paymentMethod, isCashPayment ? parsedCashReceived : undefined);
   };
 
-  const subtotalAfterDiscount = subtotal - (discountAmount || 0);
+  const subtotalAfterDiscount = subtotal - (discountAmount || 0) - (loyaltyPointsDiscountAmount || 0);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -97,14 +99,20 @@ const SaleConfirmationDialog = ({
               <span className="font-medium">-{formatCurrency(discountAmount, currentCurrency)}</span>
             </div>
           )}
-          {discountPercentage && discountPercentage > 0 && (
-            <div className="flex justify-between">
-              <span>Subtotal (after discount):</span>
-              <span className="font-medium">{formatCurrency(subtotalAfterDiscount, currentCurrency)}</span>
+          {loyaltyPointsDiscountAmount && loyaltyPointsDiscountAmount > 0 && (
+            <div className="flex justify-between text-red-600 dark:text-red-400">
+              <span>Loyalty Points Discount:</span>
+              <span className="font-medium">-{formatCurrency(loyaltyPointsDiscountAmount, currentCurrency)}</span>
             </div>
           )}
+          {(discountPercentage && discountPercentage > 0) || (loyaltyPointsDiscountAmount && loyaltyPointsDiscountAmount > 0) ? (
+            <div className="flex justify-between">
+              <span>Subtotal (after discounts):</span>
+              <span className="font-medium">{formatCurrency(subtotalAfterDiscount, currentCurrency)}</span>
+            </div>
+          ) : null}
           <div className="flex justify-between">
-            <span>Tax ({(taxRateApplied !== undefined ? taxRateApplied * 100 : 0).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
+            <span>Tax ({(taxRateApplied !== undefined ? taxRateApplied * 100 : 0).toFixed(2)}%):</span>
             <span className="font-medium">{formatCurrency(tax, currentCurrency)}</span>
           </div>
           {giftCardAmountUsed > 0 && (

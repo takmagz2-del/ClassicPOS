@@ -19,6 +19,7 @@ export interface Sale {
   customerName?: string; // New: Optional customer name
   discountPercentage?: number; // New: Optional discount percentage applied
   discountAmount?: number; // New: Optional calculated discount amount
+  loyaltyPointsUsed?: number; // New: Optional loyalty points used in the sale
   originalSaleId?: string; // New: Link to the original sale for refunds
   taxRateApplied?: number; // New: The tax rate applied to this sale
   paymentMethod?: string; // New: The payment method used for the sale

@@ -29,6 +29,7 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead className="text-right">Loyalty Points</TableHead> {/* New TableHead */}
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -40,6 +41,7 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
                 <TableCell>{customer.email}</TableCell>
                 <TableCell>{customer.phone || "N/A"}</TableCell>
                 <TableCell>{customer.address || "N/A"}</TableCell>
+                <TableCell className="text-right">{customer.loyaltyPoints}</TableCell> {/* Display loyalty points */}
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditCustomer(customer)}>
                     <Edit className="h-4 w-4" />
@@ -54,7 +56,7 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center"> {/* Updated colSpan */}
                 No customers found.
               </TableCell>
             </TableRow>

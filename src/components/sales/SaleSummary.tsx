@@ -8,16 +8,17 @@ import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
 
 interface SaleSummaryProps {
   subtotal: number;
-  taxRate: number; // Now passed as a prop from Sales page
+  taxRate: number;
   giftCardAmountUsed: number;
   discountPercentage: number;
   discountAmount: number;
+  loyaltyPointsDiscountAmount: number; // New prop for loyalty points discount
 }
 
-const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage, discountAmount }: SaleSummaryProps) => {
+const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage, discountAmount, loyaltyPointsDiscountAmount }: SaleSummaryProps) => {
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
-  const subtotalAfterDiscount = subtotal - discountAmount;
+  const subtotalAfterDiscount = subtotal - discountAmount - loyaltyPointsDiscountAmount; // Apply loyalty points discount here
   const tax = subtotalAfterDiscount * taxRate;
   let totalBeforeGiftCard = subtotalAfterDiscount + tax;
 
@@ -40,12 +41,18 @@ const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage
             <span className="font-medium">-{formatCurrency(discountAmount, currentCurrency)}</span>
           </div>
         )}
+        {loyaltyPointsDiscountAmount > 0 && (
+          <div className="flex justify-between text-red-600 dark:text-red-400">
+            <span>Loyalty Points Discount:</span>
+            <span className="font-medium">-{formatCurrency(loyaltyPointsDiscountAmount, currentCurrency)}</span>
+          </div>
+        )}
         <div className="flex justify-between">
-          <span>Subtotal (after discount):</span>
+          <span>Subtotal (after discounts):</span>
           <span className="font-medium">{formatCurrency(subtotalAfterDiscount, currentCurrency)}</span>
         </div>
         <div className="flex justify-between">
-          <span>Tax ({(taxRate * 100).toFixed(2)}%):</span> {/* Display dynamic tax rate */}
+          <span>Tax ({(taxRate * 100).toFixed(2)}%):</span>
           <span className="font-medium">{formatCurrency(tax, currentCurrency)}</span>
         </div>
         {giftCardAmountUsed > 0 && (

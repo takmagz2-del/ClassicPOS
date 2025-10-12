@@ -30,6 +30,9 @@ const formSchema = z.object({
   address: z.string().min(5, {
     message: "Address must be at least 5 characters.",
   }).optional().or(z.literal("")),
+  loyaltyPoints: z.coerce.number().int().min(0, {
+    message: "Loyalty points must be a non-negative integer.",
+  }), // New: Loyalty points field
 });
 
 type EditCustomerFormValues = z.infer<typeof formSchema>;
@@ -110,6 +113,19 @@ const EditCustomerForm = ({ initialCustomer, onCustomerUpdate, onClose }: EditCu
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="loyaltyPoints"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Loyalty Points</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

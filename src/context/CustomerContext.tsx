@@ -9,6 +9,7 @@ interface CustomerContextType {
   addCustomer: (newCustomer: Customer) => void;
   updateCustomer: (updatedCustomer: Customer) => void;
   deleteCustomer: (customerId: string) => void;
+  updateCustomerLoyaltyPoints: (customerId: string, pointsChange: number) => void; // New: Function to update loyalty points
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
@@ -30,8 +31,18 @@ export const CustomerProvider = ({ children }: { children: ReactNode }) => {
     setCustomers((prevCustomers) => prevCustomers.filter((c) => c.id !== customerId));
   }, []);
 
+  const updateCustomerLoyaltyPoints = useCallback((customerId: string, pointsChange: number) => {
+    setCustomers((prevCustomers) =>
+      prevCustomers.map((c) =>
+        c.id === customerId
+          ? { ...c, loyaltyPoints: Math.max(0, c.loyaltyPoints + pointsChange) } // Ensure points don't go below zero
+          : c
+      )
+    );
+  }, []);
+
   return (
-    <CustomerContext.Provider value={{ customers, addCustomer, updateCustomer, deleteCustomer }}>
+    <CustomerContext.Provider value={{ customers, addCustomer, updateCustomer, deleteCustomer, updateCustomerLoyaltyPoints }}>
       {children}
     </CustomerContext.Provider>
   );
