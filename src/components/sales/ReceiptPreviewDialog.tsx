@@ -46,6 +46,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   const loyaltyPointsDiscountAmount = sale.loyaltyPointsUsed ? sale.loyaltyPointsUsed / 100 : 0; // Assuming 100 points = 1 unit of currency
 
   const subtotalAfterAllDiscounts = sale.subtotal - (sale.discountAmount || 0) - loyaltyPointsDiscountAmount;
+  const pointsEarnedThisSale = Math.floor(subtotalAfterAllDiscounts);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -91,8 +92,8 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
                 <span>{customer.email}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span>Loyalty Points:</span>
-                <span>{customer.loyaltyPoints + (sale.loyaltyPointsUsed || 0) - Math.floor(subtotalAfterAllDiscounts)}</span> {/* Display points after this transaction */}
+                <span>Current Loyalty Points:</span>
+                <span>{customer.loyaltyPoints}</span>
               </div>
             </>
           )}
@@ -158,12 +159,12 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
 
           {sale.loyaltyPointsUsed && sale.loyaltyPointsUsed > 0 && (
             <div className="text-center text-xs text-muted-foreground mb-1">
-              <p>Redeemed {sale.loyaltyPointsUsed} loyalty points.</p>
+              <p>Redeemed {sale.loyaltyPointsUsed} loyalty points on this purchase.</p>
             </div>
           )}
-          {customer && (
+          {customer && pointsEarnedThisSale > 0 && (
             <div className="text-center text-xs text-muted-foreground mb-1">
-              <p>Earned {Math.floor(subtotalAfterAllDiscounts)} loyalty points on this purchase.</p>
+              <p>Earned {pointsEarnedThisSale} loyalty points on this purchase.</p>
             </div>
           )}
 
