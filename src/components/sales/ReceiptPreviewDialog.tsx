@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,8 @@ import { formatCurrency } from "@/lib/utils";
 import { useReceiptSettings } from "@/context/ReceiptSettingsContext";
 import { Printer } from "lucide-react";
 import { format } from "date-fns";
-import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useProducts } from "@/context/ProductContext";
+import { sendPrintJobToBackend } from "@/services/printService"; // Import the new service
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -30,120 +31,12 @@ interface ReceiptPreviewDialogProps {
 const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPreviewDialogProps) => {
   const { currentCurrency } = useCurrency();
   const { receiptSettings } = useReceiptSettings();
-  const { products } = useProducts(); // Use products context
-  const receiptRef = useRef<HTMLDivElement>(null);
+  const { products } = useProducts();
 
-  const handlePrint = () => {
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Receipt #${sale.id.substring(0, 8)}</title>
-            <style>
-              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; color: #333; }
-              .receipt-container { max-width: 300px; margin: 0 auto; padding: 15px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-              .header, .footer { text-align: center; margin-bottom: 15px; }
-              .header img { max-width: 100px; margin-bottom: 10px; }
-              .header h2 { margin: 0; font-size: 1.5em; }
-              .header p { margin: 2px 0; font-size: 0.9em; color: #555; }
-              .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
-              .item-row { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 3px; }
-              .item-row .name { flex: 1; }
-              .item-row .qty { width: 30px; text-align: center; }
-              .item-row .price { width: 60px; text-align: right; }
-              .item-row .total { width: 70px; text-align: right; font-weight: bold; }
-              .summary-row { display: flex; justify-content: space-between; font-size: 0.9em; margin-top: 5px; }
-              .summary-row.total { font-size: 1.1em; font-weight: bold; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px; }
-              .separator { border-top: 1px dashed #ccc; margin: 15px 0; }
-              @media print {
-                body { margin: 0; }
-                .receipt-container { border: none; box-shadow: none; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="receipt-container">
-              <div class="header">
-                ${receiptSettings.logoUrl ? `<img src="${receiptSettings.logoUrl}" alt="${receiptSettings.storeName} Logo" />` : ""}
-                <h2>${receiptSettings.storeName}</h2>
-                <p>${receiptSettings.storeAddress}</p>
-                <p>${receiptSettings.storePhone}</p>
-                ${receiptSettings.storeWebsite ? `<p>${receiptSettings.storeWebsite}</p>` : ""}
-              </div>
-
-              <div class="separator"></div>
-
-              <p><strong>Date:</strong> ${format(new Date(sale.date), "MMM dd, yyyy HH:mm")}</p>
-              <p><strong>Sale ID:</strong> ${sale.id.substring(0, 8)}</p>
-
-              ${receiptSettings.showCustomerInfo && customer ? `
-                <div class="section-title">Customer Info</div>
-                <p><strong>Name:</strong> ${customer.name}</p>
-                <p><strong>Email:</strong> ${customer.email}</p>
-              ` : ""}
-
-              <div class="section-title">Items</div>
-              <div class="item-row">
-                <span class="name">Item</span>
-                <span class="qty">Qty</span>
-                <span class="price">Price</span>
-                <span class="total">Total</span>
-              </div>
-              <div class="separator"></div>
-              ${sale.items.map(item => {
-                const product = products.find(p => p.id === item.productId);
-                return `
-                <div class="item-row">
-                  <span class="name">${item.name}</span>
-                  <span class="qty">${item.quantity}</span>
-                  <span class="price">${formatCurrency(item.price, currentCurrency)}</span>
-                  <span class="total">${formatCurrency(item.price * item.quantity, currentCurrency)}</span>
-                </div>
-                ${receiptSettings.showSku && product?.sku ? `<div class="item-row" style="font-size: 0.7em; color: #777; margin-left: 10px;">SKU: ${product.sku}</div>` : ""}
-                ${receiptSettings.showCategory && product?.category ? `<div class="item-row" style="font-size: 0.7em; color: #777; margin-left: 10px;">Category: ${product.category}</div>` : ""}
-              `;
-              }).join("")}
-              <div class="separator"></div>
-
-              <div class="summary-row">
-                <span>Subtotal:</span>
-                <span>${formatCurrency(sale.subtotal, currentCurrency)}</span>
-              </div>
-              ${sale.discountPercentage && sale.discountAmount && sale.discountPercentage > 0 ? `
-                <div class="summary-row" style="color: red;">
-                  <span>Discount (${sale.discountPercentage}%):</span>
-                  <span>-${formatCurrency(sale.discountAmount, currentCurrency)}</span>
-                </div>
-              ` : ""}
-              <div class="summary-row">
-                <span>Tax (${(sale.tax / (sale.subtotal - (sale.discountAmount || 0)) * 100).toFixed(2)}%):</span>
-                <span>${formatCurrency(sale.tax, currentCurrency)}</span>
-              </div>
-              ${sale.giftCardAmountUsed && sale.giftCardAmountUsed > 0 ? `
-                <div class="summary-row" style="color: green;">
-                  <span>Gift Card:</span>
-                  <span>-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}</span>
-                </div>
-              ` : ""}
-              <div class="summary-row total">
-                <span>TOTAL:</span>
-                <span>${formatCurrency(sale.total, currentCurrency)}</span>
-              </div>
-
-              <div class="separator"></div>
-
-              <div class="footer">
-                <p>${receiptSettings.thankYouMessage}</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
+  const handlePrint = async () => {
+    // Call the simulated backend service
+    await sendPrintJobToBackend(sale, customer, receiptSettings);
+    onClose(); // Close the dialog after sending the print job
   };
 
   return (
@@ -155,7 +48,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             Review the receipt for Sale ID: <span className="font-semibold">{sale.id.substring(0, 8)}</span>
           </DialogDescription>
         </DialogHeader>
-        <div ref={receiptRef} className="p-4 border rounded-md bg-white dark:bg-gray-900 text-sm">
+        <div className="p-4 border rounded-md bg-white dark:bg-gray-900 text-sm">
           <div className="text-center mb-4">
             {receiptSettings.logoUrl && (
               <img src={receiptSettings.logoUrl} alt={`${receiptSettings.storeName} Logo`} className="mx-auto h-16 mb-2" />
@@ -254,7 +147,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             Close
           </Button>
           <Button onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" /> Print Receipt
+            <Printer className="mr-2 h-4 w-4" /> Send to Printer
           </Button>
         </DialogFooter>
       </DialogContent>
