@@ -13,12 +13,15 @@ import { Sale } from "@/types/sale";
 import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
 import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { Button } from "@/components/ui/button"; // Import Button
+import { Printer } from "lucide-react"; // Import Printer icon
 
 interface SalesTableProps {
   sales: Sale[];
+  onViewReceipt: (sale: Sale) => void; // New prop for viewing receipt
 }
 
-const SalesTable = ({ sales }: SalesTableProps) => {
+const SalesTable = ({ sales, onViewReceipt }: SalesTableProps) => {
   const { currentCurrency } = useCurrency(); // Use currentCurrency from context
 
   return (
@@ -34,6 +37,7 @@ const SalesTable = ({ sales }: SalesTableProps) => {
             <TableHead className="text-right">Gift Card</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-center">Actions</TableHead> {/* New TableHead for Actions */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -56,11 +60,17 @@ const SalesTable = ({ sales }: SalesTableProps) => {
                 </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
                 <TableCell className="text-center capitalize">{sale.status}</TableCell>
+                <TableCell className="text-center"> {/* New TableCell for Actions */}
+                  <Button variant="ghost" size="icon" onClick={() => onViewReceipt(sale)}>
+                    <Printer className="h-4 w-4" />
+                    <span className="sr-only">View/Print Receipt</span>
+                  </Button>
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
+              <TableCell colSpan={9} className="h-24 text-center"> {/* Updated colSpan */}
                 No sales recorded yet.
               </TableCell>
             </TableRow>

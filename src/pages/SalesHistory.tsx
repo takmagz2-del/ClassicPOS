@@ -14,15 +14,23 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Sale } from "@/types/sale";
+import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog"; // Import ReceiptPreviewDialog
+import { useCustomers } from "@/context/CustomerContext"; // Import useCustomers
+import { Customer } from "@/types/customer"; // Import Customer type
 
 const SalesHistory = () => {
   const { salesHistory } = useSales();
+  const { customers } = useCustomers(); // Use customers context
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [statusFilter, setStatusFilter] = useState<string>("all"); // "all", "completed", "pending", "cancelled"
   const [sortKey, setSortKey] = useState<keyof Sale>("date"); // 'date', 'total'
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); // 'asc', 'desc'
+
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
+  const [selectedSaleForReceipt, setSelectedSaleForReceipt] = useState<Sale | null>(null);
+  const [selectedCustomerForReceipt, setSelectedCustomerForReceipt] = useState<Customer | undefined>(undefined);
 
   const filteredAndSortedSales = useMemo(() => {
     let filteredSales = salesHistory;
@@ -74,6 +82,16 @@ const SalesHistory = () => {
 
     return sortedSales;
   }, [salesHistory, searchTerm, dateRange, statusFilter, sortKey, sortOrder]);
+
+  const handleViewReceipt = (sale: Sale) => {
+    setSelectedSaleForReceipt(sale);
+    if (sale.customerId) {
+      setSelectedCustomerForReceipt(customers.find(c => c.id === sale.customerId));
+    } else {
+      setSelectedCustomerForReceipt(undefined);
+    }
+    setIsReceiptDialogOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,9 +181,18 @@ const SalesHistory = () => {
               </SelectContent>
             </Select>
           </div>
-          <SalesTable sales={filteredAndSortedSales} />
+          <SalesTable sales={filteredAndSortedSales} onViewReceipt={handleViewReceipt} />
         </CardContent>
       </Card>
+
+      {selectedSaleForReceipt && (
+        <ReceiptPreviewDialog
+          isOpen={isReceiptDialogOpen}
+          onClose={() => setIsReceiptDialogOpen(false)}
+          sale={selectedSaleForReceipt}
+          customer={selectedCustomerForReceipt}
+        />
+      )}
     </div>
   );
 };
