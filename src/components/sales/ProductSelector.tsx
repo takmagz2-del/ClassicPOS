@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Product } from "@/types/product";
-import { PlusCircle } from "lucide-react"; // Corrected PlusCicle to PlusCircle
+import { PlusCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProductSelectorProps {
