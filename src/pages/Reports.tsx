@@ -25,12 +25,14 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/context/ProductContext";
 import { useCategories } from "@/context/CategoryContext";
+import { usePaymentMethods } from "@/context/PaymentMethodContext"; // New import
 
 const Reports = () => {
   const { salesHistory } = useSales();
   const { products } = useProducts();
   const { getCategoryName } = useCategories();
   const { currentCurrency } = useCurrency();
+  const { getPaymentMethodName } = usePaymentMethods(); // New: Get payment method name utility
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
@@ -110,7 +112,7 @@ const Reports = () => {
     // Calculate Sales by Payment Method
     const salesByPaymentMethodMap = new Map<string, number>();
     filteredTransactions.filter(t => t.type === "sale").forEach(sale => {
-      const method = sale.paymentMethod || "Unknown";
+      const method = sale.paymentMethod ? getPaymentMethodName(sale.paymentMethod) : "Unknown";
       salesByPaymentMethodMap.set(method, (salesByPaymentMethodMap.get(method) || 0) + sale.total);
     });
 
@@ -126,7 +128,7 @@ const Reports = () => {
       topSellingProducts,
       salesByPaymentMethod,
     };
-  }, [salesHistory, dateRange, typeFilter, products, getCategoryName]);
+  }, [salesHistory, dateRange, typeFilter, products, getCategoryName, getPaymentMethodName]);
 
   return (
     <div className="flex flex-col gap-4">
