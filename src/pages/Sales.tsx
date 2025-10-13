@@ -22,7 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer, Scan } from "lucide-react";
+import { Printer, Scan } from "lucide-react"; // Added Scan icon
 import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,15 +32,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog";
-import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
+import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // New import
+import { useAuth } from "@/components/auth/AuthContext"; // Import useAuth
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
-  const { products, updateProductStock } = useProducts(); // Use the refactored updateProductStock
+  const { products, updateProductStock } = useProducts();
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
+  const { user: currentUser } = useAuth(); // Get the current logged-in user
   const isMobile = useIsMobile();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
@@ -49,12 +50,12 @@ const Sales = () => {
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState<boolean>(false);
   const [paymentMethodToConfirm, setPaymentMethodToConfirm] = useState<PaymentMethod | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number>(0);
-  const [appliedLoyaltyPoints, setAppliedLoyaltyPoints] = useState<number>(0);
+  const [appliedLoyaltyPoints, setLoyaltyPointsUsed] = useState<number>(0);
   const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
-  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
+  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false); // New state for scanner dialog
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -95,7 +96,7 @@ const Sales = () => {
     }
     toast.success(`${quantity}x ${product.name} added to cart.`);
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -118,7 +119,7 @@ const Sales = () => {
       )
     );
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -126,7 +127,7 @@ const Sales = () => {
     setCartItems((prev) => prev.filter((item) => item.productId !== productId));
     toast.info("Item removed from cart.");
     setAppliedGiftCardAmount(0);
-    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -135,7 +136,7 @@ const Sales = () => {
     setAppliedGiftCardAmount(0);
     setSelectedCustomerId(null);
     setDiscountPercentage(0);
-    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
     setShowReprintButton(false);
     toast.info("Cart cleared.");
@@ -150,17 +151,17 @@ const Sales = () => {
   };
 
   const handleApplyLoyaltyPoints = (points: number, equivalentAmount: number) => {
-    setAppliedLoyaltyPoints(points);
+    setLoyaltyPointsUsed(points);
     setLoyaltyPointsDiscountAmount(equivalentAmount);
     if (points === 0) {
-      setAppliedLoyaltyPoints(0);
+      setLoyaltyPointsUsed(0);
       setLoyaltyPointsDiscountAmount(0);
     }
   };
 
   const handleSelectCustomer = (customerId: string | null) => {
     setSelectedCustomerId(customerId);
-    setAppliedLoyaltyPoints(0);
+    setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
   };
 
@@ -195,8 +196,11 @@ const Sales = () => {
       discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
       loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
+      loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount > 0 ? loyaltyPointsDiscountAmount : undefined, // Include loyalty points discount
       taxRateApplied: defaultTaxRate.rate,
       paymentMethodId: paymentMethodId,
+      employeeId: currentUser?.id, // Add current user's ID
+      employeeName: currentUser?.email, // Add current user's email
     };
 
     addSale(newSale);
@@ -216,13 +220,7 @@ const Sales = () => {
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
       if (product && product.trackStock) { // Only update stock if tracking is enabled
-        updateProductStock(
-          product.id,
-          product.stock - soldItem.quantity,
-          InventoryHistoryType.SALE,
-          newSale.id,
-          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`
-        );
+        updateProductStock(product.id, product.stock - soldItem.quantity);
       }
     });
 
