@@ -1,24 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import ProductTable from "@/components/products/ProductTable";
 import { Product } from "@/types/product";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import ProductUpsertForm from "@/components/products/ProductUpsertForm"; // Updated import
+import ProductUpsertForm from "@/components/products/ProductUpsertForm";
 import DeleteProductDialog from "@/components/products/DeleteProductDialog";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Search, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useProducts } from "@/context/ProductContext";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories } from "@/context/CategoryContext";
+import { cn } from "@/lib/utils";
+
+const LOW_STOCK_THRESHOLD = 10;
 
 const Products = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { categories } = useCategories();
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // 'all', 'in-stock', 'low-stock', 'out-of-stock'
+  const [sortKey, setSortKey] = useState<keyof Product>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const handleProductSubmit = (product: Product) => {
     if (products.some(p => p.id === product.id)) {
@@ -42,6 +57,55 @@ const Products = () => {
     deleteProduct(productId);
     toast.success("Product deleted successfully!");
     setDeletingProduct(null);
+  };
+
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = products.filter((product) => {
+      const matchesSearchTerm =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategoryId === "all" || product.categoryId === selectedCategoryId;
+
+      let matchesStockStatus = true;
+      if (stockStatusFilter === "in-stock") {
+        matchesStockStatus = product.stock > 0;
+      } else if (stockStatusFilter === "low-stock") {
+        matchesStockStatus = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+      } else if (stockStatusFilter === "out-of-stock") {
+        matchesStockStatus = product.stock === 0;
+      }
+
+      return matchesSearchTerm && matchesCategory && matchesStockStatus;
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+      if (sortKey === "name" || sortKey === "sku") {
+        compareValue = a[sortKey].localeCompare(b[sortKey]);
+      } else if (sortKey === "price" || sortKey === "stock" || sortKey === "cost") {
+        compareValue = a[sortKey] - b[sortKey];
+      } else if (sortKey === "categoryId") {
+        const categoryA = categories.find(cat => cat.id === a.categoryId)?.name || "";
+        const categoryB = categories.find(cat => cat.id === b.categoryId)?.name || "";
+        compareValue = categoryA.localeCompare(categoryB);
+      }
+
+      return sortOrder === "asc" ? compareValue : -compareValue;
+    });
+
+    return filtered;
+  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, sortKey, sortOrder, categories]);
+
+  const handleSort = (key: keyof Product) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
   };
 
   return (
@@ -94,10 +158,61 @@ const Products = () => {
           <CardTitle>Product List</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+
+            <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Stock" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stock</SelectItem>
+                <SelectItem value="in-stock">In Stock</SelectItem>
+                <SelectItem value="low-stock">Low Stock (&le;{LOW_STOCK_THRESHOLD})</SelectItem>
+                <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" onClick={() => {
+              setSearchTerm("");
+              setSelectedCategoryId("all");
+              setStockStatusFilter("all");
+              setSortKey("name");
+              setSortOrder("asc");
+            }}>
+              Reset Filters
+            </Button>
+          </div>
+
           <ProductTable
-            products={products}
+            products={filteredAndSortedProducts}
             onEditProduct={handleEditProduct}
             onDeleteProduct={handleDeleteProduct}
+            onSort={handleSort}
+            sortKey={sortKey}
+            sortOrder={sortOrder}
           />
         </CardContent>
       </Card>
