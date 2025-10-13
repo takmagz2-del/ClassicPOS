@@ -11,7 +11,8 @@ import Suppliers from "@/pages/Suppliers";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import GoodsReceivedNotes from "@/pages/GoodsReceivedNotes";
 import StockAdjustments from "@/pages/StockAdjustments";
-import TransferOfGoodsPage from "@/pages/TransferOfGoods"; // New import
+import TransferOfGoodsPage from "@/pages/TransferOfGoods";
+import InventoryHistory from "@/pages/InventoryHistory"; // New import
 import Accounting from "@/pages/Accounting";
 import Reports from "@/pages/Reports";
 import Settings from "@/pages/Settings";
@@ -28,7 +29,8 @@ export const routesConfig = [
   { path: "/purchase-orders", title: "Purchase Orders", component: PurchaseOrders, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
   { path: "/goods-received-notes", title: "Goods Received Notes", component: GoodsReceivedNotes, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
   { path: "/stock-adjustments", title: "Stock Adjustments", component: StockAdjustments, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
-  { path: "/transfer-of-goods", title: "Transfer of Goods", component: TransferOfGoodsPage, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] }, // New route
+  { path: "/transfer-of-goods", title: "Transfer of Goods", component: TransferOfGoodsPage, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+  { path: "/inventory-history", title: "Inventory History", component: InventoryHistory, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] }, // New route
   { path: "/sales", title: "New Sale", component: Sales, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
   { path: "/sales-history", title: "Sales History", component: SalesHistory, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
   { path: "/stores", title: "Multi-Store", component: Stores, requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
