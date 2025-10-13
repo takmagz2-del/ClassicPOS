@@ -81,7 +81,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
 
   const selectedPurchaseOrderId = form.watch("purchaseOrderId");
   const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
-  const isFormDisabled = isEditMode && initialGRN?.status === "approved";
+  const isFormDisabled = isEditMode && initialGRN?.status === "approved"; // Centralized disabling logic
 
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
@@ -158,7 +158,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     let grnToSubmit: GoodsReceivedNote | NewGRNData;
 
     if (isEditMode) {
-n      grnToSubmit = {
+      grnToSubmit = {
         ...initialGRN!,
         ...baseGRN,
         id: initialGRN!.id,
@@ -189,7 +189,7 @@ n      grnToSubmit = {
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -198,7 +198,7 @@ n      grnToSubmit = {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isLinkedToPO || isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -223,7 +223,7 @@ n      grnToSubmit = {
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} disabled={extraProps?.isLinkedToPO || isFormDisabled} />
+              <Input type="number" min="1" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -236,7 +236,7 @@ n      grnToSubmit = {
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isLinkedToPO || isFormDisabled} />
+              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -391,7 +391,8 @@ n      grnToSubmit = {
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderGRNItem}
-              extraProps={{ isLinkedToPO, isRemoveDisabled: isLinkedToPO || isFormDisabled }}
+              isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
+              extraProps={{ isLinkedToPO, isFormDisabled }}
             />
           </CardContent>
         </Card>

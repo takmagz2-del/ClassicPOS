@@ -155,7 +155,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
   const items = form.watch("items");
   const transferFromStoreId = form.watch("transferFromStoreId");
-  const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
+  const isFormDisabled = isEditMode && initialTransfer?.status !== "pending"; // Centralized disabling logic
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1 }]);
@@ -177,7 +177,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean }
+    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -186,7 +186,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -211,7 +211,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
+              <Input type="number" min="1" {...field} disabled={extraProps?.isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -291,7 +291,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           name="transferToStoreId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>To Store (Destination)</FormLabel>
+              <FormLabel>To Store (Destination)</Label>
               <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
@@ -325,7 +325,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
-              extraProps={{ transferFromStoreId, isRemoveDisabled: isFormDisabled }}
+              isRemoveButtonDisabled={isFormDisabled}
+              extraProps={{ transferFromStoreId, isFormDisabled }}
             />
           </CardContent>
         </Card>

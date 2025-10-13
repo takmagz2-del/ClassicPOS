@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import *s z from "zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -63,6 +63,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
+
+  const isFormDisabled = false; // Stock adjustments are always editable in this mock, no status to disable by
 
   useEffect(() => {
     if (initialStockAdjustment) {
@@ -132,7 +134,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     item: StockAdjustmentItem,
     index: number,
     control: Control<StockAdjustmentFormValues>,
-    errors: FieldErrors<StockAdjustmentFormValues>
+    errors: FieldErrors<StockAdjustmentFormValues>,
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -141,7 +144,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -165,7 +168,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         render={({ field }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -190,7 +193,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} />
+              <Input type="number" min="1" {...field} disabled={extraProps?.isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -203,7 +206,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           <FormItem className="sm:col-span-3">
             <FormLabel>Reason</FormLabel>
             <FormControl>
-              <Input placeholder="e.g., Damaged stock, Found item" {...field} />
+              <Input placeholder="e.g., Damaged stock, Found item" {...field} disabled={extraProps?.isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -230,6 +233,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isFormDisabled}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -259,7 +263,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           render={({ field }) => (
             <FormItem>
               <FormLabel>Store</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a store" />
@@ -281,7 +285,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Items to Adjust</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isFormDisabled}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Item
             </Button>
           </CardHeader>
@@ -292,6 +296,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
+              isRemoveButtonDisabled={isFormDisabled}
+              extraProps={{ isFormDisabled }}
             />
           </CardContent>
         </Card>
@@ -303,14 +309,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
+                <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} disabled={isFormDisabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isFormDisabled}>
           {isEditMode ? "Save Changes" : "Create Adjustment"}
         </Button>
       </form>
