@@ -146,7 +146,7 @@ const CategorySettingsForm = () => {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">No custom tax rates defined.</p>
+            <p className="text-muted-foreground">No categories defined.</p>
           )}
         </CardContent>
       </Card>
