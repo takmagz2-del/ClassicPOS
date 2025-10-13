@@ -22,7 +22,8 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer } from "lucide-react"; // Import Printer icon
+import { Printer } from "lucide-react";
+import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs"; // New import
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -41,7 +42,7 @@ const Sales = () => {
   const [loyaltyPointsDiscountAmount, setLoyaltyPointsDiscountAmount] = useState<number>(0);
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
-  const [showReprintButton, setShowReprintButton] = useState<boolean>(false); // New state for reprint button
+  const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -124,7 +125,7 @@ const Sales = () => {
     setDiscountPercentage(0);
     setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
-    setShowReprintButton(false); // Hide reprint button on clear
+    setShowReprintButton(false);
     toast.info("Cart cleared.");
   };
 
@@ -139,7 +140,7 @@ const Sales = () => {
   const handleApplyLoyaltyPoints = (points: number, equivalentAmount: number) => {
     setAppliedLoyaltyPoints(points);
     setLoyaltyPointsDiscountAmount(equivalentAmount);
-    if (points === 0) { // Explicitly reset if 0 points are applied
+    if (points === 0) {
       setAppliedLoyaltyPoints(0);
       setLoyaltyPointsDiscountAmount(0);
     }
@@ -147,7 +148,6 @@ const Sales = () => {
 
   const handleSelectCustomer = (customerId: string | null) => {
     setSelectedCustomerId(customerId);
-    // Reset loyalty points when customer changes
     setAppliedLoyaltyPoints(0);
     setLoyaltyPointsDiscountAmount(0);
   };
@@ -163,7 +163,6 @@ const Sales = () => {
       return;
     }
 
-    // For credit sales, a customer must be selected
     if (paymentMethodToConfirm?.isCredit && !selectedCustomer) {
       toast.error("A customer must be selected for a credit sale.");
       return;
@@ -211,7 +210,7 @@ const Sales = () => {
 
     setLastSale(newSale);
     setIsReceiptDialogOpen(true);
-    setShowReprintButton(true); // Show the reprint button after sale
+    setShowReprintButton(true);
 
     handleClearCart();
     toast.success(`${paymentMethodToConfirm?.isCredit ? "Credit Sale" : "Sale"} #${newSale.id.substring(0, 8)} completed via ${paymentMethodToConfirm?.name}! Total: ${formatCurrency(newSale.total, currentCurrency)}`);
@@ -231,7 +230,6 @@ const Sales = () => {
     setIsConfirmationDialogOpen(true);
   };
 
-  // Function to handle reprinting the last receipt
   const handleReprintReceipt = () => {
     if (lastSale) {
       setIsReceiptDialogOpen(true);
@@ -242,7 +240,6 @@ const Sales = () => {
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
-        {/* Re-print Receipt Button */}
         {showReprintButton && lastSale && (
           <Button onClick={handleReprintReceipt} variant="outline">
             <Printer className="mr-2 h-4 w-4" /> Re-print Receipt
@@ -261,46 +258,28 @@ const Sales = () => {
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
 
-        {/* Right Panel: Sale Cart, Discounts, Summary, Payment */}
-        <div className="flex flex-col gap-4 flex-1">
-          <SaleCart
-            cartItems={cartItems}
-            onUpdateQuantity={handleUpdateCartItemQuantity}
-            onRemoveItem={handleRemoveCartItem}
-          />
-          <DiscountInput
-            onApplyDiscount={handleApplyDiscount}
-            currentDiscountPercentage={discountPercentage}
-            currentSaleSubtotal={currentSubtotal}
-          />
-          {selectedCustomer && (
-            <LoyaltyPointsInput
-              availablePoints={selectedCustomer.loyaltyPoints}
-              onApplyPoints={handleApplyLoyaltyPoints}
-              currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
-              appliedPoints={appliedLoyaltyPoints}
-            />
-          )}
-          <GiftCardInput
-            onApplyGiftCard={handleApplyGiftCard}
-            currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
-            appliedGiftCardAmount={appliedGiftCardAmount}
-          />
-          <SaleSummary
-            subtotal={currentSubtotal}
-            taxRate={defaultTaxRate.rate}
-            giftCardAmountUsed={appliedGiftCardAmount}
-            discountPercentage={discountPercentage}
-            discountAmount={calculatedDiscountAmount}
-            loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
-          />
-          <PaymentMethodButtons
-            onSelectPaymentMethod={openConfirmationDialog}
-            onClearCart={handleClearCart}
-            hasItemsInCart={cartItems.length > 0}
-            finalTotal={currentFinalTotal}
-          />
-        </div>
+        {/* Right Panel: Tabbed Interface */}
+        <SaleRightPanelTabs
+          cartItems={cartItems}
+          onUpdateQuantity={handleUpdateCartItemQuantity}
+          onRemoveItem={handleRemoveCartItem}
+          onApplyDiscount={handleApplyDiscount}
+          currentDiscountPercentage={discountPercentage}
+          currentSaleSubtotal={currentSubtotal}
+          selectedCustomer={selectedCustomer}
+          onApplyLoyaltyPoints={handleApplyLoyaltyPoints}
+          availableLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
+          appliedLoyaltyPoints={appliedLoyaltyPoints}
+          loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
+          onApplyGiftCard={handleApplyGiftCard}
+          currentSaleTotalBeforeGiftCard={currentTotalBeforeGiftCard}
+          appliedGiftCardAmount={appliedGiftCardAmount}
+          taxRate={defaultTaxRate.rate}
+          currentFinalTotal={currentFinalTotal}
+          onSelectPaymentMethod={openConfirmationDialog}
+          onClearCart={handleClearCart}
+          hasItemsInCart={cartItems.length > 0}
+        />
       </div>
 
       {isConfirmationDialogOpen && paymentMethodToConfirm && (

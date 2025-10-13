@@ -1,0 +1,116 @@
+"use client";
+
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SaleItem } from "@/types/sale";
+import { Product } from "@/types/product";
+import { Customer } from "@/types/customer";
+import { PaymentMethod } from "@/types/payment";
+import SaleCart from "@/components/sales/SaleCart";
+import DiscountInput from "@/components/sales/DiscountInput";
+import LoyaltyPointsInput from "@/components/sales/LoyaltyPointsInput";
+import GiftCardInput from "@/components/sales/GiftCardInput";
+import SaleSummary from "@/components/sales/SaleSummary";
+import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
+
+interface SaleRightPanelTabsProps {
+  cartItems: SaleItem[];
+  onUpdateQuantity: (productId: string, quantity: number) => void;
+  onRemoveItem: (productId: string) => void;
+  onApplyDiscount: (percentage: number) => void;
+  currentDiscountPercentage: number;
+  currentSaleSubtotal: number;
+  selectedCustomer: Customer | undefined;
+  onApplyLoyaltyPoints: (points: number, equivalentAmount: number) => void;
+  availableLoyaltyPoints: number;
+  appliedLoyaltyPoints: number;
+  loyaltyPointsDiscountAmount: number;
+  onApplyGiftCard: (code: string, amount: number) => void;
+  currentSaleTotalBeforeGiftCard: number;
+  appliedGiftCardAmount: number;
+  taxRate: number;
+  currentFinalTotal: number;
+  onSelectPaymentMethod: (method: PaymentMethod) => void;
+  onClearCart: () => void;
+  hasItemsInCart: boolean;
+}
+
+const SaleRightPanelTabs = ({
+  cartItems,
+  onUpdateQuantity,
+  onRemoveItem,
+  onApplyDiscount,
+  currentDiscountPercentage,
+  currentSaleSubtotal,
+  selectedCustomer,
+  onApplyLoyaltyPoints,
+  availableLoyaltyPoints,
+  appliedLoyaltyPoints,
+  loyaltyPointsDiscountAmount,
+  onApplyGiftCard,
+  currentSaleTotalBeforeGiftCard,
+  appliedGiftCardAmount,
+  taxRate,
+  currentFinalTotal,
+  onSelectPaymentMethod,
+  onClearCart,
+  hasItemsInCart,
+}: SaleRightPanelTabsProps) => {
+  return (
+    <Tabs defaultValue="cart" className="flex flex-col flex-1">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="cart">Cart</TabsTrigger>
+        <TabsTrigger value="discounts">Discounts & Loyalty</TabsTrigger>
+        <TabsTrigger value="payment">Payment</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="cart" className="flex-1 flex flex-col mt-4">
+        <SaleCart
+          cartItems={cartItems}
+          onUpdateQuantity={onUpdateQuantity}
+          onRemoveItem={onRemoveItem}
+        />
+      </TabsContent>
+
+      <TabsContent value="discounts" className="flex-1 flex flex-col gap-4 mt-4">
+        <DiscountInput
+          onApplyDiscount={onApplyDiscount}
+          currentDiscountPercentage={currentDiscountPercentage}
+          currentSaleSubtotal={currentSaleSubtotal}
+        />
+        {selectedCustomer && (
+          <LoyaltyPointsInput
+            availablePoints={availableLoyaltyPoints}
+            onApplyPoints={onApplyLoyaltyPoints}
+            currentSaleTotal={currentSaleTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
+            appliedPoints={appliedLoyaltyPoints}
+          />
+        )}
+        <GiftCardInput
+          onApplyGiftCard={onApplyGiftCard}
+          currentSaleTotal={currentSaleTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
+          appliedGiftCardAmount={appliedGiftCardAmount}
+        />
+      </TabsContent>
+
+      <TabsContent value="payment" className="flex-1 flex flex-col gap-4 mt-4">
+        <SaleSummary
+          subtotal={currentSaleSubtotal}
+          taxRate={taxRate}
+          giftCardAmountUsed={appliedGiftCardAmount}
+          discountPercentage={currentDiscountPercentage}
+          discountAmount={currentSaleSubtotal * (currentDiscountPercentage / 100)}
+          loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
+        />
+        <PaymentMethodButtons
+          onSelectPaymentMethod={onSelectPaymentMethod}
+          onClearCart={onClearCart}
+          hasItemsInCart={hasItemsInCart}
+          finalTotal={currentFinalTotal}
+        />
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+export default SaleRightPanelTabs;
