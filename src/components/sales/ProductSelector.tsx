@@ -48,7 +48,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     const value = e.target.value;
     setSearchTerm(value);
 
-    // Check if the input matches a product SKU or ID for quick add
     const matchingProduct = products.find(
       (p) => p.sku.toLowerCase() === value.toLowerCase() || p.id.toLowerCase() === value.toLowerCase()
     );
@@ -56,7 +55,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     if (matchingProduct) {
       if (matchingProduct.stock > 0) {
         onAddProductToCart(matchingProduct, 1);
-        setSearchTerm(""); // Clear search after adding
+        setSearchTerm("");
       } else {
         toast.error(`${matchingProduct.name} is out of stock.`);
       }
