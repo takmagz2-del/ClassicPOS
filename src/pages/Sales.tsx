@@ -24,6 +24,14 @@ import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
 import { Printer } from "lucide-react";
 import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs"; // New import
+import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"; // Import Drawer components
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -31,6 +39,7 @@ const Sales = () => {
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
+  const isMobile = useIsMobile(); // Use the hook to detect mobile
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
@@ -258,31 +267,90 @@ const Sales = () => {
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
 
-        {/* Right Panel: Tabbed Interface */}
-        <div className="md:col-span-1 lg:col-span-1 flex flex-col">
-          <SaleRightPanelTabs
-            cartItems={cartItems}
-            onUpdateQuantity={handleUpdateCartItemQuantity}
-            onRemoveItem={handleRemoveCartItem}
-            onApplyDiscount={handleApplyDiscount}
-            currentDiscountPercentage={discountPercentage}
-            currentSaleSubtotal={currentSubtotal}
-            selectedCustomer={selectedCustomer}
-            onApplyLoyaltyPoints={handleApplyLoyaltyPoints}
-            availableLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
-            appliedLoyaltyPoints={appliedLoyaltyPoints}
-            loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
-            onApplyGiftCard={handleApplyGiftCard}
-            currentSaleTotalBeforeGiftCard={currentTotalBeforeGiftCard}
-            appliedGiftCardAmount={appliedGiftCardAmount}
-            taxRate={defaultTaxRate.rate}
-            currentFinalTotal={currentFinalTotal}
-            onSelectPaymentMethod={openConfirmationDialog}
-            onClearCart={handleClearCart}
-            hasItemsInCart={cartItems.length > 0}
-          />
-        </div>
+        {/* Right Panel (Desktop/Tablet) */}
+        {!isMobile && (
+          <div className="md:col-span-1 lg:col-span-1 flex flex-col">
+            <SaleRightPanelTabs
+              cartItems={cartItems}
+              onUpdateQuantity={handleUpdateCartItemQuantity}
+              onRemoveItem={handleRemoveCartItem}
+              onApplyDiscount={handleApplyDiscount}
+              currentDiscountPercentage={discountPercentage}
+              currentSaleSubtotal={currentSubtotal}
+              selectedCustomer={selectedCustomer}
+              onApplyLoyaltyPoints={handleApplyLoyaltyPoints}
+              availableLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
+              appliedLoyaltyPoints={appliedLoyaltyPoints}
+              loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
+              onApplyGiftCard={handleApplyGiftCard}
+              currentSaleTotalBeforeGiftCard={currentTotalBeforeGiftCard}
+              appliedGiftCardAmount={appliedGiftCardAmount}
+              taxRate={defaultTaxRate.rate}
+              currentFinalTotal={currentFinalTotal}
+              onSelectPaymentMethod={openConfirmationDialog}
+              onClearCart={handleClearCart}
+              hasItemsInCart={cartItems.length > 0}
+            />
+          </div>
+        )}
       </div>
+
+      {/* Mobile Checkout Drawer (Sticky Footer) */}
+      {isMobile && (
+        <div className="sticky bottom-0 left-0 right-0 bg-background border-t p-4 z-10">
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button className="w-full h-12 text-lg" disabled={cartItems.length === 0}>
+                Checkout {formatCurrency(currentFinalTotal, currentCurrency)}
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Complete Sale</DrawerTitle>
+              </DrawerHeader>
+              <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <SaleCart
+                  cartItems={cartItems}
+                  onUpdateQuantity={handleUpdateCartItemQuantity}
+                  onRemoveItem={handleRemoveCartItem}
+                />
+                <DiscountInput
+                  onApplyDiscount={handleApplyDiscount}
+                  currentDiscountPercentage={discountPercentage}
+                  currentSaleSubtotal={currentSubtotal}
+                />
+                {selectedCustomer && (
+                  <LoyaltyPointsInput
+                    availablePoints={selectedCustomer?.loyaltyPoints || 0}
+                    onApplyPoints={handleApplyLoyaltyPoints}
+                    currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
+                    appliedPoints={appliedLoyaltyPoints}
+                  />
+                )}
+                <GiftCardInput
+                  onApplyGiftCard={handleApplyGiftCard}
+                  currentSaleTotal={currentTotalBeforeGiftCard - loyaltyPointsDiscountAmount}
+                  appliedGiftCardAmount={appliedGiftCardAmount}
+                />
+                <SaleSummary
+                  subtotal={currentSubtotal}
+                  taxRate={defaultTaxRate.rate}
+                  giftCardAmountUsed={appliedGiftCardAmount}
+                  discountPercentage={discountPercentage}
+                  discountAmount={calculatedDiscountAmount}
+                  loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
+                />
+                <PaymentMethodButtons
+                  onSelectPaymentMethod={openConfirmationDialog}
+                  onClearCart={handleClearCart}
+                  hasItemsInCart={cartItems.length > 0}
+                  finalTotal={currentFinalTotal}
+                />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </div>
+      )}
 
       {isConfirmationDialogOpen && paymentMethodToConfirm && (
         <SaleConfirmationDialog
