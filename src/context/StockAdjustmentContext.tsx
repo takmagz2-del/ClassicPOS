@@ -92,13 +92,18 @@ export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) =
 
 
   const updateStockAdjustment = useCallback((updatedAdjustment: StockAdjustment) => {
+    const store = stores.find(s => s.id === updatedAdjustment.storeId);
+    if (!store) {
+      toast.error("Invalid store selected for update.");
+      return;
+    }
     // In a real app, updating an adjustment would require reversing previous stock changes
     // and applying new ones. For this mock, we'll just update the record.
     setStockAdjustments((prev) =>
-      prev.map((sa) => (sa.id === updatedAdjustment.id ? updatedAdjustment : sa))
+      prev.map((sa) => (sa.id === updatedAdjustment.id ? { ...updatedAdjustment, storeName: store.name } : sa))
     );
     toast.success(`Stock Adjustment "${updatedAdjustment.id.substring(0,8)}" updated.`);
-  }, []);
+  }, [stores]);
 
   const deleteStockAdjustment = useCallback((adjustmentId: string) => {
     // In a real app, deleting an adjustment would require reversing its stock changes.

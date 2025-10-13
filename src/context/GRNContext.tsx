@@ -64,11 +64,19 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
   }, [suppliers, stores]);
 
   const updateGRN = useCallback((updatedGRN: GoodsReceivedNote) => {
+    const supplier = suppliers.find(s => s.id === updatedGRN.supplierId);
+    const store = stores.find(s => s.id === updatedGRN.receivingStoreId);
+
+    if (!supplier || !store) {
+      toast.error("Invalid supplier or receiving store selected for update.");
+      return;
+    }
+
     setGRNs((prev) =>
-      prev.map((grn) => (grn.id === updatedGRN.id ? updatedGRN : grn))
+      prev.map((grn) => (grn.id === updatedGRN.id ? { ...updatedGRN, supplierName: supplier.name, receivingStoreName: store.name } : grn))
     );
     toast.success(`Goods Received Note "${updatedGRN.referenceNo}" updated.`);
-  }, []);
+  }, [suppliers, stores]);
 
   const approveGRN = useCallback((grnId: string) => {
     setGRNs((prev) => {

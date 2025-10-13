@@ -80,6 +80,13 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
       const updatedTransfers = prev.map((transfer) => {
         if (transfer.id === transferId) {
           const actingUser = user || { id: actingUserId, email: "System" }; // Fallback for system actions
+          const fromStore = stores.find(s => s.id === transfer.transferFromStoreId);
+          const toStore = stores.find(s => s.id === transfer.transferToStoreId);
+
+          if (!fromStore || !toStore) {
+            toast.error("Error: Origin or destination store not found for transfer update.");
+            return transfer;
+          }
 
           if (newStatus === "in-transit" && transfer.status === "pending") {
             // Deduct stock from 'from' store
@@ -99,7 +106,7 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
               }
             });
             toast.success(`Transfer "${transfer.id.substring(0,8)}" is now In Transit.`);
-            return { ...transfer, status: newStatus };
+            return { ...transfer, status: newStatus, transferFromStoreName: fromStore.name, transferToStoreName: toStore.name };
           } else if (newStatus === "received" && transfer.status === "in-transit") {
             // Add stock to 'to' store
             transfer.items.forEach(item => {
@@ -124,6 +131,8 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
               receivedByUserId: actingUser?.id,
               receivedByUserName: actingUser?.email,
               receivedDate: new Date().toISOString(),
+              transferFromStoreName: fromStore.name,
+              transferToStoreName: toStore.name,
             };
           } else if (newStatus === "rejected" && (transfer.status === "pending" || transfer.status === "in-transit")) {
             // If rejected while in-transit, return stock to 'from' store
@@ -145,7 +154,7 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
               });
             }
             toast.info(`Transfer "${transfer.id.substring(0,8)}" rejected.`);
-            return { ...transfer, status: newStatus };
+            return { ...transfer, status: newStatus, transferFromStoreName: fromStore.name, transferToStoreName: toStore.name };
           } else {
             toast.error(`Invalid status transition for Transfer "${transfer.id.substring(0,8)}".`);
           }
@@ -154,7 +163,7 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
       });
       return updatedTransfers;
     });
-  }, [user, products, updateProductStock]);
+  }, [user, products, updateProductStock, stores]);
 
   const deleteTransfer = useCallback((transferId: string) => {
     // In a real app, deleting an active transfer would require careful stock reconciliation.

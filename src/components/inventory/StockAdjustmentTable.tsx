@@ -57,7 +57,7 @@ const StockAdjustmentTable = ({ stockAdjustments, onViewDetails, onEditAdjustmen
               <TableRow key={adjustment.id}>
                 <TableCell className="font-medium">{adjustment.id.substring(0, 8)}</TableCell>
                 <TableCell>{format(new Date(adjustment.adjustmentDate), "MMM dd, yyyy")}</TableCell>
-                <TableCell>{adjustment.storeName}</TableCell>
+                <TableCell>{adjustment.storeName || "N/A"}</TableCell>
                 <TableCell>
                   {adjustment.items.map((item, index) => (
                     <div key={index} className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ const StockAdjustmentTable = ({ stockAdjustments, onViewDetails, onEditAdjustmen
                         {item.adjustmentType === AdjustmentType.Increase ? "+" : "-"}
                         {item.quantity}
                       </Badge>
-                      <span>{item.productName}</span>
+                      <span>{item.productName || "Unknown Product"}</span>
                     </div>
                   ))}
                 </TableCell>

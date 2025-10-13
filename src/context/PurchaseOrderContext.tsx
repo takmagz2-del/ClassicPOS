@@ -48,11 +48,16 @@ export const PurchaseOrderProvider = ({ children }: { children: ReactNode }) => 
   }, [suppliers]);
 
   const updatePurchaseOrder = useCallback((updatedOrder: PurchaseOrder) => {
+    const supplier = suppliers.find(s => s.id === updatedOrder.supplierId);
+    if (!supplier) {
+      toast.error("Invalid supplier selected for update.");
+      return;
+    }
     setPurchaseOrders((prev) =>
-      prev.map((order) => (order.id === updatedOrder.id ? updatedOrder : order))
+      prev.map((order) => (order.id === updatedOrder.id ? { ...updatedOrder, supplierName: supplier.name } : order))
     );
     toast.success(`Purchase Order "${updatedOrder.referenceNo}" updated.`);
-  }, []);
+  }, [suppliers]);
 
   const deletePurchaseOrder = useCallback((orderId: string) => {
     setPurchaseOrders((prev) => prev.filter((order) => order.id !== orderId));

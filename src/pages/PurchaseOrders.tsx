@@ -78,11 +78,11 @@ const PurchaseOrders = () => {
     }
   };
 
-  // Enhance purchase orders with supplier names for display
-  const enhancedPurchaseOrders = purchaseOrders.map(order => ({
-    ...order,
-    supplierName: suppliers.find(s => s.id === order.supplierId)?.name || "Unknown Supplier",
-  }));
+  // The `enhancedPurchaseOrders` is no longer needed as `supplierName` is now managed in context.
+  // const enhancedPurchaseOrders = purchaseOrders.map(order => ({
+  //   ...order,
+  //   supplierName: suppliers.find(s => s.id === order.supplierId)?.name || "Unknown Supplier",
+  // }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -109,7 +109,7 @@ const PurchaseOrders = () => {
         </CardHeader>
         <CardContent>
           <PurchaseOrderTable
-            purchaseOrders={enhancedPurchaseOrders}
+            purchaseOrders={purchaseOrders} {/* Use purchaseOrders directly */}
             onViewDetails={handleViewDetails}
             onEditOrder={handleEditOrder}
             onDeleteOrder={handleDeleteOrder}
@@ -154,7 +154,7 @@ const PurchaseOrders = () => {
               </div>
               <div className="flex justify-between">
                 <span>Supplier:</span>
-                <span className="font-medium">{suppliers.find(s => s.id === viewingOrder.supplierId)?.name || "N/A"}</span>
+                <span className="font-medium">{viewingOrder.supplierName || "N/A"}</span>
               </div>
               <div className="flex justify-between">
                 <span>Order Date:</span>
