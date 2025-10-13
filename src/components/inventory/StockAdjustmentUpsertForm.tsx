@@ -18,120 +18,108 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, PlusCircle, MinusCircle, XCircle } from "lucide-react";
+import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { PurchaseOrder, PurchaseOrderItem, PurchaseOrderStatus, PURCHASE_ORDER_STATUSES } from "@/types/inventory"; // Import PURCHASE_ORDER_STATUSES
-import { useSuppliers } from "@/context/SupplierContext";
+import { StockAdjustment, AdjustmentType, StockAdjustmentItem } from "@/types/inventory";
+import { useStores } from "@/context/StoreContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
-  supplierId: z.string().min(1, { message: "Supplier is required." }),
-  referenceNo: z.string().min(1, { message: "Reference number is required." }),
-  orderDate: z.date({ required_error: "Order date is required." }),
-  expectedDeliveryDate: z.date().optional(),
-  status: z.enum(PURCHASE_ORDER_STATUSES), // Use z.enum with the runtime array
+  adjustmentDate: z.date({ required_error: "Adjustment date is required." }),
+  storeId: z.string().min(1, { message: "Store is required." }),
   items: z.array(z.object({
     productId: z.string().min(1, { message: "Product is required." }),
+    adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
     quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
-    unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
-  })).min(1, { message: "At least one item is required." }),
+    reason: z.string().min(3, { message: "Reason for adjustment is required." }),
+  })).min(1, { message: "At least one item is required for adjustment." }),
   notes: z.string().optional().or(z.literal("")),
 });
 
-type PurchaseOrderFormValues = z.infer<typeof formSchema>;
+type StockAdjustmentFormValues = z.infer<typeof formSchema>;
 
-interface PurchaseOrderUpsertFormProps {
-  initialPurchaseOrder?: PurchaseOrder;
-  onPurchaseOrderSubmit: (order: PurchaseOrder | Omit<PurchaseOrder, "id">) => void;
+interface StockAdjustmentUpsertFormProps {
+  initialStockAdjustment?: StockAdjustment;
+  onStockAdjustmentSubmit: (adjustment: Omit<StockAdjustment, "id" | "storeName" | "approvedByUserName" | "approvalDate"> | StockAdjustment) => void;
   onClose: () => void;
 }
 
-const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, onClose }: PurchaseOrderUpsertFormProps) => {
-  const isEditMode = !!initialPurchaseOrder;
-  const { suppliers } = useSuppliers();
+const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSubmit, onClose }: StockAdjustmentUpsertFormProps) => {
+  const isEditMode = !!initialStockAdjustment;
+  const { stores } = useStores();
   const { products } = useProducts();
 
-  const form = useForm<PurchaseOrderFormValues>({
+  const form = useForm<StockAdjustmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      supplierId: initialPurchaseOrder?.supplierId || "",
-      referenceNo: initialPurchaseOrder?.referenceNo || "",
-      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : new Date(),
-      expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
-      status: initialPurchaseOrder?.status || "pending", // Use string literal "pending"
-      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0 }],
-      notes: initialPurchaseOrder?.notes || "",
+      adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : new Date(),
+      storeId: initialStockAdjustment?.storeId || "",
+      items: initialStockAdjustment?.items || [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+      notes: initialStockAdjustment?.notes || "",
     },
   });
 
   useEffect(() => {
-    if (initialPurchaseOrder) {
+    if (initialStockAdjustment) {
       form.reset({
-        supplierId: initialPurchaseOrder.supplierId,
-        referenceNo: initialPurchaseOrder.referenceNo,
-        orderDate: new Date(initialPurchaseOrder.orderDate),
-        expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
-        status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items,
-        notes: initialPurchaseOrder.notes,
+        adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
+        storeId: initialStockAdjustment.storeId,
+        items: initialStockAdjustment.items,
+        notes: initialStockAdjustment.notes,
       });
     } else {
       form.reset({
-        supplierId: "",
-        referenceNo: "",
-        orderDate: new Date(),
-        expectedDeliveryDate: undefined,
-        status: "pending", // Use string literal "pending"
-        items: [{ productId: "", quantity: 1, unitCost: 0 }],
+        adjustmentDate: new Date(),
+        storeId: "",
+        items: [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
         notes: "",
       });
     }
-  }, [initialPurchaseOrder, form]);
+  }, [initialStockAdjustment, form]);
 
-  const onSubmit = (values: PurchaseOrderFormValues) => {
-    const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
+  const onSubmit = (values: StockAdjustmentFormValues) => {
+    const adjustmentItems: StockAdjustmentItem[] = values.items.map(item => {
+      const product = products.find(p => p.id === item.productId);
+      return {
+        productId: item.productId,
+        productName: product?.name || "Unknown Product",
+        adjustmentType: item.adjustmentType,
+        quantity: item.quantity,
+        reason: item.reason,
+      };
+    });
 
-    // Explicitly map items to ensure correct type
-    const orderItems: PurchaseOrderItem[] = values.items.map(item => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      unitCost: item.unitCost,
-    }));
-
-    const baseOrder = {
-      supplierId: values.supplierId,
-      referenceNo: values.referenceNo,
-      orderDate: values.orderDate.toISOString(),
-      expectedDeliveryDate: values.expectedDeliveryDate?.toISOString(),
-      status: values.status,
-      items: orderItems, // Use the explicitly typed array
-      totalValue: totalValue,
+    const baseAdjustment = {
+      adjustmentDate: values.adjustmentDate.toISOString(),
+      storeId: values.storeId,
+      items: adjustmentItems, // Use the explicitly typed array
       notes: values.notes,
     };
 
-    let orderToSubmit: PurchaseOrder | Omit<PurchaseOrder, "id">;
+    let adjustmentToSubmit: Omit<StockAdjustment, "id" | "storeName" | "approvedByUserName" | "approvalDate"> | StockAdjustment;
 
     if (isEditMode) {
-      orderToSubmit = {
-        id: initialPurchaseOrder!.id,
-        ...baseOrder,
+      adjustmentToSubmit = {
+        ...initialStockAdjustment!, // Keep existing ID, storeName, approvedBy, etc.
+        ...baseAdjustment,
+        id: initialStockAdjustment!.id,
       };
     } else {
-      orderToSubmit = baseOrder;
+      adjustmentToSubmit = baseAdjustment;
     }
 
-    onPurchaseOrderSubmit(orderToSubmit);
+    onStockAdjustmentSubmit(adjustmentToSubmit);
     onClose();
   };
 
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0 }]);
+    form.setValue("items", [...items, { productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -144,47 +132,10 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="supplierId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a supplier" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="referenceNo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reference Number</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., PO-2023-001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="orderDate"
+          name="adjustmentDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Order Date</FormLabel>
+              <FormLabel>Adjustment Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -219,58 +170,20 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
         <FormField
           control={form.control}
-          name="expectedDeliveryDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Expected Delivery Date (Optional)</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
+          name="storeId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Store</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Select a store" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {PURCHASE_ORDER_STATUSES.map((status) => ( // Use the runtime array
-                    <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {stores.map((store) => (
+                    <SelectItem key={store.id} value={store.id}>
+                      {store.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -282,7 +195,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Order Items</CardTitle>
+            <CardTitle className="text-base">Items to Adjust</CardTitle>
             <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Item
             </Button>
@@ -317,6 +230,30 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
                   />
                   <FormField
                     control={form.control}
+                    name={`items.${index}.adjustmentType`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(AdjustmentType).map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name={`items.${index}.quantity`}
                     render={({ field }) => (
                       <FormItem>
@@ -330,12 +267,12 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
                   />
                   <FormField
                     control={form.control}
-                    name={`items.${index}.unitCost`}
+                    name={`items.${index}.reason`}
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unit Cost</FormLabel>
+                      <FormItem className="sm:col-span-3">
+                        <FormLabel>Reason</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0.01" {...field} />
+                          <Input placeholder="e.g., Damaged stock, Found item" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -365,7 +302,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional notes for this purchase order..." {...field} />
+                <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -373,11 +310,11 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
 
         <Button type="submit" className="w-full">
-          {isEditMode ? "Save Changes" : "Create Purchase Order"}
+          {isEditMode ? "Save Changes" : "Create Adjustment"}
         </Button>
       </form>
     </Form>
   );
 };
 
-export default PurchaseOrderUpsertForm;
+export default StockAdjustmentUpsertForm;
