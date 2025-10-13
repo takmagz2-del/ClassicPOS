@@ -247,9 +247,9 @@ const Sales = () => {
         )}
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-y-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1 overflow-y-auto">
         {/* Left Panel: Customer Selector & Product Selector */}
-        <div className="flex flex-col gap-4 lg:w-1/3 xl:w-1/4">
+        <div className="flex flex-col gap-4 md:col-span-1 lg:col-span-2">
           <CustomerSelector
             customers={customers}
             selectedCustomerId={selectedCustomerId}
@@ -259,27 +259,29 @@ const Sales = () => {
         </div>
 
         {/* Right Panel: Tabbed Interface */}
-        <SaleRightPanelTabs
-          cartItems={cartItems}
-          onUpdateQuantity={handleUpdateCartItemQuantity}
-          onRemoveItem={handleRemoveCartItem}
-          onApplyDiscount={handleApplyDiscount}
-          currentDiscountPercentage={discountPercentage}
-          currentSaleSubtotal={currentSubtotal}
-          selectedCustomer={selectedCustomer}
-          onApplyLoyaltyPoints={handleApplyLoyaltyPoints}
-          availableLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
-          appliedLoyaltyPoints={appliedLoyaltyPoints}
-          loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
-          onApplyGiftCard={handleApplyGiftCard}
-          currentSaleTotalBeforeGiftCard={currentTotalBeforeGiftCard}
-          appliedGiftCardAmount={appliedGiftCardAmount}
-          taxRate={defaultTaxRate.rate}
-          currentFinalTotal={currentFinalTotal}
-          onSelectPaymentMethod={openConfirmationDialog}
-          onClearCart={handleClearCart}
-          hasItemsInCart={cartItems.length > 0}
-        />
+        <div className="md:col-span-1 lg:col-span-1 flex flex-col">
+          <SaleRightPanelTabs
+            cartItems={cartItems}
+            onUpdateQuantity={handleUpdateCartItemQuantity}
+            onRemoveItem={handleRemoveCartItem}
+            onApplyDiscount={handleApplyDiscount}
+            currentDiscountPercentage={discountPercentage}
+            currentSaleSubtotal={currentSubtotal}
+            selectedCustomer={selectedCustomer}
+            onApplyLoyaltyPoints={handleApplyLoyaltyPoints}
+            availableLoyaltyPoints={selectedCustomer?.loyaltyPoints || 0}
+            appliedLoyaltyPoints={appliedLoyaltyPoints}
+            loyaltyPointsDiscountAmount={loyaltyPointsDiscountAmount}
+            onApplyGiftCard={handleApplyGiftCard}
+            currentSaleTotalBeforeGiftCard={currentTotalBeforeGiftCard}
+            appliedGiftCardAmount={appliedGiftCardAmount}
+            taxRate={defaultTaxRate.rate}
+            currentFinalTotal={currentFinalTotal}
+            onSelectPaymentMethod={openConfirmationDialog}
+            onClearCart={handleClearCart}
+            hasItemsInCart={cartItems.length > 0}
+          />
+        </div>
       </div>
 
       {isConfirmationDialogOpen && paymentMethodToConfirm && (
