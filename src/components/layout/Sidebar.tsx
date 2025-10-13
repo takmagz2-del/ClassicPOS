@@ -5,7 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History, Truck, Package, FileText, SlidersHorizontal } from "lucide-react"; // New import: SlidersHorizontal icon
+import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History, Truck, Package, FileText, SlidersHorizontal, Repeat } from "lucide-react"; // New import: Repeat icon for Transfer of Goods
 import BrandLogo from "@/components/layout/BrandLogo";
 import { useAuth } from "@/components/auth/AuthContext";
 import { UserRole } from "@/types/user";
@@ -26,7 +26,8 @@ const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
     { to: "/suppliers", icon: Truck, label: "Suppliers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
     { to: "/purchase-orders", icon: Package, label: "Purchase Orders", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
     { to: "/goods-received-notes", icon: FileText, label: "Goods Received Notes", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
-    { to: "/stock-adjustments", icon: SlidersHorizontal, label: "Stock Adjustments", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] }, // New navigation item
+    { to: "/stock-adjustments", icon: SlidersHorizontal, label: "Stock Adjustments", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/transfer-of-goods", icon: Repeat, label: "Transfer of Goods", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] }, // New navigation item
     { to: "/sales", icon: ShoppingCart, label: "Sales Terminal", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/sales-history", icon: History, label: "Sales History", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/stores", icon: Store, label: "Multi-Store", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
