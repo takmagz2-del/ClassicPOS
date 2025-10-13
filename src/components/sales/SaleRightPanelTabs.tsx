@@ -13,6 +13,7 @@ import GiftCardInput from "@/components/sales/GiftCardInput";
 import SaleSummary from "@/components/sales/SaleSummary";
 import PaymentMethodButtons from "@/components/sales/PaymentMethodButtons";
 import HeldSalesList from "@/components/sales/HeldSalesList"; // New import
+import { useLoyaltySettings } from "@/context/LoyaltySettingsContext"; // New import
 
 interface SaleRightPanelTabsProps {
   cartItems: SaleItem[];
@@ -59,6 +60,8 @@ const SaleRightPanelTabs = ({
   hasItemsInCart,
   onResumeSale, // Destructure new prop
 }: SaleRightPanelTabsProps) => {
+  const { isLoyaltyEnabled } = useLoyaltySettings(); // Use the new context
+
   return (
     <Tabs defaultValue="cart" className="flex flex-col flex-1">
       <TabsList className="grid w-full grid-cols-4"> {/* Changed to 4 columns */}
@@ -82,7 +85,7 @@ const SaleRightPanelTabs = ({
           currentDiscountPercentage={currentDiscountPercentage}
           currentSaleSubtotal={currentSaleSubtotal}
         />
-        {selectedCustomer && (
+        {isLoyaltyEnabled && selectedCustomer && ( // Conditionally render based on isLoyaltyEnabled
           <LoyaltyPointsInput
             availablePoints={availableLoyaltyPoints}
             onApplyPoints={onApplyLoyaltyPoints}

@@ -19,6 +19,7 @@ import { PurchaseOrderProvider } from "@/context/PurchaseOrderContext";
 import { GRNProvider } from "@/context/GRNContext";
 import { StockAdjustmentProvider } from "@/context/StockAdjustmentContext";
 import { TransferOfGoodsProvider } from "@/context/TransferOfGoodsContext";
+import { LoyaltySettingsProvider } from "@/context/LoyaltySettingsContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
@@ -48,45 +49,46 @@ function App() {
                           <PrinterSettingsProvider>
                             <TaxProvider>
                               <PaymentMethodProvider>
-                                {/* InventoryHistoryProvider must wrap ProductProvider */}
-                                <InventoryHistoryProvider>
-                                  <ProductProvider>
-                                    <PurchaseOrderProvider>
-                                      <GRNProvider>
-                                        <StockAdjustmentProvider>
-                                          <TransferOfGoodsProvider>
-                                            <Toaster richColors position="top-right" />
-                                            <GlobalLoader />
-                                            <Routes>
-                                              <Route path="/login" element={LoginComponent && <LoginComponent />} />
-                                              <Route path="/signup" element={SignupComponent && <SignupComponent />} />
+                                <LoyaltySettingsProvider>
+                                  <InventoryHistoryProvider>
+                                    <ProductProvider>
+                                      <PurchaseOrderProvider>
+                                        <GRNProvider>
+                                          <StockAdjustmentProvider>
+                                            <TransferOfGoodsProvider>
+                                              <Toaster richColors position="top-right" />
+                                              <GlobalLoader />
+                                              <Routes>
+                                                <Route path="/login" element={LoginComponent && <LoginComponent />} />
+                                                <Route path="/signup" element={SignupComponent && <SignupComponent />} />
 
-                                              <Route path="/" element={<ProtectedRoute />}>
-                                                {routesConfig.map((route) => {
-                                                  if (route.path === "/login" || route.path === "/signup") {
-                                                    return null;
-                                                  }
-                                                  const Component = route.component;
-                                                  // Adjust path for parameterized routes
-                                                  const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
-                                                  return (
-                                                    <Route
-                                                      key={route.path}
-                                                      path={path}
-                                                      index={route.path === "/"}
-                                                      element={<Component />}
-                                                    />
-                                                  );
-                                                })}
-                                              </Route>
-                                              <Route path="*" element={<NotFound />} />
-                                            </Routes>
-                                          </TransferOfGoodsProvider>
-                                        </StockAdjustmentProvider>
-                                      </GRNProvider>
-                                    </PurchaseOrderProvider>
-                                  </ProductProvider>
-                                </InventoryHistoryProvider>
+                                                <Route path="/" element={<ProtectedRoute />}>
+                                                  {routesConfig.map((route) => {
+                                                    if (route.path === "/login" || route.path === "/signup") {
+                                                      return null;
+                                                    }
+                                                    const Component = route.component;
+                                                    // Adjust path for parameterized routes
+                                                    const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
+                                                    return (
+                                                      <Route
+                                                        key={route.path}
+                                                        path={path}
+                                                        index={route.path === "/"}
+                                                        element={<Component />}
+                                                      />
+                                                    );
+                                                  })}
+                                                </Route>
+                                                <Route path="*" element={<NotFound />} />
+                                              </Routes>
+                                            </TransferOfGoodsProvider>
+                                          </StockAdjustmentProvider>
+                                        </GRNProvider>
+                                      </PurchaseOrderProvider>
+                                    </ProductProvider>
+                                  </InventoryHistoryProvider>
+                                </LoyaltySettingsProvider>
                               </PaymentMethodProvider>
                             </TaxProvider>
                           </PrinterSettingsProvider>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
+import { useLoyaltySettings } from "@/context/LoyaltySettingsContext"; // New import
 
 interface LoyaltyPointsInputProps {
   availablePoints: number;
@@ -25,6 +26,7 @@ const LoyaltyPointsInput = ({
   currentSaleTotal,
   appliedPoints,
 }: LoyaltyPointsInputProps) => {
+  const { isLoyaltyEnabled } = useLoyaltySettings(); // Use the new context
   const [pointsToRedeem, setPointsToRedeem] = useState<string>(appliedPoints > 0 ? String(appliedPoints) : "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { currentCurrency } = useCurrency();
@@ -75,6 +77,19 @@ const LoyaltyPointsInput = ({
   };
 
   const redeemedAmount = calculateEquivalentAmount(appliedPoints);
+
+  if (!isLoyaltyEnabled) {
+    return (
+      <Card className="opacity-50 cursor-not-allowed">
+        <CardHeader>
+          <CardTitle>Redeem Loyalty Points</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">Loyalty program is currently disabled.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
