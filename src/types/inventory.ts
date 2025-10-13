@@ -17,6 +17,7 @@ export interface PurchaseOrderItem {
 export interface PurchaseOrder {
   id: string;
   supplierId: string;
+  supplierName: string; // Added for denormalized display
   referenceNo: string;
   orderDate: string; // ISO date string
   expectedDeliveryDate?: string; // ISO date string

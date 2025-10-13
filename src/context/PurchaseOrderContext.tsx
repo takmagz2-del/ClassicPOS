@@ -32,10 +32,20 @@ export const PurchaseOrderProvider = ({ children }: { children: ReactNode }) => 
   }, [purchaseOrders]);
 
   const addPurchaseOrder = useCallback((newOrderData: Omit<PurchaseOrder, "id">) => {
-    const newOrder: PurchaseOrder = { ...newOrderData, id: crypto.randomUUID() };
+    const supplier = suppliers.find(s => s.id === newOrderData.supplierId);
+    if (!supplier) {
+      toast.error("Invalid supplier selected.");
+      return;
+    }
+
+    const newOrder: PurchaseOrder = {
+      ...newOrderData,
+      id: crypto.randomUUID(),
+      supplierName: supplier.name, // Populate denormalized name
+    };
     setPurchaseOrders((prev) => [...prev, newOrder]);
     toast.success(`Purchase Order "${newOrder.referenceNo}" created.`);
-  }, []);
+  }, [suppliers]);
 
   const updatePurchaseOrder = useCallback((updatedOrder: PurchaseOrder) => {
     setPurchaseOrders((prev) =>

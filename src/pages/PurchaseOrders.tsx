@@ -81,7 +81,7 @@ const PurchaseOrders = () => {
   // Enhance purchase orders with supplier names for display
   const enhancedPurchaseOrders = purchaseOrders.map(order => ({
     ...order,
-    supplierId: suppliers.find(s => s.id === order.supplierId)?.name || "Unknown Supplier",
+    supplierName: suppliers.find(s => s.id === order.supplierId)?.name || "Unknown Supplier",
   }));
 
   return (

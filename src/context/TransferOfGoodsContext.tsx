@@ -64,8 +64,8 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
       ...newTransferData,
       id: crypto.randomUUID(),
       status: "pending",
-      transferFromStoreName: fromStore.name,
-      transferToStoreName: toStore.name,
+      transferFromStoreName: fromStore.name, // Populate denormalized name
+      transferToStoreName: toStore.name,     // Populate denormalized name
       approvedByUserId: user?.id, // Assuming creator approves for simplicity
       approvedByUserName: user?.email,
       approvalDate: new Date().toISOString(),
