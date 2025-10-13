@@ -56,7 +56,7 @@ const Signup = () => {
       businessName: "",
       businessType: "",
       country: "",
-      phone: "",
+      phone: undefined,
     },
   });
 
@@ -69,7 +69,7 @@ const Signup = () => {
       values.businessName,
       values.businessType,
       values.country,
-      values.phone
+      values.phone || undefined
     );
     setIsLoading(false);
 

@@ -61,12 +61,12 @@ const UserProfileForm = () => {
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
-      businessName: user?.businessName || "",
-      businessType: user?.businessType || "",
-      country: user?.country || "",
-      phone: user?.phone || "",
-      vatNumber: user?.vatNumber || "", // Default for new field
-      tinNumber: user?.tinNumber || "", // Default for new field
+      businessName: user?.businessName || undefined,
+      businessType: user?.businessType || undefined,
+      country: user?.country || undefined,
+      phone: user?.phone || undefined,
+      vatNumber: user?.vatNumber || undefined, // Default for new field
+      tinNumber: user?.tinNumber || undefined, // Default for new field
     },
   });
 
@@ -77,12 +77,12 @@ const UserProfileForm = () => {
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
-        businessName: user.businessName || "",
-        businessType: user.businessType || "",
-        country: user.country || "",
-        phone: user.phone || "",
-        vatNumber: user.vatNumber || "", // Reset new field
-        tinNumber: user.tinNumber || "", // Reset new field
+        businessName: user.businessName || undefined,
+        businessType: user.businessType || undefined,
+        country: user.country || undefined,
+        phone: user.phone || undefined,
+        vatNumber: user.vatNumber || undefined, // Reset new field
+        tinNumber: user.tinNumber || undefined, // Reset new field
       });
     }
   }, [user, form]);
@@ -94,12 +94,12 @@ const UserProfileForm = () => {
 
     const updatedFields: Partial<typeof user> = {
       email: values.email,
-      businessName: values.businessName,
-      businessType: values.businessType,
-      country: values.country,
-      phone: values.phone,
-      vatNumber: values.vatNumber, // New field
-      tinNumber: values.tinNumber, // New field
+      businessName: values.businessName || undefined,
+      businessType: values.businessType || undefined,
+      country: values.country || undefined,
+      phone: values.phone || undefined,
+      vatNumber: values.vatNumber || undefined, // New field
+      tinNumber: values.tinNumber || undefined, // New field
     };
 
     const success = await updateUser(
@@ -117,12 +117,12 @@ const UserProfileForm = () => {
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
-        businessName: values.businessName,
-        businessType: values.businessType,
-        country: values.country,
-        phone: values.phone,
-        vatNumber: values.vatNumber, // Reset new field
-        tinNumber: values.tinNumber, // Reset new field
+        businessName: values.businessName || undefined,
+        businessType: values.businessType || undefined,
+        country: values.country || undefined,
+        phone: values.phone || undefined,
+        vatNumber: values.vatNumber || undefined, // Reset new field
+        tinNumber: values.tinNumber || undefined, // Reset new field
       });
     } else {
       // Error message is already handled by AuthContext

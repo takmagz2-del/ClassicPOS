@@ -46,27 +46,43 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
 
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialCustomer || {
+    defaultValues: initialCustomer ? {
+      name: initialCustomer.name,
+      email: initialCustomer.email,
+      phone: initialCustomer.phone || undefined,
+      address: initialCustomer.address || undefined,
+      loyaltyPoints: initialCustomer.loyaltyPoints,
+      vatNumber: initialCustomer.vatNumber || undefined,
+      tinNumber: initialCustomer.tinNumber || undefined,
+    } : {
       name: "",
       email: "",
-      phone: "",
-      address: "",
+      phone: undefined,
+      address: undefined,
       loyaltyPoints: 0,
-      vatNumber: "", // Default for new field
-      tinNumber: "", // Default for new field
+      vatNumber: undefined,
+      tinNumber: undefined,
     },
   });
 
   // Reset form with new initialCustomer if it changes
   useEffect(() => {
-    form.reset(initialCustomer || {
+    form.reset(initialCustomer ? {
+      name: initialCustomer.name,
+      email: initialCustomer.email,
+      phone: initialCustomer.phone || undefined,
+      address: initialCustomer.address || undefined,
+      loyaltyPoints: initialCustomer.loyaltyPoints,
+      vatNumber: initialCustomer.vatNumber || undefined,
+      tinNumber: initialCustomer.tinNumber || undefined,
+    } : {
       name: "",
       email: "",
-      phone: "",
-      address: "",
+      phone: undefined,
+      address: undefined,
       loyaltyPoints: 0,
-      vatNumber: "",
-      tinNumber: "",
+      vatNumber: undefined,
+      tinNumber: undefined,
     });
   }, [initialCustomer, form]);
 
@@ -76,21 +92,21 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
           id: initialCustomer!.id,
           name: values.name,
           email: values.email,
-          phone: values.phone,
-          address: values.address,
+          phone: values.phone || undefined,
+          address: values.address || undefined,
           loyaltyPoints: values.loyaltyPoints,
-          vatNumber: values.vatNumber, // New field
-          tinNumber: values.tinNumber, // New field
+          vatNumber: values.vatNumber || undefined,
+          tinNumber: values.tinNumber || undefined,
         }
       : { // Explicitly construct the object for add mode
           id: crypto.randomUUID(),
           name: values.name,
           email: values.email,
-          phone: values.phone,
-          address: values.address,
+          phone: values.phone || undefined,
+          address: values.address || undefined,
           loyaltyPoints: values.loyaltyPoints,
-          vatNumber: values.vatNumber, // New field
-          tinNumber: values.tinNumber, // New field
+          vatNumber: values.vatNumber || undefined,
+          tinNumber: values.tinNumber || undefined,
         };
 
     onCustomerSubmit(customerToSubmit);

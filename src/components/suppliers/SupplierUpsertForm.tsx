@@ -41,37 +41,75 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
 
   const form = useForm<SupplierFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialSupplier || {
+    defaultValues: initialSupplier ? {
+      name: initialSupplier.name,
+      contactPerson: initialSupplier.contactPerson || undefined,
+      email: initialSupplier.email || undefined,
+      phone: initialSupplier.phone || undefined,
+      address: initialSupplier.address || undefined,
+      notes: initialSupplier.notes || undefined,
+      vatNumber: initialSupplier.vatNumber || undefined,
+      tinNumber: initialSupplier.tinNumber || undefined,
+    } : {
       name: "",
-      contactPerson: "",
-      email: "",
-      phone: "",
-      address: "",
-      notes: "",
-      vatNumber: "", // Default for new field
-      tinNumber: "", // Default for new field
+      contactPerson: undefined,
+      email: undefined,
+      phone: undefined,
+      address: undefined,
+      notes: undefined,
+      vatNumber: undefined,
+      tinNumber: undefined,
     },
   });
 
   useEffect(() => {
-    form.reset(initialSupplier || {
+    form.reset(initialSupplier ? {
+      name: initialSupplier.name,
+      contactPerson: initialSupplier.contactPerson || undefined,
+      email: initialSupplier.email || undefined,
+      phone: initialSupplier.phone || undefined,
+      address: initialSupplier.address || undefined,
+      notes: initialSupplier.notes || undefined,
+      vatNumber: initialSupplier.vatNumber || undefined,
+      tinNumber: initialSupplier.tinNumber || undefined,
+    } : {
       name: "",
-      contactPerson: "",
-      email: "",
-      phone: "",
-      address: "",
-      notes: "",
-      vatNumber: "",
-      tinNumber: "",
+      contactPerson: undefined,
+      email: undefined,
+      phone: undefined,
+      address: undefined,
+      notes: undefined,
+      vatNumber: undefined,
+      tinNumber: undefined,
     });
   }, [initialSupplier, form]);
 
   const onSubmit = (values: SupplierFormValues) => {
     if (isEditMode) {
-      const updatedSupplier: Supplier = { ...initialSupplier!, ...values };
+      const updatedSupplier: Supplier = {
+        ...initialSupplier!,
+        ...values,
+        contactPerson: values.contactPerson || undefined,
+        email: values.email || undefined,
+        phone: values.phone || undefined,
+        address: values.address || undefined,
+        notes: values.notes || undefined,
+        vatNumber: values.vatNumber || undefined,
+        tinNumber: values.tinNumber || undefined,
+      };
       onSupplierSubmit(updatedSupplier);
     } else {
-      onSupplierSubmit(values as Omit<Supplier, "id">);
+      const newSupplierData: Omit<Supplier, "id"> = {
+        ...values,
+        contactPerson: values.contactPerson || undefined,
+        email: values.email || undefined,
+        phone: values.phone || undefined,
+        address: values.address || undefined,
+        notes: values.notes || undefined,
+        vatNumber: values.vatNumber || undefined,
+        tinNumber: values.tinNumber || undefined,
+      };
+      onSupplierSubmit(newSupplierData);
     }
     onClose();
   };
