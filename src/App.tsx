@@ -13,6 +13,7 @@ import { CategoryProvider } from "@/context/CategoryContext";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { PaymentMethodProvider } from "@/context/PaymentMethodContext";
 import { StoreProvider } from "@/context/StoreContext";
+import { SupplierProvider } from "@/context/SupplierContext"; // New import
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
@@ -32,51 +33,53 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <LoadingProvider>
           <AuthProvider>
-            <StoreProvider> {/* Added StoreProvider here */}
-              <CategoryProvider>
-                <ProductProvider>
-                  <CustomerProvider>
-                    <SaleProvider>
-                      <CurrencyProvider>
-                        <ReceiptSettingsProvider>
-                          <PrinterSettingsProvider>
-                            <TaxProvider>
-                              <PaymentMethodProvider>
-                                <Toaster richColors position="top-right" />
-                                <GlobalLoader />
-                                <Routes>
-                                  <Route path="/login" element={LoginComponent && <LoginComponent />} />
-                                  <Route path="/signup" element={SignupComponent && <SignupComponent />} />
+            <StoreProvider>
+              <SupplierProvider> {/* Added SupplierProvider here */}
+                <CategoryProvider>
+                  <ProductProvider>
+                    <CustomerProvider>
+                      <SaleProvider>
+                        <CurrencyProvider>
+                          <ReceiptSettingsProvider>
+                            <PrinterSettingsProvider>
+                              <TaxProvider>
+                                <PaymentMethodProvider>
+                                  <Toaster richColors position="top-right" />
+                                  <GlobalLoader />
+                                  <Routes>
+                                    <Route path="/login" element={LoginComponent && <LoginComponent />} />
+                                    <Route path="/signup" element={SignupComponent && <SignupComponent />} />
 
-                                  <Route path="/" element={<ProtectedRoute />}>
-                                    {routesConfig.map((route) => {
-                                      if (route.path === "/login" || route.path === "/signup") {
-                                        return null;
-                                      }
-                                      const Component = route.component;
-                                      // Adjust path for parameterized routes
-                                      const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
-                                      return (
-                                        <Route
-                                          key={route.path}
-                                          path={path}
-                                          index={route.path === "/"}
-                                          element={<Component />}
-                                        />
-                                      );
-                                    })}
-                                  </Route>
-                                  <Route path="*" element={<NotFound />} />
-                                </Routes>
-                              </PaymentMethodProvider>
-                            </TaxProvider>
-                          </PrinterSettingsProvider>
-                        </ReceiptSettingsProvider>
-                      </CurrencyProvider>
-                    </SaleProvider>
-                  </CustomerProvider>
-                </ProductProvider>
-              </CategoryProvider>
+                                    <Route path="/" element={<ProtectedRoute />}>
+                                      {routesConfig.map((route) => {
+                                        if (route.path === "/login" || route.path === "/signup") {
+                                          return null;
+                                        }
+                                        const Component = route.component;
+                                        // Adjust path for parameterized routes
+                                        const path = route.path.startsWith("/") ? route.path.substring(1) : route.path;
+                                        return (
+                                          <Route
+                                            key={route.path}
+                                            path={path}
+                                            index={route.path === "/"}
+                                            element={<Component />}
+                                          />
+                                        );
+                                      })}
+                                    </Route>
+                                    <Route path="*" element={<NotFound />} />
+                                  </Routes>
+                                </PaymentMethodProvider>
+                              </TaxProvider>
+                            </PrinterSettingsProvider>
+                          </ReceiptSettingsProvider>
+                        </CurrencyProvider>
+                      </SaleProvider>
+                    </CustomerProvider>
+                  </ProductProvider>
+                </CategoryProvider>
+              </SupplierProvider>
             </StoreProvider>
           </AuthProvider>
         </LoadingProvider>

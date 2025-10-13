@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom"; // Import useLocation
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History } from "lucide-react";
+import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History, Truck } from "lucide-react"; // New import: Truck icon
 import BrandLogo from "@/components/layout/BrandLogo";
 import { useAuth } from "@/components/auth/AuthContext";
 import { UserRole } from "@/types/user";
@@ -17,12 +17,13 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
   const { user, hasPermission } = useAuth();
-  const location = useLocation(); // Get current location
+  const location = useLocation();
 
   const navItems = [
     { to: "/", icon: Home, label: "Dashboard", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
     { to: "/products", icon: Boxes, label: "Products", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
-    { to: "/customers", icon: Users, label: "Customers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/customers", icon: Users, label: "Customers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/suppliers", icon: Truck, label: "Suppliers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] }, // New navigation item
     { to: "/sales", icon: ShoppingCart, label: "Sales Terminal", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/sales-history", icon: History, label: "Sales History", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/stores", icon: Store, label: "Multi-Store", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
