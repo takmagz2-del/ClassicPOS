@@ -141,7 +141,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("authToken", "mock-jwt-token");
         localStorage.setItem("userEmail", email);
         toast.success("Login successful!");
-        navigate("/");
+        
+        // Redirect based on role
+        if (userData.role === UserRole.EMPLOYEE) {
+          navigate("/sales");
+        } else {
+          navigate("/");
+        }
+        
         stopLoading();
         resolve({ success: true });
       }, 1000);
@@ -159,6 +166,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
+        const isFirstUser = Object.keys(mockUsers).length === 0;
+        const assignedRole = isFirstUser ? UserRole.ADMIN : UserRole.EMPLOYEE;
+
         const newUserId = crypto.randomUUID();
         setMockUsers((prev) => ({
           ...prev,
@@ -167,7 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email,
             password,
             mfaEnabled: false,
-            role: UserRole.EMPLOYEE,
+            role: assignedRole, // Assign role dynamically
             businessName,
             businessType,
             country,

@@ -19,9 +19,9 @@ const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
   const { user, hasPermission } = useAuth(); // Use user and hasPermission from AuthContext
 
   const navItems = [
-    { to: "/", icon: Home, label: "Dashboard", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
-    { to: "/products", icon: Boxes, label: "Products", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
-    { to: "/customers", icon: Users, label: "Customers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
+    { to: "/", icon: Home, label: "Dashboard", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/products", icon: Boxes, label: "Products", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
+    { to: "/customers", icon: Users, label: "Customers", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
     { to: "/sales", icon: ShoppingCart, label: "Sales Terminal", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/sales-history", icon: History, label: "Sales History", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE] },
     { to: "/stores", icon: Store, label: "Multi-Store", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },

@@ -6,13 +6,14 @@ import { useAuth } from "@/components/auth/AuthContext";
 import MainLayout from "@/components/layout/MainLayout";
 import { routesConfig } from "@/config/routesConfig"; // Import routesConfig
 import { toast } from "sonner"; // Import toast
+import { UserRole } from "@/types/user"; // Import UserRole
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, hasPermission } = useAuth();
+  const { isAuthenticated, hasPermission, user } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -38,7 +39,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Check if the user has permission for the current route
   if (!hasPermission(currentRoute.requiredRoles)) {
     toast.error("You do not have permission to access this page.");
-    return <Navigate to="/" replace />; // Redirect to dashboard or an access denied page
+    // Redirect employees to /sales if they try to access a forbidden page
+    if (user?.role === UserRole.EMPLOYEE) {
+      return <Navigate to="/sales" replace />;
+    }
+    return <Navigate to="/" replace />; // Redirect to dashboard or an access denied page for other roles
   }
 
   return <MainLayout>{children || <Outlet />}</MainLayout>;
