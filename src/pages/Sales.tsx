@@ -22,16 +22,17 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer } from "lucide-react";
-import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs"; // New import
-import { useIsMobile } from "@/hooks/use-mobile"; // Import useIsMobile
+import { Printer, Scan } from "lucide-react"; // Added Scan icon
+import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"; // Import Drawer components
+} from "@/components/ui/drawer";
+import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // New import
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -39,7 +40,7 @@ const Sales = () => {
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
-  const isMobile = useIsMobile(); // Use the hook to detect mobile
+  const isMobile = useIsMobile();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [appliedGiftCardAmount, setAppliedGiftCardAmount] = useState<number>(0);
@@ -52,6 +53,7 @@ const Sales = () => {
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
+  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false); // New state for scanner dialog
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -245,15 +247,37 @@ const Sales = () => {
     }
   };
 
+  const handleBarcodeScanSuccess = (decodedText: string) => {
+    const product = products.find(p => p.sku === decodedText);
+    if (product) {
+      if (!product.availableForSale) {
+        toast.error(`${product.name} is not available for sale.`);
+        return;
+      }
+      if (product.trackStock && product.stock <= 0) {
+        toast.error(`${product.name} is out of stock.`);
+        return;
+      }
+      handleAddProductToCart(product, 1);
+    } else {
+      toast.error(`Product with SKU "${decodedText}" not found.`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
-        {showReprintButton && lastSale && (
-          <Button onClick={handleReprintReceipt} variant="outline">
-            <Printer className="mr-2 h-4 w-4" /> Re-print Receipt
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
+            <Scan className="mr-2 h-4 w-4" /> Scan Barcode
           </Button>
-        )}
+          {showReprintButton && lastSale && (
+            <Button onClick={handleReprintReceipt} variant="outline">
+              <Printer className="mr-2 h-4 w-4" /> Re-print Receipt
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1 overflow-y-auto">
@@ -382,6 +406,12 @@ const Sales = () => {
           customer={selectedCustomer}
         />
       )}
+
+      <BarcodeScannerDialog
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleBarcodeScanSuccess}
+      />
     </div>
   );
 };
