@@ -141,6 +141,33 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     }
   }, [initialGRN, form]);
 
+  // Effect to automatically populate productName and totalCost
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name?.startsWith("items.")) {
+        const items = value.items;
+        if (items) {
+          items.forEach((item, index) => {
+            const product = products.find(p => p.id === item.productId);
+            // Update productName
+            if (product && item.productName !== product.name) {
+              form.setValue(`items.${index}.productName`, product.name, { shouldValidate: true });
+            } else if (!product && item.productName !== "") {
+              form.setValue(`items.${index}.productName`, "", { shouldValidate: true });
+            }
+
+            // Update totalCost
+            const calculatedTotalCost = (item.quantityReceived || 0) * (item.unitCost || 0);
+            if (item.totalCost !== calculatedTotalCost) {
+              form.setValue(`items.${index}.totalCost`, calculatedTotalCost, { shouldValidate: true });
+            }
+          });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, products]);
+
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 

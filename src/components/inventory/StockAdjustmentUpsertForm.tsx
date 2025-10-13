@@ -85,6 +85,26 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     }
   }, [initialStockAdjustment, form]);
 
+  // Effect to automatically populate productName
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name?.startsWith("items.")) {
+        const items = value.items;
+        if (items) {
+          items.forEach((item, index) => {
+            const product = products.find(p => p.id === item.productId);
+            if (product && item.productName !== product.name) {
+              form.setValue(`items.${index}.productName`, product.name, { shouldValidate: true });
+            } else if (!product && item.productName !== "") {
+              form.setValue(`items.${index}.productName`, "", { shouldValidate: true });
+            }
+          });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, products]);
+
   const onSubmit = (values: StockAdjustmentFormValues) => {
     const adjustmentItems: StockAdjustmentItem[] = values.items.map(item => {
       const product = products.find(p => p.id === item.productId);
