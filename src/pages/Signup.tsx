@@ -30,6 +30,8 @@ const formSchema = z.object({
   businessType: z.string().min(1, { message: "Please select a business type." }),
   country: z.string().min(1, { message: "Please select a country." }),
   phone: z.string().optional().or(z.literal("")),
+  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
+  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
 }).superRefine((data, ctx) => {
   if (data.password !== data.confirmPassword) {
     ctx.addIssue({
@@ -57,6 +59,8 @@ const Signup = () => {
       businessType: "",
       country: "",
       phone: undefined,
+      vatNumber: undefined, // Default for new field
+      tinNumber: undefined, // Default for new field
     },
   });
 
@@ -69,7 +73,9 @@ const Signup = () => {
       values.businessName,
       values.businessType,
       values.country,
-      values.phone || undefined
+      values.phone || undefined,
+      values.vatNumber || undefined, // Pass new field
+      values.tinNumber || undefined // Pass new field
     );
     setIsLoading(false);
 
@@ -222,6 +228,42 @@ const Signup = () => {
                         id="phone"
                         type="tel"
                         placeholder="e.g., +15551234567"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="vatNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="vat-number">VAT Number (Optional)</Label>
+                    <FormControl>
+                      <Input
+                        id="vat-number"
+                        placeholder="e.g., GB123456789"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tinNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <Label htmlFor="tin-number">TIN Number (Optional)</Label>
+                    <FormControl>
+                      <Input
+                        id="tin-number"
+                        placeholder="e.g., 123-456-789"
                         disabled={isLoading}
                         {...field}
                       />
