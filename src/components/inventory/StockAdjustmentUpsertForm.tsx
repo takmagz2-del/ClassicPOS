@@ -59,7 +59,13 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     defaultValues: {
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
-      items: initialStockAdjustment?.items || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Added productName
+      items: initialStockAdjustment?.items.map(item => ({
+        productId: item.productId,
+        productName: item.productName, // Ensure productName is present
+        adjustmentType: item.adjustmentType,
+        quantity: item.quantity,
+        reason: item.reason,
+      })) || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Fixed: Added productName
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
@@ -71,14 +77,20 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items,
+        items: initialStockAdjustment.items.map(item => ({
+          productId: item.productId,
+          productName: item.productName,
+          adjustmentType: item.adjustmentType,
+          quantity: item.quantity,
+          reason: item.reason,
+        })),
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Added productName
+        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Fixed: Added productName
         notes: undefined,
       });
     }
@@ -122,7 +134,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]); // Added productName
+    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]); // Fixed: Added productName
   };
 
   const handleRemoveItem = (index: number) => {
@@ -135,7 +147,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -296,7 +308,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
-              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ isFormDisabled }}
             />
           </CardContent>

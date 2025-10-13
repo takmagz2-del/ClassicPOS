@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } => "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, startOfDay } from "date-fns";
@@ -67,7 +67,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : startOfDay(new Date()),
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
-      items: initialTransfer?.items || [{ productId: "", productName: "", quantity: 1 }], // Added productName
+      items: initialTransfer?.items || [{ productId: "", productName: "", quantity: 1 }], // Fixed: Added productName
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -113,7 +113,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         transferDate: startOfDay(new Date()),
         transferFromStoreId: "",
         transferToStoreId: "",
-        items: [{ productId: "", productName: "", quantity: 1 }], // Added productName
+        items: [{ productId: "", productName: "", quantity: 1 }], // Fixed: Added productName
         notes: undefined,
       });
     }
@@ -158,7 +158,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", quantity: 1 }]); // Added productName
+    form.setValue("items", [...items, { productId: "", productName: "", quantity: 1 }]); // Fixed: Added productName
   };
 
   const handleRemoveItem = (index: number) => {
@@ -177,7 +177,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { transferFromStoreId?: string; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -291,7 +291,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           name="transferToStoreId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>To Store (Destination)</FormLabel>
+              <FormLabel>To Store (Destination)</FormLabel> {/* Fixed: Closing tag */}
               <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
@@ -325,7 +325,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
-              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ transferFromStoreId, isFormDisabled }}
             />
           </CardContent>
