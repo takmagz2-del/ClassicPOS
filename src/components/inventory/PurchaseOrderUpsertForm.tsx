@@ -141,6 +141,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     form.setValue("items", newItems);
   };
 
+  const isFormDisabled = isEditMode && initialPurchaseOrder?.status !== "pending";
+
   const renderPurchaseOrderItem = (
     item: PurchaseOrderItem,
     index: number,
@@ -154,7 +156,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -179,7 +181,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} />
+              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -192,7 +194,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} />
+              <Input type="number" step="0.01" min="0.01" {...field} disabled={isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -210,7 +212,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a supplier" />
@@ -235,7 +237,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <FormItem>
               <FormLabel>Reference Number</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., PO-2023-001" {...field} />
+                <Input placeholder="e.g., PO-2023-001" {...field} disabled={isFormDisabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -256,6 +258,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isFormDisabled}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -294,6 +297,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isFormDisabled}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -323,7 +327,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -343,18 +347,20 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Order Items</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isFormDisabled}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderItem>
               items={items}
-              products={products}
-              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderPurchaseOrderItem}
+              extraProps={{ isRemoveDisabled: isFormDisabled }}
             />
           </CardContent>
         </Card>
@@ -366,16 +372,21 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional notes for this purchase order..." {...field} />
+                <Textarea placeholder="Any additional notes for this purchase order..." {...field} disabled={isFormDisabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isFormDisabled}>
           {isEditMode ? "Save Changes" : "Create Purchase Order"}
         </Button>
+        {isFormDisabled && (
+          <p className="text-sm text-muted-foreground text-center mt-2">
+            Completed or cancelled purchase orders cannot be edited.
+          </p>
+        )}
       </form>
     </Form>
   );

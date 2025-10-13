@@ -155,6 +155,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
   const items = form.watch("items");
   const transferFromStoreId = form.watch("transferFromStoreId");
+  const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1 }]);
@@ -176,7 +177,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    extraProps?: { transferFromStoreId?: string }
+    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -185,7 +186,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -210,7 +211,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} />
+              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -237,6 +238,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isFormDisabled}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -266,7 +268,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           render={({ field }) => (
             <FormItem>
               <FormLabel>From Store (Origin)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select originating store" />
@@ -290,7 +292,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           render={({ field }) => (
             <FormItem>
               <FormLabel>To Store (Destination)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination store" />
@@ -310,21 +312,20 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         />
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Items to Transfer</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isFormDisabled}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsItem>
               items={items}
-              products={products}
-              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
-              isAddButtonDisabled={isEditMode && initialTransfer?.status !== "pending"}
-              isRemoveButtonDisabled={isEditMode && initialTransfer?.status !== "pending"}
-              extraProps={{ transferFromStoreId }}
+              extraProps={{ transferFromStoreId, isRemoveDisabled: isFormDisabled }}
             />
           </CardContent>
         </Card>
@@ -336,17 +337,17 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional notes for this transfer..." {...field} />
+                <Textarea placeholder="Any additional notes for this transfer..." {...field} disabled={isFormDisabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isEditMode && initialTransfer?.status !== "pending"}>
+        <Button type="submit" className="w-full" disabled={isFormDisabled}>
           {isEditMode ? "Save Changes" : "Create Transfer"}
         </Button>
-        {isEditMode && initialTransfer?.status !== "pending" && (
+        {isFormDisabled && (
           <p className="text-sm text-muted-foreground text-center mt-2">
             Only pending transfers can be edited.
           </p>
