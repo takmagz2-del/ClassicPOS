@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, ShoppingCart, Users, LineChart, Settings, Boxes, Store, DollarSign, History } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
-import { useAuth } from "@/components/auth/AuthContext"; // New import
-import { UserRole } from "@/types/user"; // New import
+import { useAuth } from "@/components/auth/AuthContext";
+import { UserRole } from "@/types/user";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed?: boolean;
@@ -16,7 +16,8 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
-  const { user, hasPermission } = useAuth(); // Use user and hasPermission from AuthContext
+  const { user, hasPermission } = useAuth();
+  const location = useLocation(); // Get current location
 
   const navItems = [
     { to: "/", icon: Home, label: "Dashboard", requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] },
@@ -39,23 +40,28 @@ const Sidebar = ({ className, onLinkClick }: SidebarProps) => {
         <div className="px-3 py-2">
           <ScrollArea className="h-full">
             <div className="space-y-1">
-              {navItems.map((item) => (
-                // Only render if the user has the required permission
-                (item.requiredRoles && hasPermission(item.requiredRoles)) && (
-                  <Button
-                    key={item.to}
-                    variant="ghost"
-                    className="w-full justify-start"
-                    asChild
-                    onClick={onLinkClick}
-                  >
-                    <Link to={item.to}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  </Button>
-                )
-              ))}
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.to || (item.to !== "/" && location.pathname.startsWith(item.to));
+                return (
+                  (item.requiredRoles && hasPermission(item.requiredRoles)) && (
+                    <Button
+                      key={item.to}
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start",
+                        isActive && "bg-accent text-accent-foreground hover:bg-accent"
+                      )}
+                      asChild
+                      onClick={onLinkClick}
+                    >
+                      <Link to={item.to}>
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    </Button>
+                  )
+                );
+              })}
             </div>
           </ScrollArea>
         </div>
