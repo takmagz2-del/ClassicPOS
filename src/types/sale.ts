@@ -13,7 +13,7 @@ export interface Sale {
   subtotal: number;
   tax: number;
   total: number;
-  status: "pending" | "completed" | "cancelled";
+  status: "pending" | "completed" | "cancelled" | "on-hold"; // Added 'on-hold' status
   type: "sale" | "refund"; // New: Type of transaction
   giftCardAmountUsed?: number; // Added for gift card functionality
   customerId?: string; // New: Optional customer ID
@@ -27,4 +27,6 @@ export interface Sale {
   paymentMethodId?: string; // Changed from paymentMethod: string to paymentMethodId: string
   employeeId?: string; // New: ID of the employee who made the sale
   employeeName?: string; // New: Name of the employee who made the sale
+  heldByEmployeeId?: string; // New: ID of the employee who put the sale on hold
+  heldByEmployeeName?: string; // New: Name of the employee who put the sale on hold
 }
