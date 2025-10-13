@@ -53,7 +53,7 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value as string} disabled={isFormDisabled}> {/* Type assertion */}
+            <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}> {/* Changed to field.value || "" */}
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -126,7 +126,7 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value as string} disabled={isFormDisabled}> {/* Type assertion */}
+                <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}> {/* Changed to field.value || "" */}
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
