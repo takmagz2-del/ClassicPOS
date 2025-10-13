@@ -109,7 +109,7 @@ const PurchaseOrders = () => {
         </CardHeader>
         <CardContent>
           <PurchaseOrderTable
-            purchaseOrders={purchaseOrders} {/* Use purchaseOrders directly */}
+            purchaseOrders={purchaseOrders}
             onViewDetails={handleViewDetails}
             onEditOrder={handleEditOrder}
             onDeleteOrder={handleDeleteOrder}
