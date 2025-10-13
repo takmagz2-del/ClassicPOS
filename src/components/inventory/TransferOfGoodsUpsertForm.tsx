@@ -175,7 +175,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
-  const items = form.watch("items");
+  const items: TransferOfGoodsFormValues['items'] = form.watch("items");
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 

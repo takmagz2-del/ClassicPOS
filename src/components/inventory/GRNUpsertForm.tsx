@@ -210,7 +210,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  const items = form.watch("items");
+  const items: GRNFormValues['items'] = form.watch("items");
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);

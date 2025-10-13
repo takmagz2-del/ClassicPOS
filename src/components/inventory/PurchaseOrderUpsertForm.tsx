@@ -131,7 +131,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  const items = form.watch("items");
+  const items: PurchaseOrderFormValues['items'] = form.watch("items");
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]);
