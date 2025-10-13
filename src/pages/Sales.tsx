@@ -22,7 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer, Scan } from "lucide-react"; // Added Scan icon
+import { Printer, Scan, Hold } from "lucide-react"; // Added Hold icon
 import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,17 +32,18 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // New import
-import { useAuth } from "@/components/auth/AuthContext"; // Import useAuth
-import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
+import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog";
+import { useAuth } from "@/components/auth/AuthContext";
+import { InventoryHistoryType } from "@/types/inventory";
+import HeldSalesList from "@/components/sales/HeldSalesList"; // New import
 
 const Sales = () => {
-  const { salesHistory, addSale } = useSales();
+  const { salesHistory, addSale, holdSale, resumeSale } = useSales();
   const { products, updateProductStock } = useProducts();
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
-  const { user: currentUser } = useAuth(); // Get the current logged-in user
+  const { user: currentUser } = useAuth();
   const isMobile = useIsMobile();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
@@ -56,7 +57,8 @@ const Sales = () => {
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
-  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false); // New state for scanner dialog
+  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
+  const [currentSaleId, setCurrentSaleId] = useState<string>(crypto.randomUUID()); // New: Unique ID for the current sale being built
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -140,6 +142,7 @@ const Sales = () => {
     setLoyaltyPointsUsed(0);
     setLoyaltyPointsDiscountAmount(0);
     setShowReprintButton(false);
+    setCurrentSaleId(crypto.randomUUID()); // Generate new ID for a fresh sale
     toast.info("Cart cleared.");
   };
 
@@ -183,7 +186,7 @@ const Sales = () => {
     }
 
     const newSale: Sale = {
-      id: crypto.randomUUID(),
+      id: currentSaleId, // Use the currentSaleId
       date: new Date().toISOString(),
       items: cartItems,
       subtotal: currentSubtotal,
@@ -197,11 +200,13 @@ const Sales = () => {
       discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
       discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
       loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
-      loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount > 0 ? loyaltyPointsDiscountAmount : undefined, // Include loyalty points discount
+      loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount > 0 ? loyaltyPointsDiscountAmount : undefined,
       taxRateApplied: defaultTaxRate.rate,
       paymentMethodId: paymentMethodId,
-      employeeId: currentUser?.id, // Add current user's ID
-      employeeName: currentUser?.email, // Add current user's email
+      employeeId: currentUser?.id,
+      employeeName: currentUser?.email,
+      heldByEmployeeId: undefined, // Clear held status on finalization
+      heldByEmployeeName: undefined,
     };
 
     addSale(newSale);
@@ -220,16 +225,16 @@ const Sales = () => {
 
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
-      if (product && product.trackStock) { // Only update stock if tracking is enabled
+      if (product && product.trackStock) {
         updateProductStock(
           product.id,
           product.stock - soldItem.quantity,
-          InventoryHistoryType.SALE, // historyType
-          newSale.id, // referenceId
-          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`, // reason
-          undefined, // storeId (assuming single store for now, or could be passed from context)
-          currentUser?.id, // userId
-          soldItem.name // Pass product name
+          InventoryHistoryType.SALE,
+          newSale.id,
+          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`,
+          undefined,
+          currentUser?.id,
+          soldItem.name
         );
       }
     });
@@ -279,11 +284,65 @@ const Sales = () => {
     }
   };
 
+  const handleHoldSale = () => {
+    if (cartItems.length === 0) {
+      toast.error("Cannot hold an empty cart.");
+      return;
+    }
+
+    const saleToHold: Sale = {
+      id: currentSaleId,
+      date: new Date().toISOString(),
+      items: cartItems,
+      subtotal: currentSubtotal,
+      tax: currentTax,
+      total: currentFinalTotal,
+      status: "on-hold",
+      type: "sale",
+      giftCardAmountUsed: appliedGiftCardAmount,
+      customerId: selectedCustomer?.id,
+      customerName: selectedCustomer?.name,
+      discountPercentage: discountPercentage > 0 ? discountPercentage : undefined,
+      discountAmount: discountPercentage > 0 ? calculatedDiscountAmount : undefined,
+      loyaltyPointsUsed: appliedLoyaltyPoints > 0 ? appliedLoyaltyPoints : undefined,
+      loyaltyPointsDiscountAmount: loyaltyPointsDiscountAmount > 0 ? loyaltyPointsDiscountAmount : undefined,
+      taxRateApplied: defaultTaxRate.rate,
+      paymentMethodId: undefined, // No payment method yet for held sales
+      employeeId: currentUser?.id,
+      employeeName: currentUser?.email,
+      heldByEmployeeId: currentUser?.id,
+      heldByEmployeeName: currentUser?.email,
+    };
+
+    holdSale(saleToHold);
+    handleClearCart(); // Clear the current cart after holding
+  };
+
+  const handleResumeSale = (sale: Sale) => {
+    // Clear current cart before resuming
+    handleClearCart();
+
+    // Set current sale ID to the resumed sale's ID
+    setCurrentSaleId(sale.id);
+
+    // Populate cart and other states with resumed sale data
+    setCartItems(sale.items);
+    setAppliedGiftCardAmount(sale.giftCardAmountUsed || 0);
+    setSelectedCustomerId(sale.customerId || null);
+    setDiscountPercentage(sale.discountPercentage || 0);
+    setLoyaltyPointsUsed(sale.loyaltyPointsUsed || 0);
+    setLoyaltyPointsDiscountAmount(sale.loyaltyPointsDiscountAmount || 0);
+    setShowReprintButton(false); // A resumed sale is not the "last completed sale" for re-printing
+  };
+
   return (
     <div className="flex flex-col gap-4 h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleHoldSale} disabled={cartItems.length === 0}>
+            <Hold className="mr-2 h-4 w-4" /> Hold Sale
+          </Button>
           <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
             <Scan className="mr-2 h-4 w-4" /> Scan Barcode
           </Button>
@@ -329,6 +388,7 @@ const Sales = () => {
               onSelectPaymentMethod={openConfirmationDialog}
               onClearCart={handleClearCart}
               hasItemsInCart={cartItems.length > 0}
+              onResumeSale={handleResumeSale} // Pass to tabs
             />
           </div>
         )}
