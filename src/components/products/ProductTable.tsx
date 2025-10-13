@@ -102,6 +102,16 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
             <TableHead className="text-right">
               <Button
                 variant="ghost"
+                onClick={() => onSort("cost")}
+                className="group px-0 hover:bg-transparent justify-end"
+              >
+                Cost
+                {renderSortIcon("cost")}
+              </Button>
+            </TableHead>
+            <TableHead className="text-right">
+              <Button
+                variant="ghost"
                 onClick={() => onSort("stock")}
                 className="group px-0 hover:bg-transparent justify-end"
               >
@@ -136,6 +146,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
                 <TableCell>{getCategoryName(product.categoryId)}</TableCell>
                 <TableCell>{product.sku}</TableCell>
                 <TableCell className="text-right">{formatCurrency(product.price, currentCurrency)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(product.cost, currentCurrency)}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditProduct(product)}>
@@ -151,7 +162,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 No products found.
               </TableCell>
             </TableRow>
