@@ -2,19 +2,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSales } from "@/context/SaleContext";
-import { useProducts } from "@/context/ProductContext";
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useCustomers } from "@/context/CustomerContext";
+import { useProducts } from "@/context/ProductContext"; // Added import for useProducts
 import { format, startOfDay, endOfDay, isWithinInterval, subDays, eachDayOfInterval } from "date-fns";
-import { DollarSign, TrendingUp, Users, Boxes } from "lucide-react";
+import { DollarSign, TrendingUp, Users, Boxes, Gift } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import LowStockProducts from "@/components/dashboard/LowStockProducts";
 import TopCustomers from "@/components/dashboard/TopCustomers";
 import CategorySalesChart from "@/components/dashboard/CategorySalesChart";
 import RecentSales from "@/components/dashboard/RecentSales";
-import QuickActionsToolbar from "@/components/dashboard/QuickActionsToolbar"; // Import the new component
+import QuickActionsToolbar from "@/components/dashboard/QuickActionsToolbar";
 
 const Dashboard = () => {
   const { salesHistory } = useSales();
@@ -29,19 +29,24 @@ const Dashboard = () => {
   const [revenueChange, setRevenueChange] = useState<string>("");
   const [salesTodayChange, setSalesTodayChange] = useState<string>("");
   const [salesOverviewData, setSalesOverviewData] = useState<{ date: string; sales: number }[]>([]);
+  const [loyaltyPointsRedeemedLast30Days, setLoyaltyPointsRedeemedLast30Days] = useState<number>(0);
 
   useEffect(() => {
     const now = new Date();
 
-    // --- Revenue (Last 30 Days vs. Previous 30 Days) ---
     const currentPeriodStart = startOfDay(subDays(now, 29));
     const previousPeriodStart = startOfDay(subDays(now, 59));
     const previousPeriodEnd = endOfDay(subDays(now, 30));
 
-    const revenueCurrentPeriod = salesHistory
-      .filter(sale => new Date(sale.date) >= currentPeriodStart)
+    const salesInCurrentPeriod = salesHistory.filter(sale => new Date(sale.date) >= currentPeriodStart);
+
+    const revenueCurrentPeriod = salesInCurrentPeriod
       .reduce((sum, sale) => sum + sale.total, 0);
     setRevenueLast30Days(revenueCurrentPeriod);
+
+    const totalLoyaltyRedeemed = salesInCurrentPeriod
+      .reduce((sum, sale) => sum + (sale.loyaltyPointsDiscountAmount || 0), 0);
+    setLoyaltyPointsRedeemedLast30Days(totalLoyaltyRedeemed);
 
     const revenuePreviousPeriod = salesHistory
       .filter(sale => isWithinInterval(new Date(sale.date), { start: previousPeriodStart, end: previousPeriodEnd }))
@@ -56,7 +61,6 @@ const Dashboard = () => {
       setRevenueChange("No change from previous 30 days");
     }
 
-    // --- Sales Today (vs. Yesterday) ---
     const todayStart = startOfDay(now);
     const yesterdayStart = startOfDay(subDays(now, 1));
     const yesterdayEnd = endOfDay(subDays(now, 1));
@@ -79,12 +83,10 @@ const Dashboard = () => {
       setSalesTodayChange("No sales yesterday or today");
     }
 
-    // --- Snapshot KPIs (no percentage change) ---
     const stock = products.reduce((sum, product) => sum + product.stock, 0);
     setProductsInStock(stock);
     setActiveCustomersCount(customers.length);
 
-    // --- Sales Overview Chart (Last 30 Days) ---
     const thirtyDaysAgo = subDays(now, 29);
     const dateInterval = eachDayOfInterval({ start: thirtyDaysAgo, end: now });
 
@@ -111,7 +113,6 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
       </div>
 
-      {/* Quick Actions Toolbar */}
       <QuickActionsToolbar />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -153,6 +154,18 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{productsInStock}</div>
             <p className="text-xs text-muted-foreground">Total units across all products</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Loyalty Points Redeemed (30 Days)</CardTitle>
+            <Gift className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              -{formatCurrency(loyaltyPointsRedeemedLast30Days, currentCurrency)}
+            </div>
+            <p className="text-xs text-muted-foreground">Value of points used as discounts</p>
           </CardContent>
         </Card>
       </div>
