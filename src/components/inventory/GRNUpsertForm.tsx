@@ -227,7 +227,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isItemDisabled?: boolean } // Updated to isItemDisabled
   ) => (
     <>
       <FormField
@@ -236,7 +236,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isLinkedToPO || extraProps?.isItemDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -261,7 +261,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled} />
+              <Input type="number" min="1" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isItemDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -274,7 +274,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isFormDisabled} />
+              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isLinkedToPO || extraProps?.isItemDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -429,7 +429,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderGRNItem}
-              isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
               extraProps={{ isLinkedToPO, isFormDisabled }}
             />
           </CardContent>

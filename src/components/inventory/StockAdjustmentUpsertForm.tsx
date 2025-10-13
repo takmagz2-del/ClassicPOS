@@ -156,7 +156,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isItemDisabled?: boolean } // Updated to isItemDisabled
   ) => (
     <>
       <FormField
@@ -165,7 +165,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isItemDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -189,7 +189,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         render={({ field }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isItemDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -214,7 +214,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} disabled={extraProps?.isFormDisabled} />
+              <Input type="number" min="1" {...field} disabled={extraProps?.isItemDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -227,7 +227,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           <FormItem className="sm:col-span-3">
             <FormLabel>Reason</FormLabel>
             <FormControl>
-              <Input placeholder="e.g., Damaged stock, Found item" {...field} disabled={extraProps?.isFormDisabled} />
+              <Input placeholder="e.g., Damaged stock, Found item" {...field} disabled={extraProps?.isItemDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -317,7 +317,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
-              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ isFormDisabled }}
             />
           </CardContent>
