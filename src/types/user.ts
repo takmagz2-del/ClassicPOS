@@ -11,4 +11,8 @@ export interface User {
   mfaSecret?: string;
   backupCodes?: string[];
   role: UserRole;
+  businessName?: string; // New field
+  businessType?: string; // New field
+  country?: string; // New field
+  phone?: string; // New field
 }

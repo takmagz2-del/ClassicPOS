@@ -23,7 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<LoginResult>;
-  register: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string) => Promise<boolean>;
   logout: () => void;
   generateMfaSecret: (email: string) => Promise<{ secret: string; qrCodeUrl: string }>;
   verifyMfaSetup: (secret: string, totpCode: string) => Promise<boolean>;
@@ -46,9 +46,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { startLoading, stopLoading } = useLoading();
 
   const [mockUsers, setMockUsers] = useState<{ [key: string]: InternalMockUser }>({
-    "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN },
-    "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER },
-    "employee@example.com": { id: "u3", email: "employee@example.com", password: "password", mfaEnabled: false, role: UserRole.EMPLOYEE },
+    "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN, businessName: "Admin Corp", businessType: "Retail Store", country: "United States", phone: "+15551112222" },
+    "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER, businessName: "Manager Inc", businessType: "Restaurant/Cafe", country: "Canada", phone: "+15553334444" },
+    "employee@example.com": { id: "u3", email: "employee@example.com", password: "password", mfaEnabled: false, role: UserRole.EMPLOYEE, businessName: "Employee Co", businessType: "Service Business", country: "United Kingdom", phone: "+442079460123" },
   });
 
   const usersArray = Object.values(mockUsers).map(({ password, tempMfaSecret, tempBackupCodes, ...rest }) => rest);
@@ -66,6 +66,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         mfaSecret: storedUser.mfaSecret,
         backupCodes: storedUser.backupCodes,
         role: storedUser.role,
+        businessName: storedUser.businessName,
+        businessType: storedUser.businessType,
+        country: storedUser.country,
+        phone: storedUser.phone,
       });
     }
   }, [mockUsers]);
@@ -129,6 +133,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           mfaSecret: userData.mfaSecret,
           backupCodes: userData.backupCodes,
           role: userData.role,
+          businessName: userData.businessName,
+          businessType: userData.businessType,
+          country: userData.country,
+          phone: userData.phone,
         });
         localStorage.setItem("authToken", "mock-jwt-token");
         localStorage.setItem("userEmail", email);
@@ -140,7 +148,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const register = async (email: string, password: string): Promise<boolean> => {
+  const register = async (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string): Promise<boolean> => {
     startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -154,7 +162,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const newUserId = crypto.randomUUID();
         setMockUsers((prev) => ({
           ...prev,
-          [email]: { id: newUserId, email, password, mfaEnabled: false, role: UserRole.EMPLOYEE },
+          [email]: {
+            id: newUserId,
+            email,
+            password,
+            mfaEnabled: false,
+            role: UserRole.EMPLOYEE,
+            businessName,
+            businessType,
+            country,
+            phone,
+          },
         }));
         toast.success("Account created successfully! Please log in.");
         stopLoading();
@@ -375,6 +393,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             mfaSecret: newUserData.mfaSecret,
             backupCodes: newUserData.backupCodes,
             role: newUserData.role,
+            businessName: newUserData.businessName,
+            businessType: newUserData.businessType,
+            country: newUserData.country,
+            phone: newUserData.phone,
           });
           // Update localStorage if the logged-in user's email changed
           if (user.email !== newUserData.email) {
