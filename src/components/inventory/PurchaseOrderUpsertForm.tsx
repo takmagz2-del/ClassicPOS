@@ -360,7 +360,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderPurchaseOrderItem}
-              extraProps={{ isRemoveDisabled: isFormDisabled }}
+              isRemoveButtonDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>

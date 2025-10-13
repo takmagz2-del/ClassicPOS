@@ -158,7 +158,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     let grnToSubmit: GoodsReceivedNote | NewGRNData;
 
     if (isEditMode) {
-      grnToSubmit = {
+n      grnToSubmit = {
         ...initialGRN!,
         ...baseGRN,
         id: initialGRN!.id,
