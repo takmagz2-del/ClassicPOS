@@ -28,8 +28,8 @@ const LOW_STOCK_THRESHOLD = 10;
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
-  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // New state for stock status filter
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]); // New state for price range
   const { currentCurrency } = useCurrency();
   const { categories } = useCategories();
   
@@ -37,9 +37,11 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [previewImageAlt, setPreviewImageAlt] = useState("");
 
+  // Calculate min/max price dynamically from products
   const minPrice = useMemo(() => products.length > 0 ? Math.min(...products.map(p => p.price)) : 0, [products]);
   const maxPrice = useMemo(() => products.length > 0 ? Math.max(...products.map(p => p.price)) : 10000, [products]);
 
+  // Reset price range when min/max prices change (e.g., products data updates)
   React.useEffect(() => {
     setPriceRange([minPrice, maxPrice]);
   }, [minPrice, maxPrice]);
@@ -80,6 +82,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
         matchesStockStatus = product.stock === 0;
       }
 
+      // New: Filter by price range
       const matchesPriceRange =
         product.price >= priceRange[0] && product.price <= priceRange[1];
 
@@ -91,7 +94,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     setSearchTerm("");
     setSelectedCategoryId("all");
     setStockStatusFilter("all");
-    setPriceRange([minPrice, maxPrice]);
+    setPriceRange([minPrice, maxPrice]); // Reset to full range
   };
 
   const handleImageClick = (imageUrl: string, altText: string) => {
