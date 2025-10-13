@@ -41,6 +41,11 @@ const UserNav = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.email}</p>
+            {user?.businessName && (
+              <p className="text-xs leading-none text-muted-foreground">
+                Business: {user.businessName}
+              </p>
+            )}
             <p className="text-xs leading-none text-muted-foreground">
               {user?.role ? `Role: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}` : "No Role"}
             </p>
