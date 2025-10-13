@@ -164,7 +164,7 @@ const UserProfileForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Business Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isLoading}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a business type" />
@@ -188,7 +188,7 @@ const UserProfileForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Country</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isLoading}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your country" />
