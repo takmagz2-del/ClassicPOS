@@ -69,17 +69,18 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   // Internal helper for adding a product with history
   const _addProductWithHistory = useCallback((newProduct: Product) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
-    updateProductStock(
-      newProduct.id,
-      newProduct.stock,
-      InventoryHistoryType.INITIAL_STOCK,
-      newProduct.id,
-      `New product "${newProduct.name}" added with initial stock of ${newProduct.stock}.`,
-      undefined, // storeId is not directly applicable here, or could be a default store
-      authUser?.id,
-      newProduct.name // Pass product name
-    );
-  }, [updateProductStock, authUser]);
+    addHistoryEntry({
+      type: InventoryHistoryType.INITIAL_STOCK,
+      referenceId: newProduct.id,
+      description: `New product "${newProduct.name}" added with initial stock of ${newProduct.stock}.`,
+      productId: newProduct.id,
+      productName: newProduct.name,
+      quantityChange: newProduct.stock,
+      currentStock: newProduct.stock,
+      storeId: undefined, // storeId is not directly applicable here, or could be a default store
+      userId: authUser?.id,
+    });
+  }, [addHistoryEntry, authUser]);
 
   // Internal helper for updating a product with history
   const _updateProductWithHistory = useCallback((updatedProduct: Product) => {
@@ -88,23 +89,24 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         if (p.id === updatedProduct.id) {
           const quantityChange = updatedProduct.stock - p.stock;
           if (quantityChange !== 0) {
-            updateProductStock(
-              updatedProduct.id,
-              updatedProduct.stock,
-              InventoryHistoryType.PRODUCT_EDIT,
-              updatedProduct.id,
-              `Product "${updatedProduct.name}" stock manually updated from ${p.stock} to ${updatedProduct.stock}.`,
-              undefined, // storeId not specified for general product edit
-              authUser?.id,
-              updatedProduct.name // Pass product name
-            );
+            addHistoryEntry({
+              type: InventoryHistoryType.PRODUCT_EDIT,
+              referenceId: updatedProduct.id,
+              description: `Product "${updatedProduct.name}" stock manually updated from ${p.stock} to ${updatedProduct.stock}.`,
+              productId: updatedProduct.id,
+              productName: updatedProduct.name,
+              quantityChange: quantityChange,
+              currentStock: updatedProduct.stock,
+              storeId: undefined, // storeId not specified for general product edit
+              userId: authUser?.id,
+            });
           }
           return updatedProduct;
         }
         return p;
       })
     );
-  }, [updateProductStock, authUser]);
+  }, [addHistoryEntry, authUser]);
 
   const addProduct = useCallback((newProduct: Product) => {
     _addProductWithHistory(newProduct);
@@ -118,20 +120,21 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     setProducts((prevProducts) => {
       const productToDelete = prevProducts.find(p => p.id === productId);
       if (productToDelete) {
-        updateProductStock(
-          productId,
-          0, // Stock becomes 0 after deletion
-          InventoryHistoryType.PRODUCT_EDIT,
-          productId,
-          `Product "${productToDelete.name}" deleted. All ${productToDelete.stock} units removed from stock.`,
-          undefined,
-          authUser?.id,
-          productToDelete.name // Pass product name
-        );
+        addHistoryEntry({
+          type: InventoryHistoryType.PRODUCT_DELETED,
+          referenceId: productId,
+          description: `Product "${productToDelete.name}" deleted. All ${productToDelete.stock} units removed from stock.`,
+          productId: productId,
+          productName: productToDelete.name,
+          quantityChange: -productToDelete.stock, // Reflects the removal of all stock
+          currentStock: 0, // Stock becomes 0 after deletion
+          storeId: undefined,
+          userId: authUser?.id,
+        });
       }
       return prevProducts.filter((p) => p.id !== productId);
     });
-  }, [updateProductStock, authUser]);
+  }, [addHistoryEntry, authUser]);
 
   const reassignProductsToCategory = useCallback((oldCategoryId: string, newCategoryId: string) => {
     setProducts((prevProducts) =>

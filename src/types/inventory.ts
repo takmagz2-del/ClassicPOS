@@ -120,6 +120,7 @@ export enum InventoryHistoryType {
   REFUND = "Refund",
   INITIAL_STOCK = "Initial Stock",
   PRODUCT_EDIT = "Product Edit", // For manual stock changes via product edit
+  PRODUCT_DELETED = "Product Deleted", // New: For when a product is removed from the system
 }
 
 export interface InventoryHistoryEntry {
