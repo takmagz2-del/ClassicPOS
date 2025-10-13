@@ -15,4 +15,6 @@ export interface User {
   businessType?: string; // New field
   country?: string; // New field
   phone?: string; // New field
+  vatNumber?: string; // New: VAT number for the user/business
+  tinNumber?: string; // New: TIN number for the user/business
 }

@@ -18,6 +18,7 @@ const defaultReceiptSettings: ReceiptSettings = {
   showSku: true,
   showCategory: false,
   showCustomerInfo: true,
+  showVatTin: false, // Added missing property
 };
 
 const ReceiptSettingsContext = createContext<ReceiptSettingsContextType | undefined>(undefined);

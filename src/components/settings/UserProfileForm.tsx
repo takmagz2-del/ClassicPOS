@@ -29,6 +29,8 @@ const formSchema = z.object({
   businessType: z.string().min(1, { message: "Please select a business type." }).optional().or(z.literal("")),
   country: z.string().min(1, { message: "Please select a country." }).optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
+  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
+  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
 }).superRefine((data, ctx) => {
   if (data.newPassword && data.newPassword !== data.confirmNewPassword) {
     ctx.addIssue({
@@ -63,6 +65,8 @@ const UserProfileForm = () => {
       businessType: user?.businessType || "",
       country: user?.country || "",
       phone: user?.phone || "",
+      vatNumber: user?.vatNumber || "", // Default for new field
+      tinNumber: user?.tinNumber || "", // Default for new field
     },
   });
 
@@ -77,6 +81,8 @@ const UserProfileForm = () => {
         businessType: user.businessType || "",
         country: user.country || "",
         phone: user.phone || "",
+        vatNumber: user.vatNumber || "", // Reset new field
+        tinNumber: user.tinNumber || "", // Reset new field
       });
     }
   }, [user, form]);
@@ -92,6 +98,8 @@ const UserProfileForm = () => {
       businessType: values.businessType,
       country: values.country,
       phone: values.phone,
+      vatNumber: values.vatNumber, // New field
+      tinNumber: values.tinNumber, // New field
     };
 
     const success = await updateUser(
@@ -113,6 +121,8 @@ const UserProfileForm = () => {
         businessType: values.businessType,
         country: values.country,
         phone: values.phone,
+        vatNumber: values.vatNumber, // Reset new field
+        tinNumber: values.tinNumber, // Reset new field
       });
     } else {
       // Error message is already handled by AuthContext
@@ -204,6 +214,32 @@ const UserProfileForm = () => {
               <FormLabel>Phone Number (Optional)</FormLabel>
               <FormControl>
                 <Input type="tel" placeholder="e.g., +15551234567" disabled={isLoading} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="vatNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>VAT Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., GB123456789" disabled={isLoading} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tinNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>TIN Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 123-456-789" disabled={isLoading} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

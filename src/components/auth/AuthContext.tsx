@@ -23,7 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   login: (email: string, password: string, totpCode?: string, backupCode?: string) => Promise<LoginResult>;
-  register: (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string) => Promise<boolean>;
+  register: (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string, vatNumber?: string, tinNumber?: string) => Promise<boolean>;
   logout: () => void;
   generateMfaSecret: (email: string) => Promise<{ secret: string; qrCodeUrl: string }>;
   verifyMfaSetup: (secret: string, totpCode: string) => Promise<boolean>;
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { startLoading, stopLoading } = useLoading();
 
   const [mockUsers, setMockUsers] = useState<{ [key: string]: InternalMockUser }>({
-    "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN, businessName: "Admin Corp", businessType: "Retail Store", country: "United States", phone: "+15551112222" },
-    "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER, businessName: "Manager Inc", businessType: "Restaurant/Cafe", country: "Canada", phone: "+15553334444" },
+    "admin@example.com": { id: "u1", email: "admin@example.com", password: "password", mfaEnabled: false, role: UserRole.ADMIN, businessName: "Admin Corp", businessType: "Retail Store", country: "United States", phone: "+15551112222", vatNumber: "US123456789", tinNumber: "US987654321" },
+    "manager@example.com": { id: "u2", email: "manager@example.com", password: "password", mfaEnabled: false, role: UserRole.MANAGER, businessName: "Manager Inc", businessType: "Restaurant/Cafe", country: "Canada", phone: "+15553334444", vatNumber: "CA123456789" },
     "employee@example.com": { id: "u3", email: "employee@example.com", password: "password", mfaEnabled: false, role: UserRole.EMPLOYEE, businessName: "Employee Co", businessType: "Service Business", country: "United Kingdom", phone: "+442079460123" },
   });
 
@@ -70,6 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         businessType: storedUser.businessType,
         country: storedUser.country,
         phone: storedUser.phone,
+        vatNumber: storedUser.vatNumber, // New field
+        tinNumber: storedUser.tinNumber, // New field
       });
     }
   }, [mockUsers]);
@@ -137,6 +139,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           businessType: userData.businessType,
           country: userData.country,
           phone: userData.phone,
+          vatNumber: userData.vatNumber, // New field
+          tinNumber: userData.tinNumber, // New field
         });
         localStorage.setItem("authToken", "mock-jwt-token");
         localStorage.setItem("userEmail", email);
@@ -155,7 +159,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const register = async (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string): Promise<boolean> => {
+  const register = async (email: string, password: string, businessName: string, businessType: string, country: string, phone?: string, vatNumber?: string, tinNumber?: string): Promise<boolean> => {
     startLoading();
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -182,6 +186,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             businessType,
             country,
             phone,
+            vatNumber, // New field
+            tinNumber, // New field
           },
         }));
         toast.success("Account created successfully! Please log in.");
@@ -382,6 +388,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ...updatedUser,
           email: newEmailKey, // Ensure email is updated
           role: updatedUser.role || existingUser.role, // Ensure role is not undefined
+          vatNumber: updatedUser.vatNumber, // New field
+          tinNumber: updatedUser.tinNumber, // New field
         };
 
         setMockUsers((prev) => {
@@ -407,6 +415,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             businessType: newUserData.businessType,
             country: newUserData.country,
             phone: newUserData.phone,
+            vatNumber: newUserData.vatNumber, // New field
+            tinNumber: newUserData.tinNumber, // New field
           });
           // Update localStorage if the logged-in user's email changed
           if (user.email !== newUserData.email) {
