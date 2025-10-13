@@ -16,7 +16,6 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-// import { useSuppliers } from "@/context/SupplierContext"; // No longer needed for display
 
 interface PurchaseOrderTableProps {
   purchaseOrders: PurchaseOrder[];
@@ -27,7 +26,6 @@ interface PurchaseOrderTableProps {
 
 const PurchaseOrderTable = ({ purchaseOrders, onViewDetails, onEditOrder, onDeleteOrder }: PurchaseOrderTableProps) => {
   const { currentCurrency } = useCurrency();
-  // const { suppliers } = useSuppliers(); // No longer needed for display
 
   const getStatusBadgeVariant = (status: PurchaseOrderStatus) => {
     switch (status) {

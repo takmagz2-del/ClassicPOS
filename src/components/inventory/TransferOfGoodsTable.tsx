@@ -14,7 +14,6 @@ import { TransferOfGoods, TransferStatus } from "@/types/inventory";
 import { Edit, Trash2, Eye, CheckCircle2, Truck, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-// import { useStores } from "@/context/StoreContext"; // Import useStores - no longer needed for display
 
 interface TransferOfGoodsTableProps {
   transfers: TransferOfGoods[];
@@ -25,7 +24,6 @@ interface TransferOfGoodsTableProps {
 }
 
 const TransferOfGoodsTable = ({ transfers, onViewDetails, onEditTransfer, onDeleteTransfer, onUpdateTransferStatus }: TransferOfGoodsTableProps) => {
-  // const { stores } = useStores(); // Use the stores context - no longer needed for display
 
   const getStatusBadgeVariant = (status: TransferStatus) => {
     switch (status) {

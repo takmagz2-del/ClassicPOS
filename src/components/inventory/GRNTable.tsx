@@ -16,8 +16,6 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-// import { useSuppliers } from "@/context/SupplierContext"; // No longer needed for display
-// import { useStores } from "@/context/StoreContext"; // No longer needed for display
 
 interface GRNTableProps {
   grns: GoodsReceivedNote[];
@@ -29,8 +27,6 @@ interface GRNTableProps {
 
 const GRNTable = ({ grns, onViewDetails, onEditGRN, onDeleteGRN, onApproveGRN }: GRNTableProps) => {
   const { currentCurrency } = useCurrency();
-  // const { suppliers } = useSuppliers(); // No longer needed for display
-  // const { stores } = useStores(); // No longer needed for display
 
   const getStatusBadgeVariant = (status: GRNStatus) => {
     switch (status) {
