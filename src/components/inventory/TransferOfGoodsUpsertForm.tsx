@@ -287,17 +287,17 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<TransferOfGoodsItem>
-              items={items as TransferOfGoodsItem[]}
+            <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={(item, idx, ctrl, errs) => (
-                <ProductItemFields
+              renderItem={(item, idx, ctrl, errs, isDisabled) => (
+                <ProductItemFields<TransferOfGoodsFormValues, TransferOfGoodsItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}
-                  isFormDisabled={isFormDisabled}
+                  isFormDisabled={isDisabled}
                   itemType="transferOfGoods"
                   transferFromStoreId={transferFromStoreId}
                 />

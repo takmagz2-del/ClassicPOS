@@ -15,7 +15,7 @@ import { useProducts } from "@/context/ProductContext";
 import { useStores } from "@/context/StoreContext";
 import { AdjustmentType } from "@/types/inventory";
 
-interface ProductItemFieldsProps<TFormValues> {
+interface ProductItemFieldsProps<TFormValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -25,14 +25,14 @@ interface ProductItemFieldsProps<TFormValues> {
   transferFromStoreId?: string;
 }
 
-const ProductItemFields = <TFormValues extends { items: any[] }>({
+const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
   index,
   control,
   errors,
   isFormDisabled,
   itemType,
   transferFromStoreId,
-}: ProductItemFieldsProps<TFormValues>) => {
+}: ProductItemFieldsProps<TFormValues, TItem>) => {
   const { products } = useProducts();
   const { stores } = useStores(); // Although not fully used for multi-store stock, it's available
 
@@ -49,11 +49,11 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
     <>
       <FormField
         control={control}
-        name={`items.${index}.productId`}
+        name={`items.${index}.productId` as any} // Type assertion
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value as string} disabled={isFormDisabled}> {/* Type assertion */}
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -76,12 +76,12 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
       {(itemType === "purchaseOrder" || itemType === "grn" || itemType === "transferOfGoods") && (
         <FormField
           control={control}
-          name={`items.${index}.quantity`}
+          name={`items.${index}.quantity` as any} // Type assertion
           render={({ field }) => (
             <FormItem>
               <FormLabel>Quantity</FormLabel>
               <FormControl>
-                <Input type="number" min="1" {...field} disabled={isFormDisabled} />
+                <Input type="number" min="1" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,12 +92,12 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
       {(itemType === "purchaseOrder" || itemType === "grn") && (
         <FormField
           control={control}
-          name={`items.${index}.unitCost`}
+          name={`items.${index}.unitCost` as any} // Type assertion
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unit Cost</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" min="0.01" {...field} disabled={isFormDisabled} />
+                <Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,11 +109,11 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
         <>
           <FormField
             control={control}
-            name={`items.${index}.adjustmentType`}
+            name={`items.${index}.adjustmentType` as any} // Type assertion
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+                <Select onValueChange={field.onChange} value={field.value as string} disabled={isFormDisabled}> {/* Type assertion */}
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -133,12 +133,12 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
           />
           <FormField
             control={control}
-            name={`items.${index}.quantity`}
+            name={`items.${index}.quantity` as any} // Type assertion
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Quantity</FormLabel>
                 <FormControl>
-                  <Input type="number" min="1" {...field} disabled={isFormDisabled} />
+                  <Input type="number" min="1" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,12 +146,12 @@ const ProductItemFields = <TFormValues extends { items: any[] }>({
           />
           <FormField
             control={control}
-            name={`items.${index}.reason`}
+            name={`items.${index}.reason` as any} // Type assertion
             render={({ field }) => (
               <FormItem className="sm:col-span-3">
                 <FormLabel>Reason</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Damaged stock, Found item" {...field} disabled={isFormDisabled} />
+                  <Input placeholder="e.g., Damaged stock, Found item" {...field} value={field.value as string} disabled={isFormDisabled} /> {/* Type assertion */}
                 </FormControl>
                 <FormMessage />
               </FormItem>

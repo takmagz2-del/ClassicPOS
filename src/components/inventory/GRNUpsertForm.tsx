@@ -363,17 +363,17 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<GRNItem>
-              items={items as GRNItem[]}
+            <ItemFormList<GRNFormValues, GRNItem>
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={(item, idx, ctrl, errs) => (
-                <ProductItemFields
+              renderItem={(item, idx, ctrl, errs, isDisabled) => (
+                <ProductItemFields<GRNFormValues, GRNItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}
-                  isFormDisabled={isLinkedToPO || isFormDisabled}
+                  isFormDisabled={isLinkedToPO || isDisabled}
                   itemType="grn"
                 />
               )}

@@ -227,17 +227,17 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<StockAdjustmentItem>
-              items={items as StockAdjustmentItem[]}
+            <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={(item, idx, ctrl, errs) => (
-                <ProductItemFields
+              renderItem={(item, idx, ctrl, errs, isDisabled) => (
+                <ProductItemFields<StockAdjustmentFormValues, StockAdjustmentItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}
-                  isFormDisabled={isFormDisabled}
+                  isFormDisabled={isDisabled}
                   itemType="stockAdjustment"
                 />
               )}

@@ -65,7 +65,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
-      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensured productId is not optional
+      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0.01 }],
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -88,7 +88,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensured productId is not optional
+        items: [{ productId: "", quantity: 1, unitCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -134,7 +134,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]); // Ensured productId is not optional
+    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -295,17 +295,17 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<PurchaseOrderItem>
-              items={items as PurchaseOrderItem[]}
+            <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={(item, idx, ctrl, errs) => (
-                <ProductItemFields
+              renderItem={(item, idx, ctrl, errs, isDisabled) => (
+                <ProductItemFields<PurchaseOrderFormValues, PurchaseOrderItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}
-                  isFormDisabled={isFormDisabled}
+                  isFormDisabled={isDisabled}
                   itemType="purchaseOrder"
                 />
               )}
