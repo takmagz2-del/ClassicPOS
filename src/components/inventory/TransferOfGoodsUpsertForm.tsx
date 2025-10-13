@@ -35,6 +35,7 @@ const formSchema = z.object({
   transferToStoreId: z.string().min(1, { message: "Destination store is required." }),
   items: z.array(z.object({
     productId: z.string().min(1, { message: "Product is required." }),
+    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
     quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   })).min(1, { message: "At least one item is required for transfer." }),
   notes: z.string().optional().or(z.literal("")),
@@ -67,7 +68,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : startOfDay(new Date()),
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
-      items: initialTransfer?.items || [{ productId: "", productName: "", quantity: 1 }], // Fixed: Added productName
+      items: initialTransfer?.items || [{ productId: "", productName: "", quantity: 1 }],
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -113,7 +114,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         transferDate: startOfDay(new Date()),
         transferFromStoreId: "",
         transferToStoreId: "",
-        items: [{ productId: "", productName: "", quantity: 1 }], // Fixed: Added productName
+        items: [{ productId: "", productName: "", quantity: 1 }],
         notes: undefined,
       });
     }
@@ -158,7 +159,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", quantity: 1 }]); // Fixed: Added productName
+    form.setValue("items", [...items, { productId: "", productName: "", quantity: 1 }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -177,7 +178,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    extraProps?: { transferFromStoreId?: string; isFormDisabled?: boolean }
+    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -291,7 +292,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           name="transferToStoreId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>To Store (Destination)</FormLabel> {/* Fixed: Closing tag */}
+              <FormLabel>To Store (Destination)</FormLabel>
               <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
@@ -325,6 +326,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
+              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ transferFromStoreId, isFormDisabled }}
             />
           </CardContent>

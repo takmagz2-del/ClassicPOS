@@ -64,7 +64,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
-      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0.01 }], // Fixed: Ensure non-optional values
+      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensured productId is not optional
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -87,7 +87,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ productId: "", quantity: 1, unitCost: 0.01 }], // Fixed: Ensure non-optional values
+        items: [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensured productId is not optional
         notes: undefined,
       });
     }
@@ -133,7 +133,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]); // Fixed: Ensure non-optional values
+    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]); // Ensured productId is not optional
   };
 
   const handleRemoveItem = (index: number) => {
@@ -148,7 +148,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     index: number,
     control: Control<PurchaseOrderFormValues>,
     errors: FieldErrors<PurchaseOrderFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -361,7 +361,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderPurchaseOrderItem}
-              extraProps={{ isFormDisabled }}
+              isRemoveButtonDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>

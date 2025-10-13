@@ -39,8 +39,10 @@ const formSchema = z.object({
   receivingStoreId: z.string().min(1, { message: "Receiving store is required." }),
   items: z.array(z.object({
     productId: z.string().min(1, { message: "Product is required." }),
+    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
     quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
     unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
+    totalCost: z.coerce.number().min(0, { message: "Total cost must be a non-negative number." }), // Added totalCost to schema
   })).min(1, { message: "At least one item is required." }),
   notes: z.string().optional().or(z.literal("")),
 });
@@ -72,36 +74,39 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items.map(item => ({
         productId: item.productId,
-        productName: item.productName, // Ensure productName is present
+        productName: item.productName,
         quantityReceived: item.quantityReceived,
         unitCost: item.unitCost,
-        totalCost: item.totalCost, // Ensure totalCost is present
-      })) || [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Fixed: Added productName and totalCost
+        totalCost: item.totalCost,
+      })) || [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
       notes: initialGRN?.notes || undefined,
     },
   });
 
   const selectedPurchaseOrderId = form.watch("purchaseOrderId");
   const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
-  const isFormDisabled = isEditMode && initialGRN?.status === "approved";
+  const isFormDisabled = isEditMode && initialGRN?.status === "approved"; // Centralized disabling logic
 
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
       const po = getPurchaseOrderById(selectedPurchaseOrderId);
       if (po) {
         form.setValue("supplierId", po.supplierId);
-        form.setValue("items", po.items.map(item => ({
-          productId: item.productId,
-          productName: products.find(p => p.id === item.productId)?.name || "Unknown Product", // Populate productName
-          quantityReceived: item.quantity,
-          unitCost: item.unitCost,
-          totalCost: item.quantity * item.unitCost, // Populate totalCost
-        })));
+        form.setValue("items", po.items.map(item => {
+          const product = products.find(p => p.id === item.productId);
+          return {
+            productId: item.productId,
+            productName: product?.name || "Unknown Product",
+            quantityReceived: item.quantity,
+            unitCost: item.unitCost,
+            totalCost: item.quantity * item.unitCost,
+          };
+        }));
         form.setValue("notes", `Linked to PO: ${po.referenceNo}`);
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Fixed: Added productName and totalCost
+      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -130,7 +135,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Fixed: Added productName and totalCost
+        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -180,7 +185,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Fixed: Added productName and totalCost
+    form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -195,7 +200,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -397,6 +402,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderGRNItem}
+              isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
               extraProps={{ isLinkedToPO, isFormDisabled }}
             />
           </CardContent>

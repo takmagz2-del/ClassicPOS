@@ -34,6 +34,7 @@ const formSchema = z.object({
   storeId: z.string().min(1, { message: "Store is required." }),
   items: z.array(z.object({
     productId: z.string().min(1, { message: "Product is required." }),
+    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
     adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
     quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
     reason: z.string().min(3, { message: "Reason for adjustment is required." }),
@@ -59,13 +60,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     defaultValues: {
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
-      items: initialStockAdjustment?.items.map(item => ({
-        productId: item.productId,
-        productName: item.productName, // Ensure productName is present
-        adjustmentType: item.adjustmentType,
-        quantity: item.quantity,
-        reason: item.reason,
-      })) || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Fixed: Added productName
+      items: initialStockAdjustment?.items || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
@@ -77,20 +72,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items.map(item => ({
-          productId: item.productId,
-          productName: item.productName,
-          adjustmentType: item.adjustmentType,
-          quantity: item.quantity,
-          reason: item.reason,
-        })),
+        items: initialStockAdjustment.items,
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Fixed: Added productName
+        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
         notes: undefined,
       });
     }
@@ -134,7 +123,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]); // Fixed: Added productName
+    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -147,7 +136,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -308,6 +297,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
+              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ isFormDisabled }}
             />
           </CardContent>
