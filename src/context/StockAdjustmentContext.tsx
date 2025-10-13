@@ -1,0 +1,134 @@
+"use client";
+
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
+import { StockAdjustment, AdjustmentType, InventoryHistoryType, StockAdjustmentItem } from "@/types/inventory";
+import { toast } from "sonner";
+import { useStores } from "./StoreContext";
+import { useAuth } from "@/components/auth/AuthContext";
+import { useProducts } from "./ProductContext";
+import { useInventoryHistory } from "./InventoryHistoryContext";
+
+interface StockAdjustmentContextType {
+  stockAdjustments: StockAdjustment[];
+  addStockAdjustment: (newAdjustment: Omit<StockAdjustment, "id" | "storeName" | "approvedByUserName" | "approvalDate">) => void;
+  updateStockAdjustment: (updatedAdjustment: StockAdjustment) => void;
+  approveStockAdjustment: (adjustmentId: string) => void;
+  deleteStockAdjustment: (adjustmentId: string) => void;
+  getStockAdjustmentById: (adjustmentId: string) => StockAdjustment | undefined;
+}
+
+const StockAdjustmentContext = createContext<StockAdjustmentContextType | undefined>(undefined);
+
+export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) => {
+  const { stores } = useStores();
+  const { user } = useAuth();
+  const { updateProductStock, products } = useProducts();
+  const { addHistoryEntry } = useInventoryHistory();
+
+  const [stockAdjustments, setStockAdjustments] = useState<StockAdjustment[]>(() => {
+    if (typeof window !== "undefined") {
+      const storedAdjustments = localStorage.getItem("stockAdjustments");
+      return storedAdjustments ? JSON.parse(storedAdjustments) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("stockAdjustments", JSON.stringify(stockAdjustments));
+    }
+  }, [stockAdjustments]);
+
+  const addStockAdjustment = useCallback((newAdjustmentData: Omit<StockAdjustment, "id" | "storeName" | "approvedByUserName" | "approvalDate">) => {
+    const store = stores.find(s => s.id === newAdjustmentData.storeId);
+
+    if (!store) {
+      toast.error("Invalid store selected for adjustment.");
+      return;
+    }
+
+    const newAdjustment: StockAdjustment = {
+      ...newAdjustmentData,
+      id: crypto.randomUUID(),
+      storeName: store.name,
+      // Stock adjustments are considered 'pending' until approved, but for simplicity,
+      // we'll assume they are created by an authorized user and directly applied/logged.
+      // A more complex flow would involve a 'pending' status and a separate approval step.
+      approvedByUserId: user?.id,
+      approvedByUserName: user?.email,
+      approvalDate: new Date().toISOString(),
+    };
+
+    // Apply stock changes immediately upon creation (assuming creation implies approval for now)
+    newAdjustment.items.forEach(item => {
+      const product = products.find(p => p.id === item.productId);
+      if (product) {
+        let newStock = product.stock;
+        if (item.adjustmentType === AdjustmentType.Increase) {
+          newStock += item.quantity;
+        } else {
+          newStock -= item.quantity;
+        }
+        updateProductStock(item.productId, newStock);
+
+        addHistoryEntry({
+          type: item.adjustmentType === AdjustmentType.Increase ? InventoryHistoryType.SA_INCREASE : InventoryHistoryType.SA_DECREASE,
+          referenceId: newAdjustment.id,
+          description: `${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} ${item.quantity}x ${item.productName} due to: ${item.reason}`,
+          productId: item.productId,
+          quantityChange: item.adjustmentType === AdjustmentType.Increase ? item.quantity : -item.quantity,
+          currentStock: newStock,
+          storeId: newAdjustment.storeId,
+          userId: user?.id,
+        });
+      }
+    });
+
+    setStockAdjustments((prev) => [...prev, newAdjustment]);
+    toast.success(`Stock Adjustment created and applied.`);
+  }, [stores, user, products, updateProductStock, addHistoryEntry]);
+
+  // For simplicity, approveStockAdjustment will just log a message if called,
+  // as stock changes are applied on creation in this mock.
+  const approveStockAdjustment = useCallback((adjustmentId: string) => {
+    const adjustment = stockAdjustments.find(sa => sa.id === adjustmentId);
+    if (adjustment) {
+      toast.info(`Stock Adjustment "${adjustment.id.substring(0,8)}" is already applied.`);
+    }
+  }, [stockAdjustments]);
+
+
+  const updateStockAdjustment = useCallback((updatedAdjustment: StockAdjustment) => {
+    // In a real app, updating an adjustment would require reversing previous stock changes
+    // and applying new ones. For this mock, we'll just update the record.
+    setStockAdjustments((prev) =>
+      prev.map((sa) => (sa.id === updatedAdjustment.id ? updatedAdjustment : sa))
+    );
+    toast.success(`Stock Adjustment "${updatedAdjustment.id.substring(0,8)}" updated.`);
+  }, []);
+
+  const deleteStockAdjustment = useCallback((adjustmentId: string) => {
+    // In a real app, deleting an adjustment would require reversing its stock changes.
+    // For this mock, we'll just remove the record.
+    setStockAdjustments((prev) => prev.filter((sa) => sa.id !== adjustmentId));
+    toast.info("Stock Adjustment deleted.");
+  }, []);
+
+  const getStockAdjustmentById = useCallback((adjustmentId: string) => {
+    return stockAdjustments.find(sa => sa.id === adjustmentId);
+  }, [stockAdjustments]);
+
+  return (
+    <StockAdjustmentContext.Provider value={{ stockAdjustments, addStockAdjustment, updateStockAdjustment, approveStockAdjustment, deleteStockAdjustment, getStockAdjustmentById }}>
+      {children}
+    </StockAdjustmentContext.Provider>
+  );
+};
+
+export const useStockAdjustments = () => {
+  const context = useContext(StockAdjustmentContext);
+  if (context === undefined) {
+    throw new Error("useStockAdjustments must be used within a StockAdjustmentProvider");
+  }
+  return context;
+};
