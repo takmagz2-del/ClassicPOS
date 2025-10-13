@@ -30,12 +30,14 @@ const SalesHistory = () => {
   const { customers } = useCustomers();
   const { updateProductStock, products } = useProducts(); // Destructure products here
   const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
+  const { users } = useAuth(); // Get all users for employee filter
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
   const [customerFilter, setCustomerFilter] = useState<string>("all"); // New state for customer filter
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all"); // New state for employee filter
   const [sortKey, setSortKey] = useState<keyof Sale>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -97,7 +99,12 @@ const SalesHistory = () => {
       filteredSales = filteredSales.filter((sale) => sale.customerId === customerFilter);
     }
 
-    // 6. Sort
+    // 6. Filter by employee
+    if (employeeFilter !== "all") {
+      filteredSales = filteredSales.filter((sale) => sale.employeeId === employeeFilter || sale.heldByEmployeeId === employeeFilter);
+    }
+
+    // 7. Sort
     const sortedSales = [...filteredSales].sort((a, b) => {
       let compareValue = 0;
       if (sortKey === "date") {
@@ -109,7 +116,7 @@ const SalesHistory = () => {
     });
 
     return sortedSales;
-  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, customerFilter, sortKey, sortOrder]);
+  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, customerFilter, employeeFilter, sortKey, sortOrder]);
 
   const handleViewReceipt = (sale: Sale) => {
     setSelectedSaleForReceipt(sale);
@@ -146,7 +153,11 @@ const SalesHistory = () => {
       customerName: selectedSaleForRefund.customerName,
       discountPercentage: selectedSaleForRefund.discountPercentage,
       discountAmount: selectedSaleForRefund.discountAmount,
+      loyaltyPointsUsed: selectedSaleForRefund.loyaltyPointsUsed,
+      loyaltyPointsDiscountAmount: selectedSaleForRefund.loyaltyPointsDiscountAmount,
       taxRateApplied: selectedSaleForRefund.taxRateApplied,
+      employeeId: selectedSaleForRefund.employeeId, // Keep original employee ID
+      employeeName: selectedSaleForRefund.employeeName, // Keep original employee name
     };
 
     refundSale(newRefundTransaction);
@@ -246,6 +257,7 @@ const SalesHistory = () => {
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="on-hold">On Hold</SelectItem> {/* New filter option */}
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
@@ -275,6 +287,20 @@ const SalesHistory = () => {
               </SelectContent>
             </Select>
 
+            <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Employee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Employees</SelectItem>
+                {users.map((employee) => (
+                  <SelectItem key={employee.id} value={employee.id}>
+                    {employee.email} ({employee.role})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={sortKey} onValueChange={(value: keyof Sale) => setSortKey(value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort by" />
@@ -299,7 +325,7 @@ const SalesHistory = () => {
             sales={filteredAndSortedSales}
             onViewReceipt={handleViewReceipt}
             onRefundSale={handleRefundSale}
-            onSettleCreditSale={handleSettleCreditSale} // Pass the new prop
+            onSettleCreditSale={handleSettleCreditSale}
           />
         </CardContent>
       </Card>

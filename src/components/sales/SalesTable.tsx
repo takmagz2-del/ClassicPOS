@@ -16,6 +16,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Printer, Undo2, CheckCircle2 } from "lucide-react";
 import { usePaymentMethods } from "@/context/PaymentMethodContext"; // New import
+import { Badge } from "@/components/ui/badge"; // Import Badge for status
 
 interface SalesTableProps {
   sales: Sale[];
@@ -28,6 +29,21 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
   const { currentCurrency } = useCurrency();
   const { getPaymentMethodName } = usePaymentMethods(); // Use getPaymentMethodName from context
 
+  const getStatusBadgeVariant = (status: Sale["status"]) => {
+    switch (status) {
+      case "completed":
+        return "default";
+      case "pending":
+        return "secondary";
+      case "on-hold":
+        return "outline";
+      case "cancelled":
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -36,11 +52,10 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
             <TableHead>Sale ID</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Items</TableHead>
-            <TableHead className="text-right">Subtotal</TableHead>
-            <TableHead className="text-right">Tax</TableHead>
-            <TableHead className="text-right">Gift Card</TableHead>
             <TableHead className="text-right">Total</TableHead>
-            <TableHead className="text-center">Payment Method</TableHead> {/* New TableHead */}
+            <TableHead className="text-center">Payment Method</TableHead>
+            <TableHead>Employee</TableHead> {/* New TableHead */}
+            <TableHead>Held By</TableHead> {/* New TableHead */}
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Type</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -59,22 +74,17 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
                     </div>
                   ))}
                 </TableCell>
-                <TableCell className="text-right">{formatCurrency(sale.subtotal, currentCurrency)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(sale.tax, currentCurrency)}</TableCell>
-                <TableCell className="text-right">
-                  {sale.giftCardAmountUsed ? `-${formatCurrency(sale.giftCardAmountUsed, currentCurrency)}` : formatCurrency(0, currentCurrency)}
-                </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
-                <TableCell className="text-center capitalize">{sale.paymentMethodId ? getPaymentMethodName(sale.paymentMethodId) : "N/A"}</TableCell> {/* Display payment method name */}
+                <TableCell className="text-center capitalize">{sale.paymentMethodId ? getPaymentMethodName(sale.paymentMethodId) : "N/A"}</TableCell>
+                <TableCell>{sale.employeeName || "N/A"}</TableCell> {/* Display employeeName */}
+                <TableCell>{sale.heldByEmployeeName || "N/A"}</TableCell> {/* Display heldByEmployeeName */}
                 <TableCell className="text-center capitalize">
-                  <span className={sale.status === "pending" ? "text-orange-500 font-semibold" : ""}>
-                    {sale.status}
-                  </span>
+                  <Badge variant={getStatusBadgeVariant(sale.status)}>{sale.status}</Badge>
                 </TableCell>
                 <TableCell className="text-center capitalize">
-                  <span className={sale.type === "refund" ? "text-destructive font-semibold" : ""}>
+                  <Badge variant={sale.type === "refund" ? "destructive" : "secondary"}>
                     {sale.type}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onViewReceipt(sale)}>
@@ -98,7 +108,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={11} className="h-24 text-center">
+              <TableCell colSpan={10} className="h-24 text-center"> {/* Updated colspan */}
                 No sales recorded yet.
               </TableCell>
             </TableRow>
