@@ -28,6 +28,7 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
+import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 const formSchema = z.object({
   adjustmentDate: z.date({ required_error: "Adjustment date is required." }),
@@ -151,90 +152,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     form.setValue("items", newItems);
   };
 
-  const renderStockAdjustmentItem = (
-    item: StockAdjustmentItem,
-    index: number,
-    control: Control<StockAdjustmentFormValues>,
-    errors: FieldErrors<StockAdjustmentFormValues>,
-  ) => (
-    <>
-      <FormField
-        control={control}
-        name={`items.${index}.productId`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} (SKU: {product.sku})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.adjustmentType`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Type</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {Object.values(AdjustmentType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.quantity`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Quantity</FormLabel>
-            <FormControl>
-              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.reason`}
-        render={({ field }) => (
-          <FormItem className="sm:col-span-3">
-            <FormLabel>Reason</FormLabel>
-            <FormControl>
-              <Input placeholder="e.g., Damaged stock, Found item" {...field} disabled={isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
-  );
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -315,7 +232,15 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={renderStockAdjustmentItem}
+              renderItem={(item, idx, ctrl, errs) => (
+                <ProductItemFields
+                  index={idx}
+                  control={ctrl}
+                  errors={errs}
+                  isFormDisabled={isFormDisabled}
+                  itemType="stockAdjustment"
+                />
+              )}
               isRemoveButtonDisabled={isFormDisabled}
               isFormDisabled={isFormDisabled}
             />

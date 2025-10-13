@@ -28,6 +28,7 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
+import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 const formSchema = z.object({
   transferDate: z.date({ required_error: "Transfer date is required." }),
@@ -187,59 +188,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     form.setValue("items", newItems);
   };
 
-  const getAvailableProductsForTransfer = (currentProductId?: string) => {
-    // In a real multi-store app, this would filter products based on stock in `transferFromStoreId`
-    // For this mock, we'll just filter by trackStock and stock > 0 globally.
-    return products.filter(p => p.trackStock && p.stock > 0);
-  };
-
-  const renderTransferOfGoodsItem = (
-    item: TransferOfGoodsItem,
-    index: number,
-    control: Control<TransferOfGoodsFormValues>,
-    errors: FieldErrors<TransferOfGoodsFormValues>,
-  ) => (
-    <>
-      <FormField
-        control={control}
-        name={`items.${index}.productId`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {getAvailableProductsForTransfer(item.productId).map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} (SKU: {product.sku}) - Stock: {product.stock}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.quantity`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Quantity</FormLabel>
-            <FormControl>
-              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
-  );
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -344,7 +292,16 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={renderTransferOfGoodsItem}
+              renderItem={(item, idx, ctrl, errs) => (
+                <ProductItemFields
+                  index={idx}
+                  control={ctrl}
+                  errors={errs}
+                  isFormDisabled={isFormDisabled}
+                  itemType="transferOfGoods"
+                  transferFromStoreId={transferFromStoreId}
+                />
+              )}
               isRemoveButtonDisabled={isFormDisabled}
               isFormDisabled={isFormDisabled}
             />

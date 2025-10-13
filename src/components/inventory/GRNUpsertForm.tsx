@@ -30,6 +30,7 @@ import { usePurchaseOrders } from "@/context/PurchaseOrderContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
+import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 const formSchema = z.object({
   purchaseOrderId: z.string().optional().or(z.literal("")),
@@ -222,66 +223,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
 
   const availablePurchaseOrders = purchaseOrders.filter(po => po.status === "pending" || po.status === "completed");
 
-  const renderGRNItem = (
-    item: GRNItem,
-    index: number,
-    control: Control<GRNFormValues>,
-    errors: FieldErrors<GRNFormValues>,
-  ) => (
-    <>
-      <FormField
-        control={control}
-        name={`items.${index}.productId`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO || isFormDisabled}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} (SKU: {product.sku})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.quantityReceived`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Quantity</FormLabel>
-            <FormControl>
-              <Input type="number" min="1" {...field} disabled={isLinkedToPO || isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.unitCost`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unit Cost</FormLabel>
-            <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} disabled={isLinkedToPO || isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
-  );
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -427,7 +368,15 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={renderGRNItem}
+              renderItem={(item, idx, ctrl, errs) => (
+                <ProductItemFields
+                  index={idx}
+                  control={ctrl}
+                  errors={errs}
+                  isFormDisabled={isLinkedToPO || isFormDisabled}
+                  itemType="grn"
+                />
+              )}
               isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
               isFormDisabled={isFormDisabled}
             />

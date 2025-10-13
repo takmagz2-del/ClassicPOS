@@ -28,6 +28,7 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
+import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 const formSchema = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required." }),
@@ -142,66 +143,6 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   };
 
   const isFormDisabled = isEditMode && initialPurchaseOrder?.status !== "pending";
-
-  const renderPurchaseOrderItem = (
-    item: PurchaseOrderItem,
-    index: number,
-    control: Control<PurchaseOrderFormValues>,
-    errors: FieldErrors<PurchaseOrderFormValues>,
-  ) => (
-    <>
-      <FormField
-        control={control}
-        name={`items.${index}.productId`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {products.map((product) => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name} (SKU: {product.sku})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.quantity`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Quantity</FormLabel>
-            <FormControl>
-              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name={`items.${index}.unitCost`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unit Cost</FormLabel>
-            <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} disabled={isFormDisabled} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
-  );
 
   return (
     <Form {...form}>
@@ -359,7 +300,15 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
-              renderItem={renderPurchaseOrderItem}
+              renderItem={(item, idx, ctrl, errs) => (
+                <ProductItemFields
+                  index={idx}
+                  control={ctrl}
+                  errors={errs}
+                  isFormDisabled={isFormDisabled}
+                  itemType="purchaseOrder"
+                />
+              )}
               isRemoveButtonDisabled={isFormDisabled}
               isFormDisabled={isFormDisabled}
             />
