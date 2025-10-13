@@ -131,7 +131,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  const items: PurchaseOrderFormValues['items'] = form.watch("items");
+  const items = form.watch("items");
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]);
@@ -296,15 +296,15 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
-              items={items}
+              items={items as PurchaseOrderItem[]}
               onRemoveItem={handleRemoveItem}
-              control={form.control}
-              errors={form.formState.errors}
+              control={form.control as Control<PurchaseOrderFormValues>}
+              errors={form.formState.errors as FieldErrors<PurchaseOrderFormValues>}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
                 <ProductItemFields<PurchaseOrderFormValues, PurchaseOrderItem>
                   index={idx}
-                  control={ctrl}
-                  errors={errs}
+                  control={ctrl as Control<PurchaseOrderFormValues>}
+                  errors={errs as FieldErrors<PurchaseOrderFormValues>}
                   isFormDisabled={isDisabled}
                   itemType="purchaseOrder"
                 />

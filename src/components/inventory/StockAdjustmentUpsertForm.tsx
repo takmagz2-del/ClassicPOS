@@ -141,7 +141,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     onClose();
   };
 
-  const items: StockAdjustmentFormValues['items'] = form.watch("items");
+  const items = form.watch("items");
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
@@ -228,15 +228,15 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           </CardHeader>
           <CardContent>
             <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
-              items={items}
+              items={items as StockAdjustmentItem[]}
               onRemoveItem={handleRemoveItem}
-              control={form.control}
-              errors={form.formState.errors}
+              control={form.control as Control<StockAdjustmentFormValues>}
+              errors={form.formState.errors as FieldErrors<StockAdjustmentFormValues>}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
                 <ProductItemFields<StockAdjustmentFormValues, StockAdjustmentItem>
                   index={idx}
-                  control={ctrl}
-                  errors={errs}
+                  control={ctrl as Control<StockAdjustmentFormValues>}
+                  errors={errs as FieldErrors<StockAdjustmentFormValues>}
                   isFormDisabled={isDisabled}
                   itemType="stockAdjustment"
                 />

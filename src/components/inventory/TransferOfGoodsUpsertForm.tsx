@@ -175,7 +175,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
-  const items: TransferOfGoodsFormValues['items'] = form.watch("items");
+  const items = form.watch("items");
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
@@ -288,15 +288,15 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
-              items={items}
+              items={items as TransferOfGoodsItem[]}
               onRemoveItem={handleRemoveItem}
-              control={form.control}
-              errors={form.formState.errors}
+              control={form.control as Control<TransferOfGoodsFormValues>}
+              errors={form.formState.errors as FieldErrors<TransferOfGoodsFormValues>}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
                 <ProductItemFields<TransferOfGoodsFormValues, TransferOfGoodsItem>
                   index={idx}
-                  control={ctrl}
-                  errors={errs}
+                  control={ctrl as Control<TransferOfGoodsFormValues>}
+                  errors={errs as FieldErrors<TransferOfGoodsFormValues>}
                   isFormDisabled={isDisabled}
                   itemType="transferOfGoods"
                   transferFromStoreId={transferFromStoreId}

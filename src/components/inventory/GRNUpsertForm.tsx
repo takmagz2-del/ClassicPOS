@@ -210,7 +210,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  const items: GRNFormValues['items'] = form.watch("items");
+  const items = form.watch("items");
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
@@ -364,15 +364,15 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, GRNItem>
-              items={items}
+              items={items as GRNItem[]}
               onRemoveItem={handleRemoveItem}
-              control={form.control}
-              errors={form.formState.errors}
+              control={form.control as Control<GRNFormValues>}
+              errors={form.formState.errors as FieldErrors<GRNFormValues>}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
                 <ProductItemFields<GRNFormValues, GRNItem>
                   index={idx}
-                  control={ctrl}
-                  errors={errs}
+                  control={ctrl as Control<GRNFormValues>}
+                  errors={errs as FieldErrors<GRNFormValues>}
                   isFormDisabled={isLinkedToPO || isDisabled}
                   itemType="grn"
                 />
