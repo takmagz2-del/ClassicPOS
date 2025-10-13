@@ -20,12 +20,16 @@ interface BarcodeScannerDialogProps {
 const qrcodeRegionId = "html5qr-code-full-region";
 
 const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScannerDialogProps) => {
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const html5QrcodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
+    // Get the current scanner instance from the ref
+    let scanner = html5QrcodeScannerRef.current;
+
     if (isOpen) {
-      if (!scannerRef.current) {
-        scannerRef.current = new Html5QrcodeScanner(
+      // Initialize scanner if it hasn't been initialized yet
+      if (!scanner) {
+        scanner = new Html5QrcodeScanner(
           qrcodeRegionId,
           {
             fps: 10,
@@ -40,9 +44,8 @@ const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScanner
           },
           false // verbose
         );
+        html5QrcodeScannerRef.current = scanner; // Store the new instance in the ref
       }
-
-      const html5QrcodeScanner = scannerRef.current;
 
       const handleScanSuccess = (decodedText: string) => {
         onScanSuccess(decodedText);
@@ -55,25 +58,27 @@ const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScanner
         // Optionally show a toast for persistent errors, but avoid spamming
       };
 
-      html5QrcodeScanner.render(handleScanSuccess, handleScanError);
-
-      return () => {
-        if (html5QrcodeScanner.is
-          Scanning) {
-          html5QrcodeScanner.stop().catch((err) => {
-            console.error("Failed to stop html5QrcodeScanner", err);
-          });
-        }
-      };
-    } else {
-      // If dialog is closed, ensure scanner is stopped
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch((err) => {
-          console.error("Failed to stop html5QrcodeScanner on close", err);
-        });
+      // Only render if the scanner is not already scanning
+      if (scanner && !scanner.isScanning) {
+        scanner.render(handleScanSuccess, handleScanError);
       }
     }
-  }, [isOpen, onScanSuccess, onClose]);
+
+    // Cleanup function for when the dialog closes or component unmounts
+    return () => {
+      const currentScanner = html5QrcodeScannerRef.current;
+      if (currentScanner && currentScanner.isScanning) {
+        currentScanner.stop().catch((err) => {
+          console.error("Failed to stop html5QrcodeScanner", err);
+        });
+        // If the dialog is closing (isOpen becomes false), clear the ref
+        // This ensures a fresh scanner instance if the dialog is opened again
+        if (!isOpen) {
+          html5QrcodeScannerRef.current = null;
+        }
+      }
+    };
+  }, [isOpen, onScanSuccess, onClose]); // Dependencies are correct
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
