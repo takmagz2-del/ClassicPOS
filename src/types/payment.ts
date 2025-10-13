@@ -1,3 +1,5 @@
+"use client";
+
 export interface PaymentMethod {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface PaymentMethod {
 
 export const defaultPaymentMethods: PaymentMethod[] = [
   { id: "pm-cash-card", name: "Cash/Card", isCashEquivalent: true, isCredit: false, isBNPL: false },
+  { id: "pm-zig-wallet", name: "ZiG Digital Wallet", isCashEquivalent: true, isCredit: false, isBNPL: false }, // Added ZiG Digital Wallet
   { id: "pm-apple-pay", name: "Apple Pay", isCashEquivalent: true, isCredit: false, isBNPL: false },
   { id: "pm-google-pay", name: "Google Pay", isCashEquivalent: true, isCredit: false, isBNPL: false },
   { id: "pm-credit-account", name: "Credit Account", isCashEquivalent: false, isCredit: true, isBNPL: false },

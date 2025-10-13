@@ -16,12 +16,13 @@ import { Customer } from "@/types/customer";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useReceiptSettings } from "@/context/ReceiptSettingsContext";
-import { Printer } from "lucide-react";
+import { Printer, Mail, Share2 } from "lucide-react"; // Added Mail and Share2 icons
 import { format } from "date-fns";
 import { useProducts } from "@/context/ProductContext";
 import { sendPrintJobToBackend } from "@/services/printService";
 import { usePrinterSettings } from "@/context/PrinterSettingsContext";
-import { useCategories } from "@/context/CategoryContext"; // New import
+import { useCategories } from "@/context/CategoryContext";
+import { toast } from "sonner"; // Import toast
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -35,11 +36,21 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   const { receiptSettings } = useReceiptSettings();
   const { printerSettings } = usePrinterSettings();
   const { products } = useProducts();
-  const { getCategoryName } = useCategories(); // Use getCategoryName
+  const { getCategoryName } = useCategories();
 
   const handlePrint = async () => {
     await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
     onClose();
+  };
+
+  const handleEmailReceipt = () => {
+    toast.info("Email receipt functionality requires backend integration.");
+    // In a real app, you'd trigger an API call to send the email
+  };
+
+  const handleShareReceipt = () => {
+    toast.info("Share receipt functionality requires backend/native app integration.");
+    // In a real app, you'd use Web Share API or native sharing plugins
   };
 
   // Calculate loyalty points discount amount for display on receipt
@@ -172,11 +183,16 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             <p>{receiptSettings.thankYouMessage}</p>
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          <Button onClick={handlePrint}>
+        <DialogFooter className="flex flex-col sm:flex-row sm:justify-between gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={handleEmailReceipt} className="w-full sm:w-auto">
+              <Mail className="mr-2 h-4 w-4" /> Email
+            </Button>
+            <Button variant="outline" onClick={handleShareReceipt} className="w-full sm:w-auto">
+              <Share2 className="mr-2 h-4 w-4" /> Share
+            </Button>
+          </div>
+          <Button onClick={handlePrint} className="w-full sm:w-auto">
             <Printer className="mr-2 h-4 w-4" /> Send to Printer
           </Button>
         </DialogFooter>
