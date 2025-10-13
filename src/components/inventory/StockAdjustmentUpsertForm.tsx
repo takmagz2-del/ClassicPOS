@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form"; // Removed FormProvider import
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import { useStores } from "@/context/StoreContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ItemFormList from "./ItemFormList"; // Import the new component
+import ItemFormList from "./ItemFormList";
 
 const formSchema = z.object({
   adjustmentDate: z.date({ required_error: "Adjustment date is required." }),
@@ -129,7 +129,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   };
 
   return (
-    // Removed FormProvider
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
@@ -196,18 +195,20 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         />
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Items to Adjust</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList
               items={items}
               products={products}
-              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
               formType="stockAdjustment"
-              control={form.control} // Pass control
-              errors={form.formState.errors} // Pass errors
+              control={form.control}
+              errors={form.formState.errors}
             />
           </CardContent>
         </Card>

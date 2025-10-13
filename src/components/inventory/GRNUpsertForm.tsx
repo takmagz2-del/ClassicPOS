@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form"; // Removed FormProvider import
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, startOfDay } from "date-fns"; // Import startOfDay
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { GoodsReceivedNote, GRNItem, GRNStatus } from "@/types/inventory";
 import { useSuppliers } from "@/context/SupplierContext";
@@ -29,7 +29,7 @@ import { useProducts } from "@/context/ProductContext";
 import { usePurchaseOrders } from "@/context/PurchaseOrderContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ItemFormList from "./ItemFormList"; // Import the new component
+import ItemFormList from "./ItemFormList";
 
 const formSchema = z.object({
   purchaseOrderId: z.string().optional().or(z.literal("")),
@@ -47,7 +47,6 @@ const formSchema = z.object({
 
 type GRNFormValues = z.infer<typeof formSchema>;
 
-// Define a type for the data expected by addGRN in the context
 type NewGRNData = Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "receivingStoreName" | "approvedByUserName" | "approvalDate">;
 
 interface GRNUpsertFormProps {
@@ -185,7 +184,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const availablePurchaseOrders = purchaseOrders.filter(po => po.status === "pending" || po.status === "completed");
 
   return (
-    // Removed FormProvider
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
@@ -317,19 +315,21 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         />
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Received Items</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isLinkedToPO}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList
               items={items}
               products={products}
-              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
               formType="grn"
               isLinkedToPO={isLinkedToPO}
-              control={form.control} // Pass control
-              errors={form.formState.errors} // Pass errors
+              control={form.control}
+              errors={form.formState.errors}
             />
           </CardContent>
         </Card>

@@ -19,7 +19,6 @@ import { AdjustmentType } from "@/types/inventory";
 interface ItemFormListProps {
   items: any[]; // Can be PurchaseOrderItem, GRNItem, or StockAdjustmentItem
   products: Product[];
-  onAddItem: () => void;
   onRemoveItem: (index: number) => void;
   formType: "purchaseOrder" | "grn" | "stockAdjustment" | "transfer";
   isLinkedToPO?: boolean; // Specific to GRN form
@@ -31,7 +30,6 @@ interface ItemFormListProps {
 const ItemFormList = ({
   items,
   products,
-  onAddItem,
   onRemoveItem,
   formType,
   isLinkedToPO = false,
@@ -155,7 +153,7 @@ const ItemFormList = ({
               />
             )}
           </div>
-          {items.length > 1 && !isLinkedToPO && (
+          {items.length > 0 && !isLinkedToPO && ( // Only show remove button if there's at least one item
             <Button type="button" variant="ghost" size="icon" onClick={() => onRemoveItem(index)}>
               <XCircle className="h-5 w-5 text-destructive" />
               <span className="sr-only">Remove Item</span>
@@ -168,9 +166,6 @@ const ItemFormList = ({
           {errors.items.message as string}
         </p>
       )}
-      <Button type="button" variant="outline" size="sm" onClick={onAddItem} disabled={isLinkedToPO}>
-        <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-      </Button>
     </div>
   );
 };

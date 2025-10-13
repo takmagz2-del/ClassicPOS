@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form"; // Removed FormProvider import
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -20,21 +20,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, MinusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, startOfDay } from "date-fns"; // Import startOfDay
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { PurchaseOrder, PurchaseOrderItem, PurchaseOrderStatus, PURCHASE_ORDER_STATUSES } from "@/types/inventory"; // Import PURCHASE_ORDER_STATUSES
+import { PurchaseOrder, PurchaseOrderItem, PurchaseOrderStatus, PURCHASE_ORDER_STATUSES } from "@/types/inventory";
 import { useSuppliers } from "@/context/SupplierContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ItemFormList from "./ItemFormList"; // Import the new component
+import ItemFormList from "./ItemFormList";
 
 const formSchema = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required." }),
   referenceNo: z.string().min(1, { message: "Reference number is required." }),
   orderDate: z.date({ required_error: "Order date is required." }),
   expectedDeliveryDate: z.date().optional(),
-  status: z.enum(PURCHASE_ORDER_STATUSES), // Use z.enum with the runtime array
+  status: z.enum(PURCHASE_ORDER_STATUSES),
   items: z.array(z.object({
     productId: z.string().min(1, { message: "Product is required." }),
     quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -61,11 +61,11 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     defaultValues: {
       supplierId: initialPurchaseOrder?.supplierId || "",
       referenceNo: initialPurchaseOrder?.referenceNo || "",
-      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()), // Use startOfDay
+      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
-      status: initialPurchaseOrder?.status || "pending", // Use string literal "pending"
+      status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0 }],
-      notes: initialPurchaseOrder?.notes || undefined, // Ensure optional notes are undefined if empty
+      notes: initialPurchaseOrder?.notes || undefined,
     },
   });
 
@@ -142,7 +142,6 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   };
 
   return (
-    // Removed FormProvider
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
@@ -284,18 +283,20 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Order Items</CardTitle>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList
               items={items}
               products={products}
-              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
               formType="purchaseOrder"
-              control={form.control} // Pass control
-              errors={form.formState.errors} // Pass errors
+              control={form.control}
+              errors={form.formState.errors}
             />
           </CardContent>
         </Card>
