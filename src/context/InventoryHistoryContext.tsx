@@ -4,13 +4,12 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import { InventoryHistoryEntry, InventoryHistoryType } from "@/types/inventory";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useStores } from "./StoreContext";
-// import { useProducts } from "./ProductContext"; // Removed to break circular dependency
 
 interface InventoryHistoryContextType {
   history: InventoryHistoryEntry[];
   addHistoryEntry: (
-    entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName" | "productName"> &
-           ({ productId?: never; productName?: never } | { productId: string; productName: string })
+    entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName"> &
+           ({ productId: string; productName: string } | { productId?: never; productName?: never })
   ) => void;
 }
 
@@ -19,7 +18,6 @@ const InventoryHistoryContext = createContext<InventoryHistoryContextType | unde
 export const InventoryHistoryProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const { stores } = useStores();
-  // const { products } = useProducts(); // Removed to break circular dependency
 
   const [history, setHistory] = useState<InventoryHistoryEntry[]>(() => {
     if (typeof window !== "undefined") {
@@ -35,8 +33,8 @@ export const InventoryHistoryProvider = ({ children }: { children: ReactNode }) 
     }
   }, [history]);
 
-  const addHistoryEntry = useCallback((entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName" | "productName"> &
-  ({ productId?: never; productName?: never } | { productId: string; productName: string })) => {
+  const addHistoryEntry = useCallback((entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName"> &
+  ({ productId: string; productName: string } | { productId?: never; productName?: never })) => {
     const storeName = entry.storeId ? stores.find(s => s.id === entry.storeId)?.name : undefined;
 
     const newEntry: InventoryHistoryEntry = {
@@ -48,7 +46,7 @@ export const InventoryHistoryProvider = ({ children }: { children: ReactNode }) 
       productName: entry.productName, // productName is now guaranteed by type if productId is present
     };
     setHistory((prev) => [...prev, newEntry]);
-  }, [user, stores]); // Removed 'products' from dependencies
+  }, [user, stores]);
 
   return (
     <InventoryHistoryContext.Provider value={{ history, addHistoryEntry }}>
