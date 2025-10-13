@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form"; // Import FormProvider
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { useStores } from "@/context/StoreContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ItemFormList from "./ItemFormList"; // Import the new component
 
 const formSchema = z.object({
   transferDate: z.date({ required_error: "Transfer date is required." }),
@@ -67,7 +68,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items || [{ productId: "", quantity: 1 }],
-      notes: initialTransfer?.notes || "",
+      notes: initialTransfer?.notes || undefined,
     },
   });
 
@@ -102,7 +103,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         transferFromStoreId: initialTransfer.transferFromStoreId,
         transferToStoreId: initialTransfer.transferToStoreId,
         items: initialTransfer.items,
-        notes: initialTransfer.notes,
+        notes: initialTransfer.notes || undefined,
       });
     } else {
       form.reset({
@@ -110,7 +111,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         transferFromStoreId: "",
         transferToStoreId: "",
         items: [{ productId: "", quantity: 1 }],
-        notes: "",
+        notes: undefined,
       });
     }
   }, [initialTransfer, form]);
@@ -130,14 +131,14 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: values.transferFromStoreId,
       transferToStoreId: values.transferToStoreId,
       items: transferItems,
-      notes: values.notes,
+      notes: values.notes || undefined,
     };
 
     let transferToSubmit: Omit<TransferOfGoods, "id" | "status" | "transferFromStoreName" | "transferToStoreName" | "approvedByUserName" | "approvalDate" | "receivedByUserName" | "receivedDate"> | TransferOfGoods;
 
     if (isEditMode) {
       transferToSubmit = {
-        ...initialTransfer!, // Keep existing ID, status, names, approvedBy, etc.
+        ...initialTransfer!,
         ...baseTransfer,
         id: initialTransfer!.id,
       };
@@ -161,187 +162,138 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     form.setValue("items", newItems);
   };
 
-  const availableProductsInFromStore = products.filter(p => p.trackStock && p.stock > 0); // Simplified: assuming all products are in all stores for now
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="transferDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Transfer Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="transferFromStoreId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>From Store (Origin)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select originating store" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {stores.map((store) => (
-                    <SelectItem key={store.id} value={store.id}>
-                      {store.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="transferToStoreId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>To Store (Destination)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select destination store" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {stores.map((store) => (
-                    <SelectItem key={store.id} value={store.id}>
-                      {store.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Items to Transfer</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {items.map((item, index) => (
-              <div key={index} className="flex items-end gap-2 border-b pb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.productId`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {availableProductsInFromStore.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name} (SKU: {product.sku}) - Stock: {product.stock}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.quantity`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {items.length > 1 && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                    <XCircle className="h-5 w-5 text-destructive" />
-                    <span className="sr-only">Remove Item</span>
-                  </Button>
-                )}
-              </div>
-            ))}
-            {form.formState.errors.items && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.items.message}
-              </p>
+    <FormProvider {...form}> {/* Wrap with FormProvider */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="transferDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Transfer Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
             )}
-          </CardContent>
-        </Card>
+          />
+          <FormField
+            control={form.control}
+            name="transferFromStoreId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>From Store (Origin)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select originating store" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {stores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="transferToStoreId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>To Store (Destination)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select destination store" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {stores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Any additional notes for this transfer..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Items to Transfer</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ItemFormList
+                items={items}
+                products={products}
+                onAddItem={handleAddItem}
+                onRemoveItem={handleRemoveItem}
+                formType="transfer"
+                transferFromStoreId={transferFromStoreId}
+              />
+            </CardContent>
+          </Card>
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Any additional notes for this transfer..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full" disabled={isEditMode && initialTransfer?.status !== "pending"}>
+            {isEditMode ? "Save Changes" : "Create Transfer"}
+          </Button>
+          {isEditMode && initialTransfer?.status !== "pending" && (
+            <p className="text-sm text-muted-foreground text-center mt-2">
+              Only pending transfers can be edited.
+            </p>
           )}
-        />
-
-        <Button type="submit" className="w-full" disabled={isEditMode && initialTransfer?.status !== "pending"}>
-          {isEditMode ? "Save Changes" : "Create Transfer"}
-        </Button>
-        {isEditMode && initialTransfer?.status !== "pending" && (
-          <p className="text-sm text-muted-foreground text-center mt-2">
-            Only pending transfers can be edited.
-          </p>
-        )}
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 

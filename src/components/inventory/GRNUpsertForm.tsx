@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form"; // Import FormProvider
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { useProducts } from "@/context/ProductContext";
 import { usePurchaseOrders } from "@/context/PurchaseOrderContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ItemFormList from "./ItemFormList"; // Import the new component
 
 const formSchema = z.object({
   purchaseOrderId: z.string().optional().or(z.literal("")),
@@ -51,7 +52,7 @@ type NewGRNData = Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "re
 
 interface GRNUpsertFormProps {
   initialGRN?: GoodsReceivedNote;
-  onGRNSubmit: (grn: GoodsReceivedNote | NewGRNData) => void; // Refined type
+  onGRNSubmit: (grn: GoodsReceivedNote | NewGRNData) => void;
   onClose: () => void;
 }
 
@@ -68,14 +69,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       purchaseOrderId: initialGRN?.purchaseOrderId || "",
       supplierId: initialGRN?.supplierId || "",
       referenceNo: initialGRN?.referenceNo || "",
-      receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()), // Use startOfDay
+      receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items.map(item => ({
         productId: item.productId,
         quantityReceived: item.quantityReceived,
         unitCost: item.unitCost,
       })) || [{ productId: "", quantityReceived: 1, unitCost: 0 }],
-      notes: initialGRN?.notes || "",
+      notes: initialGRN?.notes || undefined,
     },
   });
 
@@ -92,14 +93,12 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           quantityReceived: item.quantity,
           unitCost: item.unitCost,
         })));
-        // Optionally set referenceNo or notes from PO
         form.setValue("notes", `Linked to PO: ${po.referenceNo}`);
       }
     } else if (!isEditMode) {
-      // Clear PO-related fields if "none" is selected and not in edit mode
       form.setValue("supplierId", "");
       form.setValue("items", [{ productId: "", quantityReceived: 1, unitCost: 0 }]);
-      form.setValue("notes", "");
+      form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode]);
 
@@ -116,17 +115,17 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           quantityReceived: item.quantityReceived,
           unitCost: item.unitCost,
         })),
-        notes: initialGRN.notes,
+        notes: initialGRN.notes || undefined,
       });
     } else {
       form.reset({
         purchaseOrderId: "",
         supplierId: "",
         referenceNo: "",
-        receivedDate: startOfDay(new Date()), // Use startOfDay
+        receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
         items: [{ productId: "", quantityReceived: 1, unitCost: 0 }],
-        notes: "",
+        notes: undefined,
       });
     }
   }, [initialGRN, form]);
@@ -153,14 +152,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivingStoreId: values.receivingStoreId,
       items: grnItems,
       totalValue: totalValue,
-      notes: values.notes,
+      notes: values.notes || undefined,
     };
 
-    let grnToSubmit: GoodsReceivedNote | NewGRNData; // Use the refined type
+    let grnToSubmit: GoodsReceivedNote | NewGRNData;
 
     if (isEditMode) {
       grnToSubmit = {
-        ...initialGRN!, // Keep existing status, approvedBy, etc.
+        ...initialGRN!,
         ...baseGRN,
         id: initialGRN!.id,
       };
@@ -183,241 +182,181 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     form.setValue("items", newItems);
   };
 
-  const availablePurchaseOrders = purchaseOrders.filter(po => po.status === "pending" || po.status === "completed"); // Can link to pending or completed POs
+  const availablePurchaseOrders = purchaseOrders.filter(po => po.status === "pending" || po.status === "completed");
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="purchaseOrderId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Link to Purchase Order (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Purchase Order" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No Purchase Order</SelectItem>
-                  {availablePurchaseOrders.map((po) => (
-                    <SelectItem key={po.id} value={po.id}>
-                      {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Linking to a PO will pre-fill supplier and item details.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="supplierId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a supplier" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="referenceNo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reference Number</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., GRN-2023-001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="receivedDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Received Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+    <FormProvider {...form}> {/* Wrap with FormProvider */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="purchaseOrderId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Link to Purchase Order (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Purchase Order" />
+                    </SelectTrigger>
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="receivingStoreId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Receiving Store</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a receiving store" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {stores.map((store) => (
-                    <SelectItem key={store.id} value={store.id}>
-                      {store.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Received Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isLinkedToPO}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {items.map((item, index) => (
-              <div key={index} className="flex items-end gap-2 border-b pb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.productId`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name} (SKU: {product.sku})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.quantityReceived`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity Received</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} disabled={isLinkedToPO} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.unitCost`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unit Cost</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" min="0.01" {...field} disabled={isLinkedToPO} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {items.length > 1 && !isLinkedToPO && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                    <XCircle className="h-5 w-5 text-destructive" />
-                    <span className="sr-only">Remove Item</span>
-                  </Button>
-                )}
-              </div>
-            ))}
-            {form.formState.errors.items && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.items.message}
-              </p>
+                  <SelectContent>
+                    <SelectItem value="none">No Purchase Order</SelectItem>
+                    {availablePurchaseOrders.map((po) => (
+                      <SelectItem key={po.id} value={po.id}>
+                        {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Linking to a PO will pre-fill supplier and item details.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
-          </CardContent>
-        </Card>
+          />
+          <FormField
+            control={form.control}
+            name="supplierId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Supplier</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a supplier" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="referenceNo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reference Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., GRN-2023-001" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="receivedDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Received Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="receivingStoreId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Receiving Store</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a receiving store" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {stores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Any additional notes for this Goods Received Note..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Received Items</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ItemFormList
+                items={items}
+                products={products}
+                onAddItem={handleAddItem}
+                onRemoveItem={handleRemoveItem}
+                formType="grn"
+                isLinkedToPO={isLinkedToPO}
+              />
+            </CardContent>
+          </Card>
+
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Any additional notes for this Goods Received Note..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full" disabled={isEditMode && initialGRN?.status === "approved"}>
+            {isEditMode ? "Save Changes" : "Create GRN"}
+          </Button>
+          {isEditMode && initialGRN?.status === "approved" && (
+            <p className="text-sm text-muted-foreground text-center mt-2">
+              Approved GRNs cannot be edited.
+            </p>
           )}
-        />
-
-        <Button type="submit" className="w-full" disabled={isEditMode && initialGRN?.status === "approved"}>
-          {isEditMode ? "Save Changes" : "Create GRN"}
-        </Button>
-        {isEditMode && initialGRN?.status === "approved" && (
-          <p className="text-sm text-muted-foreground text-center mt-2">
-            Approved GRNs cannot be edited.
-          </p>
-        )}
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 

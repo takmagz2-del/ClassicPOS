@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form"; // Import FormProvider
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { useSuppliers } from "@/context/SupplierContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ItemFormList from "./ItemFormList"; // Import the new component
 
 const formSchema = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required." }),
@@ -46,7 +47,7 @@ type PurchaseOrderFormValues = z.infer<typeof formSchema>;
 
 interface PurchaseOrderUpsertFormProps {
   initialPurchaseOrder?: PurchaseOrder;
-  onPurchaseOrderSubmit: (order: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">) => void; // Changed type
+  onPurchaseOrderSubmit: (order: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">) => void;
   onClose: () => void;
 }
 
@@ -60,11 +61,11 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     defaultValues: {
       supplierId: initialPurchaseOrder?.supplierId || "",
       referenceNo: initialPurchaseOrder?.referenceNo || "",
-      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()), // Use startOfDay
+      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
-      status: initialPurchaseOrder?.status || "pending", // Use string literal "pending"
+      status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0 }],
-      notes: initialPurchaseOrder?.notes || "",
+      notes: initialPurchaseOrder?.notes || undefined, // Ensure optional notes are undefined if empty
     },
   });
 
@@ -77,17 +78,17 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
         items: initialPurchaseOrder.items,
-        notes: initialPurchaseOrder.notes,
+        notes: initialPurchaseOrder.notes || undefined,
       });
     } else {
       form.reset({
         supplierId: "",
         referenceNo: "",
-        orderDate: startOfDay(new Date()), // Use startOfDay
+        orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
-        status: "pending", // Use string literal "pending"
+        status: "pending",
         items: [{ productId: "", quantity: 1, unitCost: 0 }],
-        notes: "",
+        notes: undefined,
       });
     }
   }, [initialPurchaseOrder, form]);
@@ -95,14 +96,12 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
-    // Explicitly map items to ensure correct type
     const orderItems: PurchaseOrderItem[] = values.items.map(item => ({
       productId: item.productId,
       quantity: item.quantity,
       unitCost: item.unitCost,
     }));
 
-    // This object will be used for both new and updated orders, but it doesn't include supplierName
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
       referenceNo: values.referenceNo,
@@ -111,22 +110,19 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       status: values.status,
       items: orderItems,
       totalValue: totalValue,
-      notes: values.notes || undefined, // Ensure optional notes are undefined if empty
+      notes: values.notes || undefined,
     };
 
-    let orderToSubmit: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">; // Changed type
+    let orderToSubmit: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">;
 
     if (isEditMode) {
-      // For edit mode, we take the existing order and apply changes from the form.
-      // supplierName is already on initialPurchaseOrder and should be preserved.
       orderToSubmit = {
         ...initialPurchaseOrder!,
         ...formValuesWithoutSupplierName,
-        id: initialPurchaseOrder!.id, // Ensure ID is explicitly kept
-        supplierName: initialPurchaseOrder!.supplierName, // Explicitly keep supplierName
+        id: initialPurchaseOrder!.id,
+        supplierName: initialPurchaseOrder!.supplierName,
       };
     } else {
-      // For new orders, we create an object that matches Omit<PurchaseOrder, "id" | "supplierName">
       orderToSubmit = formValuesWithoutSupplierName;
     }
 
@@ -146,243 +142,182 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="supplierId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a supplier" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="referenceNo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Reference Number</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., PO-2023-001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="orderDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Order Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+    <FormProvider {...form}> {/* Wrap with FormProvider */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="supplierId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Supplier</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a supplier" />
+                    </SelectTrigger>
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="expectedDeliveryDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Expected Delivery Date (Optional)</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {PURCHASE_ORDER_STATUSES.map((status) => ( // Use the runtime array
-                    <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Order Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {items.map((item, index) => (
-              <div key={index} className="flex items-end gap-2 border-b pb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.productId`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name} (SKU: {product.sku})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.quantity`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.unitCost`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unit Cost</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" min="0.01" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {items.length > 1 && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                    <XCircle className="h-5 w-5 text-destructive" />
-                    <span className="sr-only">Remove Item</span>
-                  </Button>
-                )}
-              </div>
-            ))}
-            {form.formState.errors.items && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.items.message}
-              </p>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
             )}
-          </CardContent>
-        </Card>
+          />
+          <FormField
+            control={form.control}
+            name="referenceNo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reference Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., PO-2023-001" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="orderDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Order Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="expectedDeliveryDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Expected Delivery Date (Optional)</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {PURCHASE_ORDER_STATUSES.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Any additional notes for this purchase order..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Order Items</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ItemFormList
+                items={items}
+                products={products}
+                onAddItem={handleAddItem}
+                onRemoveItem={handleRemoveItem}
+                formType="purchaseOrder"
+              />
+            </CardContent>
+          </Card>
 
-        <Button type="submit" className="w-full">
-          {isEditMode ? "Save Changes" : "Create Purchase Order"}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Any additional notes for this purchase order..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full">
+            {isEditMode ? "Save Changes" : "Create Purchase Order"}
+          </Button>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 

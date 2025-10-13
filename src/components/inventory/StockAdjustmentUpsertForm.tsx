@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form"; // Import FormProvider
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { useStores } from "@/context/StoreContext";
 import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ItemFormList from "./ItemFormList"; // Import the new component
 
 const formSchema = z.object({
   adjustmentDate: z.date({ required_error: "Adjustment date is required." }),
@@ -59,7 +60,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
       items: initialStockAdjustment?.items || [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
-      notes: initialStockAdjustment?.notes || "",
+      notes: initialStockAdjustment?.notes || undefined,
     },
   });
 
@@ -69,14 +70,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
         items: initialStockAdjustment.items,
-        notes: initialStockAdjustment.notes,
+        notes: initialStockAdjustment.notes || undefined,
       });
     } else {
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
         items: [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
-        notes: "",
+        notes: undefined,
       });
     }
   }, [initialStockAdjustment, form]);
@@ -96,15 +97,15 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     const baseAdjustment = {
       adjustmentDate: values.adjustmentDate.toISOString(),
       storeId: values.storeId,
-      items: adjustmentItems, // Use the explicitly typed array
-      notes: values.notes,
+      items: adjustmentItems,
+      notes: values.notes || undefined,
     };
 
     let adjustmentToSubmit: Omit<StockAdjustment, "id" | "storeName" | "approvedByUserName" | "approvalDate"> | StockAdjustment;
 
     if (isEditMode) {
       adjustmentToSubmit = {
-        ...initialStockAdjustment!, // Keep existing ID, storeName, approvedBy, etc.
+        ...initialStockAdjustment!,
         ...baseAdjustment,
         id: initialStockAdjustment!.id,
       };
@@ -128,192 +129,107 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="adjustmentDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Adjustment Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="storeId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Store</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a store" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {stores.map((store) => (
-                    <SelectItem key={store.id} value={store.id}>
-                      {store.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Items to Adjust</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {items.map((item, index) => (
-              <div key={index} className="flex items-end gap-2 border-b pb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.productId`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name} (SKU: {product.sku})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.adjustmentType`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(AdjustmentType).map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.quantity`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity</FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.reason`}
-                    render={({ field }) => (
-                      <FormItem className="sm:col-span-3">
-                        <FormLabel>Reason</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Damaged stock, Found item" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {items.length > 1 && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
-                    <XCircle className="h-5 w-5 text-destructive" />
-                    <span className="sr-only">Remove Item</span>
-                  </Button>
-                )}
-              </div>
-            ))}
-            {form.formState.errors.items && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.items.message}
-              </p>
+    <FormProvider {...form}> {/* Wrap with FormProvider */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="adjustmentDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Adjustment Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
             )}
-          </CardContent>
-        </Card>
+          />
+          <FormField
+            control={form.control}
+            name="storeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Store</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a store" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {stores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Items to Adjust</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ItemFormList
+                items={items}
+                products={products}
+                onAddItem={handleAddItem}
+                onRemoveItem={handleRemoveItem}
+                formType="stockAdjustment"
+              />
+            </CardContent>
+          </Card>
 
-        <Button type="submit" className="w-full">
-          {isEditMode ? "Save Changes" : "Create Adjustment"}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full">
+            {isEditMode ? "Save Changes" : "Create Adjustment"}
+          </Button>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 
