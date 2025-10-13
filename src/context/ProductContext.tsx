@@ -66,8 +66,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     );
   }, [addHistoryEntry, authUser]);
 
-  // Internal helper for adding a product with history
-  const _addProductWithHistory = useCallback((newProduct: Product) => {
+  const addProduct = useCallback((newProduct: Product) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
     addHistoryEntry({
       type: InventoryHistoryType.INITIAL_STOCK,
@@ -82,8 +81,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [addHistoryEntry, authUser]);
 
-  // Internal helper for updating a product with history
-  const _updateProductWithHistory = useCallback((updatedProduct: Product) => {
+  const updateProduct = useCallback((updatedProduct: Product) => {
     setProducts((prevProducts) =>
       prevProducts.map((p) => {
         if (p.id === updatedProduct.id) {
@@ -107,14 +105,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       })
     );
   }, [addHistoryEntry, authUser]);
-
-  const addProduct = useCallback((newProduct: Product) => {
-    _addProductWithHistory(newProduct);
-  }, [_addProductWithHistory]);
-
-  const updateProduct = useCallback((updatedProduct: Product) => {
-    _updateProductWithHistory(updatedProduct);
-  }, [_updateProductWithHistory]);
 
   const deleteProduct = useCallback((productId: string) => {
     setProducts((prevProducts) => {
