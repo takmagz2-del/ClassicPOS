@@ -14,6 +14,7 @@ import { TransferOfGoods, TransferStatus } from "@/types/inventory";
 import { Edit, Trash2, Eye, CheckCircle2, Truck, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useStores } from "@/context/StoreContext"; // Import useStores
 
 interface TransferOfGoodsTableProps {
   transfers: TransferOfGoods[];
@@ -24,6 +25,7 @@ interface TransferOfGoodsTableProps {
 }
 
 const TransferOfGoodsTable = ({ transfers, onViewDetails, onEditTransfer, onDeleteTransfer, onUpdateTransferStatus }: TransferOfGoodsTableProps) => {
+  const { stores } = useStores(); // Use the stores context
 
   const getStatusBadgeVariant = (status: TransferStatus) => {
     switch (status) {
@@ -58,8 +60,8 @@ const TransferOfGoodsTable = ({ transfers, onViewDetails, onEditTransfer, onDele
             transfers.map((transfer) => (
               <TableRow key={transfer.id}>
                 <TableCell className="font-medium">{transfer.id.substring(0, 8)}</TableCell>
-                <TableCell>{transfer.transferFromStoreName}</TableCell>
-                <TableCell>{transfer.transferToStoreName}</TableCell>
+                <TableCell>{stores.find(s => s.id === transfer.transferFromStoreId)?.name || "Unknown Store"}</TableCell> {/* Display full store name */}
+                <TableCell>{stores.find(s => s.id === transfer.transferToStoreId)?.name || "Unknown Store"}</TableCell> {/* Display full store name */}
                 <TableCell>{format(new Date(transfer.transferDate), "MMM dd, yyyy")}</TableCell>
                 <TableCell className="text-center">
                   <Badge variant={getStatusBadgeVariant(transfer.status)}>{transfer.status}</Badge>
