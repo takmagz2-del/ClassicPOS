@@ -16,12 +16,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/components/auth/AuthContext";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { mockBusinessTypes } from "@/data/mockBusinessTypes";
+import { mockCountries } from "@/data/mockCountries";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(6, { message: "New password must be at least 6 characters." }).optional().or(z.literal("")),
   confirmNewPassword: z.string().optional(),
+  businessName: z.string().min(1, { message: "Business name is required." }).optional().or(z.literal("")),
+  businessType: z.string().min(1, { message: "Please select a business type." }).optional().or(z.literal("")),
+  country: z.string().min(1, { message: "Please select a country." }).optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
 }).superRefine((data, ctx) => {
   if (data.newPassword && data.newPassword !== data.confirmNewPassword) {
     ctx.addIssue({
@@ -52,6 +59,10 @@ const UserProfileForm = () => {
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
+      businessName: user?.businessName || "",
+      businessType: user?.businessType || "",
+      country: user?.country || "",
+      phone: user?.phone || "",
     },
   });
 
@@ -62,6 +73,10 @@ const UserProfileForm = () => {
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
+        businessName: user.businessName || "",
+        businessType: user.businessType || "",
+        country: user.country || "",
+        phone: user.phone || "",
       });
     }
   }, [user, form]);
@@ -73,9 +88,13 @@ const UserProfileForm = () => {
 
     const updatedFields: Partial<typeof user> = {
       email: values.email,
+      businessName: values.businessName,
+      businessType: values.businessType,
+      country: values.country,
+      phone: values.phone,
     };
 
-    const success = await updateUser( // Pass user.id here
+    const success = await updateUser(
       user.id,
       updatedFields,
       values.currentPassword || undefined,
@@ -86,10 +105,14 @@ const UserProfileForm = () => {
     if (success) {
       toast.success("Profile updated successfully!");
       form.reset({
-        email: values.email, // Keep current email
+        email: values.email,
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
+        businessName: values.businessName,
+        businessType: values.businessType,
+        country: values.country,
+        phone: values.phone,
       });
     } else {
       // Error message is already handled by AuthContext
@@ -107,6 +130,80 @@ const UserProfileForm = () => {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="your@example.com" {...field} disabled={isLoading} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="businessName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Business Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., My Awesome Store" disabled={isLoading} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="businessType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Business Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a business type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {mockBusinessTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your country" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {mockCountries.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number (Optional)</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder="e.g., +15551234567" disabled={isLoading} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
