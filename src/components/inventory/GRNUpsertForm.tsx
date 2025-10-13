@@ -397,7 +397,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNItem>
-              items={items}
+              items={items as GRNItem[]}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
