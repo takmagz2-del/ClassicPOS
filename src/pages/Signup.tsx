@@ -175,7 +175,7 @@ const Signup = () => {
                 render={({ field }) => (
                   <FormItem>
                     <Label htmlFor="business-type">Business Type</Label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                    <Select onValueChange={field.onChange} value={field.value || ""} disabled={isLoading}>
                       <FormControl>
                         <SelectTrigger id="business-type">
                           <SelectValue placeholder="Select a business type" />
@@ -199,7 +199,7 @@ const Signup = () => {
                 render={({ field }) => (
                   <FormItem>
                     <Label htmlFor="country">Country</Label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                    <Select onValueChange={field.onChange} value={field.value || ""} disabled={isLoading}>
                       <FormControl>
                         <SelectTrigger id="country">
                           <SelectValue placeholder="Select your country" />

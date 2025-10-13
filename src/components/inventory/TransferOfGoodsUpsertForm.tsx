@@ -236,7 +236,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           render={({ field }) => (
             <FormItem>
               <FormLabel>From Store (Origin)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select originating store" />
@@ -260,7 +260,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           render={({ field }) => (
             <FormItem>
               <FormLabel>To Store (Destination)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select destination store" />
@@ -288,7 +288,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
-              items={items} // No longer need type assertion here
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<TransferOfGoodsFormValues>}
               errors={form.formState.errors as FieldErrors<TransferOfGoodsFormValues>}

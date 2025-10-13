@@ -101,7 +101,7 @@ const PrinterSettingsForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Printer Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a printer type" />
@@ -127,7 +127,7 @@ const PrinterSettingsForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Connection Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select connection type" />

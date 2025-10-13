@@ -268,7 +268,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -296,7 +296,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
-              items={items} // No longer need type assertion here
+              items={items}
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<PurchaseOrderFormValues>}
               errors={form.formState.errors as FieldErrors<PurchaseOrderFormValues>}
