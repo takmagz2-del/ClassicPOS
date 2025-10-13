@@ -71,6 +71,30 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     },
   });
 
+  // Add custom validation for stock quantity
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
+        const items = value.items;
+        if (items) {
+          items.forEach((item, index) => {
+            const product = products.find(p => p.id === item.productId);
+            if (product && product.trackStock && item.quantity > product.stock) {
+              form.setError(`items.${index}.quantity`, {
+                type: "manual",
+                message: `Quantity exceeds available stock (${product.stock}).`,
+              });
+            } else {
+              form.clearErrors(`items.${index}.quantity`);
+            }
+          });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, products]);
+
+
   useEffect(() => {
     if (initialTransfer) {
       form.reset({

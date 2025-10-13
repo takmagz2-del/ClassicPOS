@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/drawer";
 import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // New import
 import { useAuth } from "@/components/auth/AuthContext"; // Import useAuth
+import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
@@ -220,7 +221,15 @@ const Sales = () => {
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
       if (product && product.trackStock) { // Only update stock if tracking is enabled
-        updateProductStock(product.id, product.stock - soldItem.quantity);
+        updateProductStock(
+          product.id,
+          product.stock - soldItem.quantity,
+          InventoryHistoryType.SALE, // historyType
+          newSale.id, // referenceId
+          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`, // reason
+          undefined, // storeId (assuming single store for now, or could be passed from context)
+          currentUser?.id // userId
+        );
       }
     });
 
