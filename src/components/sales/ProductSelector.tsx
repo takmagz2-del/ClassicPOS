@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import ImagePreviewDialog from "@/components/common/ImagePreviewDialog"; // Import the new component
+import { Button } from "@/components/ui/button"; // Import Button for Reset Filters
+import { Badge } from "@/components/ui/badge"; // Import Badge for stock status
 
 interface ProductSelectorProps {
   products: Product[];
@@ -37,8 +39,8 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   const [previewImageAlt, setPreviewImageAlt] = useState("");
 
   // Calculate min and max price for slider
-  const minPrice = useMemo(() => Math.min(...products.map(p => p.price)), [products]);
-  const maxPrice = useMemo(() => Math.max(...products.map(p => p.price)), [products]);
+  const minPrice = useMemo(() => products.length > 0 ? Math.min(...products.map(p => p.price)) : 0, [products]);
+  const maxPrice = useMemo(() => products.length > 0 ? Math.max(...products.map(p => p.price)) : 10000, [products]);
 
   // Update price range when min/max changes (e.g., on initial load or product updates)
   React.useEffect(() => {
@@ -128,12 +130,13 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
               </SelectContent>
             </Select>
 
-            <button
+            <Button
               onClick={resetFilters}
-              className="text-xs text-muted-foreground hover:text-foreground underline"
+              variant="outline"
+              className="w-full"
             >
               Reset Filters
-            </button>
+            </Button>
           </div>
 
           {/* Price Range Slider */}
@@ -195,7 +198,14 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                       <p className="text-xs text-muted-foreground mt-1">{formatCurrency(product.price, currentCurrency)}</p>
                       <p className="text-[0.65rem] text-muted-foreground mt-1">SKU: {product.sku}</p>
                       <p className="text-[0.65rem] text-muted-foreground">
-                        Stock: <span className={product.stock <= LOW_STOCK_THRESHOLD && product.stock > 0 ? "text-orange-500 font-semibold" : product.stock === 0 ? "text-red-500 font-semibold" : ""}>{product.stock}</span>
+                        Stock: {" "}
+                        {product.stock === 0 ? (
+                          <Badge variant="destructive">Out of Stock</Badge>
+                        ) : product.stock <= LOW_STOCK_THRESHOLD ? (
+                          <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({product.stock})</Badge>
+                        ) : (
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({product.stock})</Badge>
+                        )}
                       </p>
                     </div>
                   </CardContent>
