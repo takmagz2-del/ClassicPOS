@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  Form
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -183,6 +184,67 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
 
   const availablePurchaseOrders = purchaseOrders.filter(po => po.status === "pending" || po.status === "completed");
 
+  const renderGRNItem = (
+    item: GRNItem,
+    index: number,
+    control: Control<GRNFormValues>,
+    errors: FieldErrors<GRNFormValues>,
+    extraProps?: { isLinkedToPO?: boolean }
+  ) => (
+    <>
+      <FormField
+        control={control}
+        name={`items.${index}.productId`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isLinkedToPO}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name} (SKU: {product.sku})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.quantityReceived`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Quantity</FormLabel>
+            <FormControl>
+              <Input type="number" min="1" {...field} disabled={extraProps?.isLinkedToPO} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.unitCost`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Unit Cost</FormLabel>
+            <FormControl>
+              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isLinkedToPO} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -315,21 +377,21 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Received Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isLinkedToPO}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList
+            <ItemFormList<GRNItem>
               items={items}
               products={products}
+              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
-              formType="grn"
-              isLinkedToPO={isLinkedToPO}
               control={form.control}
               errors={form.formState.errors}
+              renderItem={renderGRNItem}
+              isAddButtonDisabled={isLinkedToPO}
+              isRemoveButtonDisabled={isLinkedToPO}
+              extraProps={{ isLinkedToPO }}
             />
           </CardContent>
         </Card>

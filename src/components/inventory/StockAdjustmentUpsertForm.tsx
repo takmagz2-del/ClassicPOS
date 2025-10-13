@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -128,6 +128,90 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     form.setValue("items", newItems);
   };
 
+  const renderStockAdjustmentItem = (
+    item: StockAdjustmentItem,
+    index: number,
+    control: Control<StockAdjustmentFormValues>,
+    errors: FieldErrors<StockAdjustmentFormValues>
+  ) => (
+    <>
+      <FormField
+        control={control}
+        name={`items.${index}.productId`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name} (SKU: {product.sku})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.adjustmentType`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Type</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {Object.values(AdjustmentType).map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.quantity`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Quantity</FormLabel>
+            <FormControl>
+              <Input type="number" min="1" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.reason`}
+        render={({ field }) => (
+          <FormItem className="sm:col-span-3">
+            <FormLabel>Reason</FormLabel>
+            <FormControl>
+              <Input placeholder="e.g., Damaged stock, Found item" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -195,20 +279,18 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Items to Adjust</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList
+            <ItemFormList<StockAdjustmentItem>
               items={items}
               products={products}
+              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
-              formType="stockAdjustment"
               control={form.control}
               errors={form.formState.errors}
+              renderItem={renderStockAdjustmentItem}
             />
           </CardContent>
         </Card>

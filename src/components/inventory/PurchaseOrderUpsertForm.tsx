@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -140,6 +140,66 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     const newItems = items.filter((_, i) => i !== index);
     form.setValue("items", newItems);
   };
+
+  const renderPurchaseOrderItem = (
+    item: PurchaseOrderItem,
+    index: number,
+    control: Control<PurchaseOrderFormValues>,
+    errors: FieldErrors<PurchaseOrderFormValues>
+  ) => (
+    <>
+      <FormField
+        control={control}
+        name={`items.${index}.productId`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name} (SKU: {product.sku})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.quantity`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Quantity</FormLabel>
+            <FormControl>
+              <Input type="number" min="1" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.unitCost`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Unit Cost</FormLabel>
+            <FormControl>
+              <Input type="number" step="0.01" min="0.01" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
 
   return (
     <Form {...form}>
@@ -283,20 +343,18 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Order Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList
+            <ItemFormList<PurchaseOrderItem>
               items={items}
               products={products}
+              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
-              formType="purchaseOrder"
               control={form.control}
               errors={form.formState.errors}
+              renderItem={renderPurchaseOrderItem}
             />
           </CardContent>
         </Card>

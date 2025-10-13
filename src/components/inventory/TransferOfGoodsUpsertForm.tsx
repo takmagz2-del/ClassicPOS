@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -77,9 +77,12 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     const subscription = form.watch((value, { name, type }) => {
       if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
         const items = value.items;
-        if (items) {
+        const transferFromStoreId = value.transferFromStoreId; // Get the selected 'from' store ID
+        if (items && transferFromStoreId) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
+            // In a real multi-store inventory, you'd check stock for the specific `transferFromStoreId`
+            // For this mock, we're checking against the global product stock.
             if (product && product.trackStock && item.quantity > product.stock) {
               form.setError(`items.${index}.quantity`, {
                 type: "manual",
@@ -161,6 +164,60 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     const newItems = items.filter((_, i) => i !== index);
     form.setValue("items", newItems);
   };
+
+  const getAvailableProductsForTransfer = (currentProductId?: string) => {
+    // In a real multi-store app, this would filter products based on stock in `transferFromStoreId`
+    // For this mock, we'll just filter by trackStock and stock > 0 globally.
+    return products.filter(p => p.trackStock && p.stock > 0);
+  };
+
+  const renderTransferOfGoodsItem = (
+    item: TransferOfGoodsItem,
+    index: number,
+    control: Control<TransferOfGoodsFormValues>,
+    errors: FieldErrors<TransferOfGoodsFormValues>,
+    extraProps?: { transferFromStoreId?: string }
+  ) => (
+    <>
+      <FormField
+        control={control}
+        name={`items.${index}.productId`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {getAvailableProductsForTransfer(item.productId).map((product) => (
+                  <SelectItem key={product.id} value={product.id}>
+                    {product.name} (SKU: {product.sku}) - Stock: {product.stock}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name={`items.${index}.quantity`}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Quantity</FormLabel>
+            <FormControl>
+              <Input type="number" min="1" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
 
   return (
     <Form {...form}>
@@ -253,21 +310,21 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Items to Transfer</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList
+            <ItemFormList<TransferOfGoodsItem>
               items={items}
               products={products}
+              onAddItem={handleAddItem}
               onRemoveItem={handleRemoveItem}
-              formType="transfer"
-              transferFromStoreId={transferFromStoreId}
               control={form.control}
               errors={form.formState.errors}
+              renderItem={renderTransferOfGoodsItem}
+              isAddButtonDisabled={isEditMode && initialTransfer?.status !== "pending"}
+              isRemoveButtonDisabled={isEditMode && initialTransfer?.status !== "pending"}
+              extraProps={{ transferFromStoreId }}
             />
           </CardContent>
         </Card>
