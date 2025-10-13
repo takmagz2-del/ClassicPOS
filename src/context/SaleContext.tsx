@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Sale } from "@/types/sale";
 
 interface SaleContextType {
@@ -13,7 +13,19 @@ interface SaleContextType {
 const SaleContext = createContext<SaleContextType | undefined>(undefined);
 
 export const SaleProvider = ({ children }: { children: ReactNode }) => {
-  const [salesHistory, setSalesHistory] = useState<Sale[]>([]);
+  const [salesHistory, setSalesHistory] = useState<Sale[]>(() => {
+    if (typeof window !== "undefined") {
+      const storedSales = localStorage.getItem("salesHistory");
+      return storedSales ? JSON.parse(storedSales) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
+    }
+  }, [salesHistory]);
 
   const addSale = (sale: Sale) => {
     setSalesHistory((prevSales) => [...prevSales, sale]);
