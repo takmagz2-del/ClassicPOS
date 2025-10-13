@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useSuppliers } from "@/context/SupplierContext"; // Import useSuppliers
+// import { useSuppliers } from "@/context/SupplierContext"; // No longer needed for display
 
 interface PurchaseOrderTableProps {
   purchaseOrders: PurchaseOrder[];
@@ -27,7 +27,7 @@ interface PurchaseOrderTableProps {
 
 const PurchaseOrderTable = ({ purchaseOrders, onViewDetails, onEditOrder, onDeleteOrder }: PurchaseOrderTableProps) => {
   const { currentCurrency } = useCurrency();
-  const { suppliers } = useSuppliers(); // Use the suppliers context
+  // const { suppliers } = useSuppliers(); // No longer needed for display
 
   const getStatusBadgeVariant = (status: PurchaseOrderStatus) => {
     switch (status) {
@@ -61,7 +61,7 @@ const PurchaseOrderTable = ({ purchaseOrders, onViewDetails, onEditOrder, onDele
             purchaseOrders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">{order.referenceNo}</TableCell>
-                <TableCell>{suppliers.find(s => s.id === order.supplierId)?.name || "Unknown Supplier"}</TableCell> {/* Display supplier name */}
+                <TableCell>{order.supplierName || "Unknown Supplier"}</TableCell> {/* Use denormalized supplierName */}
                 <TableCell>{format(new Date(order.orderDate), "MMM dd, yyyy")}</TableCell>
                 <TableCell>{order.expectedDeliveryDate ? format(new Date(order.expectedDeliveryDate), "MMM dd, yyyy") : "N/A"}</TableCell>
                 <TableCell className="text-right">{formatCurrency(order.totalValue, currentCurrency)}</TableCell>

@@ -16,8 +16,8 @@ import { format } from "date-fns";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { useSuppliers } from "@/context/SupplierContext"; // Import useSuppliers
-import { useStores } from "@/context/StoreContext"; // Import useStores
+// import { useSuppliers } from "@/context/SupplierContext"; // No longer needed for display
+// import { useStores } from "@/context/StoreContext"; // No longer needed for display
 
 interface GRNTableProps {
   grns: GoodsReceivedNote[];
@@ -29,8 +29,8 @@ interface GRNTableProps {
 
 const GRNTable = ({ grns, onViewDetails, onEditGRN, onDeleteGRN, onApproveGRN }: GRNTableProps) => {
   const { currentCurrency } = useCurrency();
-  const { suppliers } = useSuppliers(); // Use the suppliers context
-  const { stores } = useStores(); // Use the stores context
+  // const { suppliers } = useSuppliers(); // No longer needed for display
+  // const { stores } = useStores(); // No longer needed for display
 
   const getStatusBadgeVariant = (status: GRNStatus) => {
     switch (status) {
@@ -64,8 +64,8 @@ const GRNTable = ({ grns, onViewDetails, onEditGRN, onDeleteGRN, onApproveGRN }:
             grns.map((grn) => (
               <TableRow key={grn.id}>
                 <TableCell className="font-medium">{grn.referenceNo}</TableCell>
-                <TableCell>{suppliers.find(s => s.id === grn.supplierId)?.name || "Unknown Supplier"}</TableCell> {/* Display supplier name */}
-                <TableCell>{stores.find(s => s.id === grn.receivingStoreId)?.name || "Unknown Store"}</TableCell> {/* Display store name */}
+                <TableCell>{grn.supplierName || "Unknown Supplier"}</TableCell> {/* Use denormalized supplierName */}
+                <TableCell>{grn.receivingStoreName || "Unknown Store"}</TableCell> {/* Use denormalized receivingStoreName */}
                 <TableCell>{format(new Date(grn.receivedDate), "MMM dd, yyyy")}</TableCell>
                 <TableCell className="text-right">{formatCurrency(grn.totalValue, currentCurrency)}</TableCell>
                 <TableCell className="text-center">
