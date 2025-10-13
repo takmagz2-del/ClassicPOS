@@ -20,13 +20,17 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
   const [categories, setCategories] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       const storedCategories = localStorage.getItem("productCategories");
-      const parsedCategories: Category[] = storedCategories ? JSON.parse(storedCategories) : mockCategories;
+      let initialCategories: Category[] = storedCategories ? JSON.parse(storedCategories) : mockCategories;
 
-      // Ensure 'Uncategorized' category exists
-      if (!parsedCategories.some(cat => cat.isUncategorized)) {
-        return [...parsedCategories, { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true }];
+      // Ensure 'Uncategorized' category exists and is correctly formatted
+      const uncategorizedIndex = initialCategories.findIndex(cat => cat.isUncategorized);
+      if (uncategorizedIndex === -1) {
+        initialCategories = [...initialCategories, { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true }];
+      } else {
+        // Ensure existing 'Uncategorized' has the correct ID and name
+        initialCategories[uncategorizedIndex] = { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true };
       }
-      return parsedCategories;
+      return initialCategories;
     }
     return mockCategories;
   });
@@ -39,13 +43,8 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
 
   const getUncategorizedCategoryId = useCallback(() => {
     const uncategorized = categories.find(cat => cat.isUncategorized);
-    if (!uncategorized) {
-      // This should ideally not happen due to the initial state logic, but as a fallback
-      const newUncategorized: Category = { id: "cat-uncategorized", name: "Uncategorized", isUncategorized: true };
-      setCategories(prev => [...prev, newUncategorized]);
-      return newUncategorized.id;
-    }
-    return uncategorized.id;
+    // This should always exist due to initial state logic
+    return uncategorized ? uncategorized.id : "cat-uncategorized";
   }, [categories]);
 
   const addCategory = useCallback((name: string) => {
@@ -59,6 +58,10 @@ export const CategoryProvider = ({ children }: { children: ReactNode }) => {
   }, [categories]);
 
   const updateCategory = useCallback((updatedCategory: Category) => {
+    if (updatedCategory.isUncategorized) {
+      toast.error("The 'Uncategorized' category cannot be edited.");
+      return;
+    }
     if (categories.some(cat => cat.id !== updatedCategory.id && cat.name.toLowerCase() === updatedCategory.name.toLowerCase())) {
       toast.error(`Category "${updatedCategory.name}" already exists.`);
       return;

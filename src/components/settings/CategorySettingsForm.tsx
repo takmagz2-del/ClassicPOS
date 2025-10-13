@@ -75,11 +75,19 @@ const CategorySettingsForm = () => {
   };
 
   const handleEditClick = (category: Category) => {
+    if (category.isUncategorized) {
+      toast.error("The 'Uncategorized' category cannot be edited.");
+      return;
+    }
     setEditingCategory(category);
     setIsAddEditDialogOpen(true);
   };
 
   const handleDeleteClick = (category: Category) => {
+    if (category.isUncategorized) {
+      toast.error("The 'Uncategorized' category cannot be deleted.");
+      return;
+    }
     setCategoryToDelete(category);
     setIsDeleteDialogOpen(true);
   };
@@ -138,7 +146,7 @@ const CategorySettingsForm = () => {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">No product categories defined.</p>
+            <p className="text-muted-foreground">No custom tax rates defined.</p>
           )}
         </CardContent>
       </Card>
