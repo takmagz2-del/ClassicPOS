@@ -63,23 +63,22 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     );
   }, [addHistoryEntry, authUser]);
 
-  const addProduct = useCallback((newProduct: Product) => {
-    setProducts((prevProducts) => {
-      const updatedProducts = [...prevProducts, newProduct];
-      updateProductStock(
-        newProduct.id,
-        newProduct.stock,
-        InventoryHistoryType.INITIAL_STOCK,
-        newProduct.id,
-        `New product "${newProduct.name}" added with initial stock of ${newProduct.stock}.`,
-        undefined, // storeId is not directly applicable here, or could be a default store
-        authUser?.id
-      );
-      return updatedProducts;
-    });
+  // Internal helper for adding a product with history
+  const _addProductWithHistory = useCallback((newProduct: Product) => {
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
+    updateProductStock(
+      newProduct.id,
+      newProduct.stock,
+      InventoryHistoryType.INITIAL_STOCK,
+      newProduct.id,
+      `New product "${newProduct.name}" added with initial stock of ${newProduct.stock}.`,
+      undefined, // storeId is not directly applicable here, or could be a default store
+      authUser?.id
+    );
   }, [updateProductStock, authUser]);
 
-  const updateProduct = useCallback((updatedProduct: Product) => {
+  // Internal helper for updating a product with history
+  const _updateProductWithHistory = useCallback((updatedProduct: Product) => {
     setProducts((prevProducts) =>
       prevProducts.map((p) => {
         if (p.id === updatedProduct.id) {
@@ -101,6 +100,14 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       })
     );
   }, [updateProductStock, authUser]);
+
+  const addProduct = useCallback((newProduct: Product) => {
+    _addProductWithHistory(newProduct);
+  }, [_addProductWithHistory]);
+
+  const updateProduct = useCallback((updatedProduct: Product) => {
+    _updateProductWithHistory(updatedProduct);
+  }, [_updateProductWithHistory]);
 
   const deleteProduct = useCallback((productId: string) => {
     setProducts((prevProducts) => {
