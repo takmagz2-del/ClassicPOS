@@ -21,7 +21,7 @@ const TransferOfGoodsContext = createContext<TransferOfGoodsContextType | undefi
 export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) => {
   const { stores } = useStores();
   const { user } = useAuth();
-  const { updateProductStock, products } = useProducts();
+  const { updateProductStock, products } = useProducts(); // Use the refactored updateProductStock
   const { addHistoryEntry } = useInventoryHistory();
 
   const [transfers, setTransfers] = useState<TransferOfGoods[]>(() => {
@@ -86,17 +86,15 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
             transfer.items.forEach(item => {
               const product = products.find(p => p.id === item.productId);
               if (product) {
-                updateProductStock(item.productId, product.stock - item.quantity);
-                addHistoryEntry({
-                  type: InventoryHistoryType.TOG_OUT,
-                  referenceId: transfer.id,
-                  description: `Transferred ${item.quantity}x ${item.productName} out to ${transfer.transferToStoreName}`,
-                  productId: item.productId,
-                  quantityChange: -item.quantity,
-                  currentStock: product.stock - item.quantity,
-                  storeId: transfer.transferFromStoreId,
-                  userId: actingUser?.id,
-                });
+                updateProductStock(
+                  item.productId,
+                  product.stock - item.quantity,
+                  InventoryHistoryType.TOG_OUT,
+                  transfer.id,
+                  `Transferred ${item.quantity}x ${item.productName} out to ${transfer.transferToStoreName}`,
+                  transfer.transferFromStoreId,
+                  actingUser?.id
+                );
               }
             });
             toast.success(`Transfer "${transfer.id.substring(0,8)}" is now In Transit.`);
@@ -106,17 +104,15 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
             transfer.items.forEach(item => {
               const product = products.find(p => p.id === item.productId);
               if (product) {
-                updateProductStock(item.productId, product.stock + item.quantity);
-                addHistoryEntry({
-                  type: InventoryHistoryType.TOG_IN,
-                  referenceId: transfer.id,
-                  description: `Received ${item.quantity}x ${item.productName} from ${transfer.transferFromStoreName}`,
-                  productId: item.productId,
-                  quantityChange: item.quantity,
-                  currentStock: product.stock + item.quantity,
-                  storeId: transfer.transferToStoreId,
-                  userId: actingUser?.id,
-                });
+                updateProductStock(
+                  item.productId,
+                  product.stock + item.quantity,
+                  InventoryHistoryType.TOG_IN,
+                  transfer.id,
+                  `Received ${item.quantity}x ${item.productName} from ${transfer.transferFromStoreName}`,
+                  transfer.transferToStoreId,
+                  actingUser?.id
+                );
               }
             });
             toast.success(`Transfer "${transfer.id.substring(0,8)}" received at ${transfer.transferToStoreName}.`);
@@ -133,17 +129,15 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
               transfer.items.forEach(item => {
                 const product = products.find(p => p.id === item.productId);
                 if (product) {
-                  updateProductStock(item.productId, product.stock + item.quantity);
-                  addHistoryEntry({
-                    type: InventoryHistoryType.TOG_OUT, // Log as a reversal of the original TOG_OUT
-                    referenceId: transfer.id,
-                    description: `Rejected transfer: ${item.quantity}x ${item.productName} returned to ${transfer.transferFromStoreName}`,
-                    productId: item.productId,
-                    quantityChange: item.quantity, // Positive change as stock is returned
-                    currentStock: product.stock + item.quantity,
-                    storeId: transfer.transferFromStoreId,
-                    userId: actingUser?.id,
-                  });
+                  updateProductStock(
+                    item.productId,
+                    product.stock + item.quantity,
+                    InventoryHistoryType.TOG_OUT, // Log as a reversal of the original TOG_OUT
+                    transfer.id,
+                    `Rejected transfer: ${item.quantity}x ${item.productName} returned to ${transfer.transferFromStoreName}`,
+                    transfer.transferFromStoreId,
+                    actingUser?.id
+                  );
                 }
               });
             }
@@ -157,7 +151,7 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
       });
       return updatedTransfers;
     });
-  }, [user, products, updateProductStock, addHistoryEntry]);
+  }, [user, products, updateProductStock]);
 
   const deleteTransfer = useCallback((transferId: string) => {
     // In a real app, deleting an active transfer would require careful stock reconciliation.

@@ -23,11 +23,12 @@ import { useProducts } from "@/context/ProductContext"; // Import useProducts
 import { toast } from "sonner";
 import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
 import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
+import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
 
 const SalesHistory = () => {
   const { salesHistory, refundSale, settleSale } = useSales();
   const { customers } = useCustomers();
-  const { increaseProductStock } = useProducts(); // Use increaseProductStock
+  const { updateProductStock } = useProducts(); // Use updateProductStock
   const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -151,7 +152,14 @@ const SalesHistory = () => {
     refundSale(newRefundTransaction);
 
     refundItems.forEach(item => {
-      increaseProductStock(item.productId, item.quantity);
+      // Use updateProductStock instead of increaseProductStock
+      updateProductStock(
+        item.productId,
+        (products.find(p => p.id === item.productId)?.stock || 0) + item.quantity,
+        InventoryHistoryType.REFUND,
+        newRefundTransaction.id,
+        `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`
+      );
     });
 
     toast.success(`Refund processed for Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}. Total: ${formatCurrency(newRefundTransaction.total, currentCurrency)}`);

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useSuppliers } from "./SupplierContext";
 import { useStores } from "./StoreContext";
 import { useAuth } from "@/components/auth/AuthContext";
-import { useProducts } from "./ProductContext";
+import { useProducts } from "./ProductContext"; // Import useProducts
 import { useInventoryHistory } from "./InventoryHistoryContext";
 import { usePurchaseOrders } from "./PurchaseOrderContext";
 
@@ -25,7 +25,7 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
   const { suppliers } = useSuppliers();
   const { stores } = useStores();
   const { user } = useAuth();
-  const { increaseProductStock } = useProducts();
+  const { updateProductStock, products } = useProducts(); // Destructure products here
   const { addHistoryEntry } = useInventoryHistory();
   const { updatePurchaseOrder, getPurchaseOrderById } = usePurchaseOrders();
 
@@ -76,16 +76,19 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
         if (grn.id === grnId && grn.status === "pending") {
           // Update stock for each item
           grn.items.forEach(item => {
-            increaseProductStock(item.productId, item.quantityReceived);
-            addHistoryEntry({
-              type: InventoryHistoryType.GRN,
-              referenceId: grn.id,
-              description: `Received ${item.quantityReceived}x ${item.productName} from ${grn.supplierName}`,
-              productId: item.productId,
-              quantityChange: item.quantityReceived,
-              storeId: grn.receivingStoreId,
-              userId: user?.id,
-            });
+            // Use the refactored updateProductStock
+            const product = products.find(p => p.id === item.productId);
+            if (product) {
+              updateProductStock(
+                item.productId,
+                product.stock + item.quantityReceived,
+                InventoryHistoryType.GRN,
+                grn.id,
+                `Received ${item.quantityReceived}x ${item.productName} from ${grn.supplierName}`,
+                grn.receivingStoreId,
+                user?.id
+              );
+            }
           });
 
           // If linked to a PO, update PO status (simplified to 'completed')
@@ -109,7 +112,7 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
       });
       return updatedGRNs;
     });
-  }, [increaseProductStock, addHistoryEntry, user, getPurchaseOrderById, updatePurchaseOrder]);
+  }, [updateProductStock, user, getPurchaseOrderById, updatePurchaseOrder, products]); // products is now correctly in scope
 
   const deleteGRN = useCallback((grnId: string) => {
     setGRNs((prev) => prev.filter((grn) => grn.id !== grnId));

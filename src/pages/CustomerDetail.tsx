@@ -14,19 +14,20 @@ import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import RefundDialog from "@/components/sales/RefundDialog";
 import SettleCreditSaleDialog from "@/components/sales/SettleCreditSaleDialog";
 import { toast } from "sonner";
-import { useProducts } from "@/context/ProductContext";
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import CustomerUpsertForm from "@/components/customers/CustomerUpsertForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
 
 const CustomerDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { customers, updateCustomer, deleteCustomer } = useCustomers();
   const { salesHistory, refundSale, settleSale } = useSales();
-  const { increaseProductStock } = useProducts();
+  const { updateProductStock, products } = useProducts(); // Destructure products here
   const { currentCurrency } = useCurrency();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -107,7 +108,18 @@ const CustomerDetail = () => {
       taxRateApplied: originalTaxRate,
     };
     refundSale(newRefundTransaction);
-    refundItems.forEach(item => increaseProductStock(item.productId, item.quantity));
+    refundItems.forEach(item => {
+      const product = products.find(p => p.id === item.productId); // products is now correctly in scope
+      if (product) {
+        updateProductStock(
+          item.productId,
+          product.stock + item.quantity,
+          InventoryHistoryType.REFUND,
+          newRefundTransaction.id,
+          `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`
+        );
+      }
+    });
     toast.success(`Refund processed for ${formatCurrency(newRefundTransaction.total, currentCurrency)}`);
     setIsRefundDialogOpen(false);
   };

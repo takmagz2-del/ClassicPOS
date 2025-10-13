@@ -22,7 +22,7 @@ const StockAdjustmentContext = createContext<StockAdjustmentContextType | undefi
 export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) => {
   const { stores } = useStores();
   const { user } = useAuth();
-  const { updateProductStock, products } = useProducts();
+  const { updateProductStock, products } = useProducts(); // Use the refactored updateProductStock
   const { addHistoryEntry } = useInventoryHistory();
 
   const [stockAdjustments, setStockAdjustments] = useState<StockAdjustment[]>(() => {
@@ -51,9 +51,6 @@ export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) =
       ...newAdjustmentData,
       id: crypto.randomUUID(),
       storeName: store.name,
-      // Stock adjustments are considered 'pending' until approved, but for simplicity,
-      // we'll assume they are created by an authorized user and directly applied/logged.
-      // A more complex flow would involve a 'pending' status and a separate approval step.
       approvedByUserId: user?.id,
       approvedByUserName: user?.email,
       approvalDate: new Date().toISOString(),
@@ -63,30 +60,25 @@ export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) =
     newAdjustment.items.forEach(item => {
       const product = products.find(p => p.id === item.productId);
       if (product) {
-        let newStock = product.stock;
-        if (item.adjustmentType === AdjustmentType.Increase) {
-          newStock += item.quantity;
-        } else {
-          newStock -= item.quantity;
-        }
-        updateProductStock(item.productId, newStock);
+        const newStock = item.adjustmentType === AdjustmentType.Increase
+          ? product.stock + item.quantity
+          : product.stock - item.quantity;
 
-        addHistoryEntry({
-          type: item.adjustmentType === AdjustmentType.Increase ? InventoryHistoryType.SA_INCREASE : InventoryHistoryType.SA_DECREASE,
-          referenceId: newAdjustment.id,
-          description: `${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} ${item.quantity}x ${item.productName} due to: ${item.reason}`,
-          productId: item.productId,
-          quantityChange: item.adjustmentType === AdjustmentType.Increase ? item.quantity : -item.quantity,
-          currentStock: newStock,
-          storeId: newAdjustment.storeId,
-          userId: user?.id,
-        });
+        updateProductStock(
+          item.productId,
+          newStock,
+          item.adjustmentType === AdjustmentType.Increase ? InventoryHistoryType.SA_INCREASE : InventoryHistoryType.SA_DECREASE,
+          newAdjustment.id,
+          `Stock adjusted: ${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} by ${item.quantity} due to: ${item.reason}`,
+          newAdjustment.storeId,
+          user?.id
+        );
       }
     });
 
     setStockAdjustments((prev) => [...prev, newAdjustment]);
     toast.success(`Stock Adjustment created and applied.`);
-  }, [stores, user, products, updateProductStock, addHistoryEntry]);
+  }, [stores, user, products, updateProductStock]);
 
   // For simplicity, approveStockAdjustment will just log a message if called,
   // as stock changes are applied on creation in this mock.

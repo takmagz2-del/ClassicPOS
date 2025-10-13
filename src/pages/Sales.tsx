@@ -22,7 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer, Scan } from "lucide-react"; // Added Scan icon
+import { Printer, Scan } from "lucide-react";
 import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,11 +32,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // New import
+import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog";
+import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
 
 const Sales = () => {
   const { salesHistory, addSale } = useSales();
-  const { products, updateProductStock } = useProducts();
+  const { products, updateProductStock } = useProducts(); // Use the refactored updateProductStock
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
@@ -53,7 +54,7 @@ const Sales = () => {
   const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState<boolean>(false);
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
-  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false); // New state for scanner dialog
+  const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -76,7 +77,7 @@ const Sales = () => {
       const updatedCart = cartItems.map((item, index) => {
         if (index === existingItemIndex) {
           const newQuantity = item.quantity + quantity;
-          if (newQuantity > product.stock) {
+          if (product.trackStock && newQuantity > product.stock) {
             toast.error(`Cannot add more than available stock for ${product.name}. Available: ${product.stock}`);
             return item;
           }
@@ -86,7 +87,7 @@ const Sales = () => {
       });
       setCartItems(updatedCart);
     } else {
-      if (quantity > product.stock) {
+      if (product.trackStock && quantity > product.stock) {
         toast.error(`Cannot add more than available stock for ${product.name}. Available: ${product.stock}`);
         return;
       }
@@ -106,7 +107,7 @@ const Sales = () => {
       handleRemoveCartItem(productId);
       return;
     }
-    if (newQuantity > productInStock.stock) {
+    if (productInStock.trackStock && newQuantity > productInStock.stock) {
       toast.error(`Cannot set quantity higher than available stock for ${productInStock.name}. Available: ${productInStock.stock}`);
       return;
     }
@@ -214,8 +215,14 @@ const Sales = () => {
 
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
-      if (product) {
-        updateProductStock(product.id, product.stock - soldItem.quantity);
+      if (product && product.trackStock) { // Only update stock if tracking is enabled
+        updateProductStock(
+          product.id,
+          product.stock - soldItem.quantity,
+          InventoryHistoryType.SALE,
+          newSale.id,
+          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`
+        );
       }
     });
 
