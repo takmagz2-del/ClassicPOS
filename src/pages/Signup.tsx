@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -93,7 +92,6 @@ const Signup = () => {
           </p>
         </CardContent>
       </Card>
-      <MadeWithDyad />
     </div>
   );
 };

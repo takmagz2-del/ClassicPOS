@@ -3,7 +3,6 @@
 import React, { ReactNode } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
@@ -27,7 +26,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
         </main>
-        <MadeWithDyad />
       </div>
     </div>
   );
