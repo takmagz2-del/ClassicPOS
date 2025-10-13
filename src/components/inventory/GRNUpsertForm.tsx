@@ -227,6 +227,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
+    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField
@@ -429,6 +430,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
               errors={form.formState.errors}
               renderItem={renderGRNItem}
               isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
+              isFormDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>

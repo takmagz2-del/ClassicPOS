@@ -148,6 +148,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     index: number,
     control: Control<PurchaseOrderFormValues>,
     errors: FieldErrors<PurchaseOrderFormValues>,
+    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField
@@ -361,6 +362,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
               errors={form.formState.errors}
               renderItem={renderPurchaseOrderItem}
               isRemoveButtonDisabled={isFormDisabled}
+              isFormDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>

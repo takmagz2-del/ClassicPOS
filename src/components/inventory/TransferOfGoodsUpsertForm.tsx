@@ -198,6 +198,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
+    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField
@@ -346,6 +347,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
               isRemoveButtonDisabled={isFormDisabled}
+              isFormDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>
