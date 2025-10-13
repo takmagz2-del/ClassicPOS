@@ -32,7 +32,7 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <LoadingProvider>
           <AuthProvider>
-            <StoreProvider>
+            <StoreProvider> {/* Added StoreProvider here */}
               <CategoryProvider>
                 <ProductProvider>
                   <CustomerProvider>
