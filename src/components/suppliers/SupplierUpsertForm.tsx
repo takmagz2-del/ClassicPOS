@@ -85,29 +85,27 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
   }, [initialSupplier, form]);
 
   const onSubmit = (values: SupplierFormValues) => {
+    const cleanedValues = {
+      contactPerson: values.contactPerson || undefined,
+      email: values.email || undefined,
+      phone: values.phone || undefined,
+      address: values.address || undefined,
+      notes: values.notes || undefined,
+      vatNumber: values.vatNumber || undefined,
+      tinNumber: values.tinNumber || undefined,
+    };
+
     if (isEditMode) {
       const updatedSupplier: Supplier = {
         ...initialSupplier!,
-        ...values,
-        contactPerson: values.contactPerson || undefined,
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        address: values.address || undefined,
-        notes: values.notes || undefined,
-        vatNumber: values.vatNumber || undefined,
-        tinNumber: values.tinNumber || undefined,
+        name: values.name, // Ensure name is explicitly set
+        ...cleanedValues,
       };
       onSupplierSubmit(updatedSupplier);
     } else {
       const newSupplierData: Omit<Supplier, "id"> = {
-        ...values,
-        contactPerson: values.contactPerson || undefined,
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        address: values.address || undefined,
-        notes: values.notes || undefined,
-        vatNumber: values.vatNumber || undefined,
-        tinNumber: values.tinNumber || undefined,
+        name: values.name, // Ensure name is explicitly set
+        ...cleanedValues,
       };
       onSupplierSubmit(newSupplierData);
     }

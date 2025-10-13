@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { StockAdjustment, AdjustmentType, StockAdjustmentItem } from "@/types/inventory";
 import { useStores } from "@/context/StoreContext";
@@ -56,7 +56,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   const form = useForm<StockAdjustmentFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : new Date(),
+      adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
       items: initialStockAdjustment?.items || [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
       notes: initialStockAdjustment?.notes || "",
@@ -73,7 +73,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       });
     } else {
       form.reset({
-        adjustmentDate: new Date(),
+        adjustmentDate: startOfDay(new Date()),
         storeId: "",
         items: [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
         notes: "",

@@ -46,7 +46,7 @@ type PurchaseOrderFormValues = z.infer<typeof formSchema>;
 
 interface PurchaseOrderUpsertFormProps {
   initialPurchaseOrder?: PurchaseOrder;
-  onPurchaseOrderSubmit: (order: PurchaseOrder | Omit<PurchaseOrder, "id">) => void;
+  onPurchaseOrderSubmit: (order: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">) => void; // Changed type
   onClose: () => void;
 }
 
@@ -102,26 +102,32 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       unitCost: item.unitCost,
     }));
 
-    const baseOrder = {
+    // This object will be used for both new and updated orders, but it doesn't include supplierName
+    const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
       referenceNo: values.referenceNo,
       orderDate: values.orderDate.toISOString(),
       expectedDeliveryDate: values.expectedDeliveryDate?.toISOString(),
       status: values.status,
-      items: orderItems, // Use the explicitly typed array
+      items: orderItems,
       totalValue: totalValue,
-      notes: values.notes,
+      notes: values.notes || undefined, // Ensure optional notes are undefined if empty
     };
 
-    let orderToSubmit: PurchaseOrder | Omit<PurchaseOrder, "id">;
+    let orderToSubmit: PurchaseOrder | Omit<PurchaseOrder, "id" | "supplierName">; // Changed type
 
     if (isEditMode) {
+      // For edit mode, we take the existing order and apply changes from the form.
+      // supplierName is already on initialPurchaseOrder and should be preserved.
       orderToSubmit = {
-        id: initialPurchaseOrder!.id,
-        ...baseOrder,
+        ...initialPurchaseOrder!,
+        ...formValuesWithoutSupplierName,
+        id: initialPurchaseOrder!.id, // Ensure ID is explicitly kept
+        supplierName: initialPurchaseOrder!.supplierName, // Explicitly keep supplierName
       };
     } else {
-      orderToSubmit = baseOrder;
+      // For new orders, we create an object that matches Omit<PurchaseOrder, "id" | "supplierName">
+      orderToSubmit = formValuesWithoutSupplierName;
     }
 
     onPurchaseOrderSubmit(orderToSubmit);

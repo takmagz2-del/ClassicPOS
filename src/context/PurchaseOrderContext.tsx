@@ -7,7 +7,7 @@ import { useSuppliers } from "./SupplierContext";
 
 interface PurchaseOrderContextType {
   purchaseOrders: PurchaseOrder[];
-  addPurchaseOrder: (newOrder: Omit<PurchaseOrder, "id">) => void;
+  addPurchaseOrder: (newOrder: Omit<PurchaseOrder, "id" | "supplierName">) => void; // Changed type
   updatePurchaseOrder: (updatedOrder: PurchaseOrder) => void;
   deletePurchaseOrder: (orderId: string) => void;
   getPurchaseOrderById: (orderId: string) => PurchaseOrder | undefined;
@@ -31,7 +31,7 @@ export const PurchaseOrderProvider = ({ children }: { children: ReactNode }) => 
     }
   }, [purchaseOrders]);
 
-  const addPurchaseOrder = useCallback((newOrderData: Omit<PurchaseOrder, "id">) => {
+  const addPurchaseOrder = useCallback((newOrderData: Omit<PurchaseOrder, "id" | "supplierName">) => { // Changed type
     const supplier = suppliers.find(s => s.id === newOrderData.supplierId);
     if (!supplier) {
       toast.error("Invalid supplier selected.");

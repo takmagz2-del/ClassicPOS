@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { TransferOfGoods, TransferOfGoodsItem } from "@/types/inventory";
 import { useStores } from "@/context/StoreContext";
@@ -63,7 +63,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   const form = useForm<TransferOfGoodsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : new Date(),
+      transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : startOfDay(new Date()),
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items || [{ productId: "", quantity: 1 }],
@@ -106,7 +106,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       });
     } else {
       form.reset({
-        transferDate: new Date(),
+        transferDate: startOfDay(new Date()),
         transferFromStoreId: "",
         transferToStoreId: "",
         items: [{ productId: "", quantity: 1 }],
