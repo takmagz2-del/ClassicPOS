@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useProducts } from "@/context/ProductContext";
 import { useCategories } from "@/context/CategoryContext";
 import { usePaymentMethods } from "@/context/PaymentMethodContext";
+import { useAuth } from "@/components/auth/AuthContext"; // Import useAuth
 
 const Reports = () => {
   const { salesHistory } = useSales();
@@ -34,12 +35,14 @@ const Reports = () => {
   const { getCategoryName } = useCategories();
   const { currentCurrency } = useCurrency();
   const { getPaymentMethodName } = usePaymentMethods();
+  const { users } = useAuth(); // Get all users for employee filter
 
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date(),
   });
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all"); // New state for employee filter
 
   const {
     totalRevenue,
@@ -75,6 +78,11 @@ const Reports = () => {
 
     if (typeFilter !== "all") {
       filteredTransactions = filteredTransactions.filter((transaction) => transaction.type === typeFilter);
+    }
+
+    // Apply employee filter
+    if (employeeFilter !== "all") {
+      filteredTransactions = filteredTransactions.filter((transaction) => transaction.employeeId === employeeFilter);
     }
 
     const totalRev = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
@@ -152,7 +160,7 @@ const Reports = () => {
       topSellingProducts,
       salesByPaymentMethod,
     };
-  }, [salesHistory, dateRange, typeFilter, products, getCategoryName, getPaymentMethodName]);
+  }, [salesHistory, dateRange, typeFilter, employeeFilter, products, getCategoryName, getPaymentMethodName, users]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -204,6 +212,20 @@ const Reports = () => {
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="sale">Sale</SelectItem>
             <SelectItem value="refund">Refund</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by Employee" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Employees</SelectItem>
+            {users.map((employee) => (
+              <SelectItem key={employee.id} value={employee.id}>
+                {employee.email} ({employee.role})
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
