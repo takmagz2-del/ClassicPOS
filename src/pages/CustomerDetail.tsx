@@ -116,7 +116,10 @@ const CustomerDetail = () => {
           product.stock + item.quantity,
           InventoryHistoryType.REFUND,
           newRefundTransaction.id,
-          `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`
+          `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`,
+          undefined, // storeId
+          undefined, // userId
+          item.name // Pass product name
         );
       }
     });

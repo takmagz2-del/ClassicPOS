@@ -228,7 +228,8 @@ const Sales = () => {
           newSale.id, // referenceId
           `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`, // reason
           undefined, // storeId (assuming single store for now, or could be passed from context)
-          currentUser?.id // userId
+          currentUser?.id, // userId
+          soldItem.name // Pass product name
         );
       }
     });

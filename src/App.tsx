@@ -14,11 +14,11 @@ import { LoadingProvider } from "@/context/LoadingContext";
 import { PaymentMethodProvider } from "@/context/PaymentMethodContext";
 import { StoreProvider } from "@/context/StoreContext";
 import { SupplierProvider } from "@/context/SupplierContext";
-import { InventoryHistoryProvider } from "@/context/InventoryHistoryContext"; // New import
-import { PurchaseOrderProvider } from "@/context/PurchaseOrderContext"; // New import
-import { GRNProvider } from "@/context/GRNContext"; // New import
-import { StockAdjustmentProvider } from "@/context/StockAdjustmentContext"; // New import
-import { TransferOfGoodsProvider } from "@/context/TransferOfGoodsContext"; // New import
+import { InventoryHistoryProvider } from "@/context/InventoryHistoryContext";
+import { PurchaseOrderProvider } from "@/context/PurchaseOrderContext";
+import { GRNProvider } from "@/context/GRNContext";
+import { StockAdjustmentProvider } from "@/context/StockAdjustmentContext";
+import { TransferOfGoodsProvider } from "@/context/TransferOfGoodsContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { routesConfig } from "@/config/routesConfig";
 import NotFound from "@/pages/NotFound";
@@ -41,19 +41,20 @@ function App() {
             <StoreProvider>
               <SupplierProvider>
                 <CategoryProvider>
-                  <ProductProvider> {/* ProductProvider needs InventoryHistoryProvider */}
-                    <CustomerProvider>
-                      <SaleProvider>
-                        <CurrencyProvider>
-                          <ReceiptSettingsProvider>
-                            <PrinterSettingsProvider>
-                              <TaxProvider>
-                                <PaymentMethodProvider>
-                                  <InventoryHistoryProvider> {/* New Provider */}
-                                    <PurchaseOrderProvider> {/* New Provider */}
-                                      <GRNProvider> {/* New Provider */}
-                                        <StockAdjustmentProvider> {/* New Provider */}
-                                          <TransferOfGoodsProvider> {/* New Provider */}
+                  <CustomerProvider>
+                    <SaleProvider>
+                      <CurrencyProvider>
+                        <ReceiptSettingsProvider>
+                          <PrinterSettingsProvider>
+                            <TaxProvider>
+                              <PaymentMethodProvider>
+                                {/* InventoryHistoryProvider must wrap ProductProvider */}
+                                <InventoryHistoryProvider>
+                                  <ProductProvider>
+                                    <PurchaseOrderProvider>
+                                      <GRNProvider>
+                                        <StockAdjustmentProvider>
+                                          <TransferOfGoodsProvider>
                                             <Toaster richColors position="top-right" />
                                             <GlobalLoader />
                                             <Routes>
@@ -84,15 +85,15 @@ function App() {
                                         </StockAdjustmentProvider>
                                       </GRNProvider>
                                     </PurchaseOrderProvider>
-                                  </InventoryHistoryProvider>
-                                </PaymentMethodProvider>
-                              </TaxProvider>
-                            </PrinterSettingsProvider>
-                          </ReceiptSettingsProvider>
-                        </CurrencyProvider>
-                      </SaleProvider>
-                    </CustomerProvider>
-                  </ProductProvider>
+                                  </ProductProvider>
+                                </InventoryHistoryProvider>
+                              </PaymentMethodProvider>
+                            </TaxProvider>
+                          </PrinterSettingsProvider>
+                        </ReceiptSettingsProvider>
+                      </CurrencyProvider>
+                    </SaleProvider>
+                  </CustomerProvider>
                 </CategoryProvider>
               </SupplierProvider>
             </StoreProvider>

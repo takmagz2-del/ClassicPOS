@@ -71,7 +71,8 @@ export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) =
           newAdjustment.id,
           `Stock adjusted: ${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} by ${item.quantity} due to: ${item.reason}`,
           newAdjustment.storeId,
-          user?.id
+          user?.id,
+          item.productName // Pass product name
         );
       }
     });

@@ -16,7 +16,8 @@ interface ProductContextType {
     referenceId: string,
     reason?: string,
     storeId?: string,
-    userId?: string
+    userId?: string,
+    productName?: string // Added productName to the signature
   ) => void;
   updateProduct: (updatedProduct: Product) => void;
   addProduct: (newProduct: Product) => void;
@@ -38,7 +39,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     referenceId: string,
     reason?: string,
     storeId?: string,
-    userId?: string
+    userId?: string,
+    productName?: string // Added productName to the function parameters
   ) => {
     setProducts((prevProducts) =>
       prevProducts.map((p) => {
@@ -50,6 +52,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
               referenceId: referenceId,
               description: reason || `Stock updated from ${p.stock} to ${newStock}`,
               productId: productId,
+              productName: productName || p.name, // Use passed productName or fallback to p.name
               quantityChange: quantityChange,
               currentStock: newStock,
               storeId: storeId,
@@ -73,7 +76,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       newProduct.id,
       `New product "${newProduct.name}" added with initial stock of ${newProduct.stock}.`,
       undefined, // storeId is not directly applicable here, or could be a default store
-      authUser?.id
+      authUser?.id,
+      newProduct.name // Pass product name
     );
   }, [updateProductStock, authUser]);
 
@@ -91,7 +95,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
               updatedProduct.id,
               `Product "${updatedProduct.name}" stock manually updated from ${p.stock} to ${updatedProduct.stock}.`,
               undefined, // storeId not specified for general product edit
-              authUser?.id
+              authUser?.id,
+              updatedProduct.name // Pass product name
             );
           }
           return updatedProduct;
@@ -120,7 +125,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
           productId,
           `Product "${productToDelete.name}" deleted. All ${productToDelete.stock} units removed from stock.`,
           undefined,
-          authUser?.id
+          authUser?.id,
+          productToDelete.name // Pass product name
         );
       }
       return prevProducts.filter((p) => p.id !== productId);

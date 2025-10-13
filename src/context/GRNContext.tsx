@@ -86,7 +86,8 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
                 grn.id,
                 `Received ${item.quantityReceived}x ${item.productName} from ${grn.supplierName}`,
                 grn.receivingStoreId,
-                user?.id
+                user?.id,
+                item.productName // Pass product name
               );
             }
           });

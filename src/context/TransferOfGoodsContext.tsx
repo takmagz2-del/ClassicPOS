@@ -93,7 +93,8 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
                   transfer.id,
                   `Transferred ${item.quantity}x ${item.productName} out to ${transfer.transferToStoreName}`,
                   transfer.transferFromStoreId,
-                  actingUser?.id
+                  actingUser?.id,
+                  item.productName // Pass product name
                 );
               }
             });
@@ -111,7 +112,8 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
                   transfer.id,
                   `Received ${item.quantity}x ${item.productName} from ${transfer.transferFromStoreName}`,
                   transfer.transferToStoreId,
-                  actingUser?.id
+                  actingUser?.id,
+                  item.productName // Pass product name
                 );
               }
             });
@@ -136,7 +138,8 @@ export const TransferOfGoodsProvider = ({ children }: { children: ReactNode }) =
                     transfer.id,
                     `Rejected transfer: ${item.quantity}x ${item.productName} returned to ${transfer.transferFromStoreName}`,
                     transfer.transferFromStoreId,
-                    actingUser?.id
+                    actingUser?.id,
+                    item.productName // Pass product name
                   );
                 }
               });
