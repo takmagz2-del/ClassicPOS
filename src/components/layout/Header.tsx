@@ -32,7 +32,7 @@ const Header = () => {
           <Sidebar onLinkClick={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
-      <h1 className="text-xl font-semibold">{pageTitle}</h1>
+      <h1 className="text-xl font-semibold flex-1 min-w-0 truncate">{pageTitle}</h1>
       <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <CurrencySelector />
         <ThemeToggle />
