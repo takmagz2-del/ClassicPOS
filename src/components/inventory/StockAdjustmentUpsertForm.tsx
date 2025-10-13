@@ -156,7 +156,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField

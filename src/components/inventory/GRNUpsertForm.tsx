@@ -227,7 +227,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
-    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField

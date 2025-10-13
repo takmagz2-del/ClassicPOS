@@ -198,7 +198,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField

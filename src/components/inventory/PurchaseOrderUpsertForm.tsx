@@ -148,7 +148,6 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     index: number,
     control: Control<PurchaseOrderFormValues>,
     errors: FieldErrors<PurchaseOrderFormValues>,
-    isFormDisabled: boolean, // Added isFormDisabled here
   ) => (
     <>
       <FormField

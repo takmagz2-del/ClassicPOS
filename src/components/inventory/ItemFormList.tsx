@@ -15,7 +15,6 @@ interface ItemFormListProps<TItem> {
     index: number,
     control: Control<any>,
     errors: FieldErrors<any>,
-    isFormDisabled: boolean, // Added isFormDisabled here
   ) => React.ReactNode;
   isRemoveButtonDisabled?: boolean;
   isFormDisabled?: boolean; // Added isFormDisabled here
@@ -35,7 +34,7 @@ const ItemFormList = <TItem,>({
       {items.map((item, index) => (
         <div key={index} className="flex items-end gap-2 border-b pb-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-            {renderItem(item, index, control, errors, isFormDisabled)}
+            {renderItem(item, index, control, errors)}
           </div>
           {items.length > 0 && (
             <Button type="button" variant="ghost" size="icon" onClick={() => onRemoveItem(index)} disabled={isRemoveButtonDisabled || isFormDisabled}>
