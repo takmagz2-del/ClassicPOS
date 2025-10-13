@@ -23,11 +23,9 @@ const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScanner
   const html5QrcodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // Get the current scanner instance from the ref
     let scanner = html5QrcodeScannerRef.current;
 
     if (isOpen) {
-      // Initialize scanner if it hasn't been initialized yet
       if (!scanner) {
         scanner = new Html5QrcodeScanner(
           qrcodeRegionId,
@@ -44,41 +42,36 @@ const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScanner
           },
           false // verbose
         );
-        html5QrcodeScannerRef.current = scanner; // Store the new instance in the ref
+        html5QrcodeScannerRef.current = scanner;
       }
 
       const handleScanSuccess = (decodedText: string) => {
         onScanSuccess(decodedText);
         toast.success(`Scanned: ${decodedText}`);
-        onClose(); // Close dialog after successful scan
+        onClose();
       };
 
       const handleScanError = (errorMessage: string) => {
         // console.warn(`Barcode scan error: ${errorMessage}`);
-        // Optionally show a toast for persistent errors, but avoid spamming
       };
 
-      // Only render if the scanner is not already scanning
       if (scanner && !scanner.isScanning) {
         scanner.render(handleScanSuccess, handleScanError);
       }
     }
 
-    // Cleanup function for when the dialog closes or component unmounts
     return () => {
       const currentScanner = html5QrcodeScannerRef.current;
       if (currentScanner && currentScanner.isScanning) {
         currentScanner.stop().catch((err) => {
           console.error("Failed to stop html5QrcodeScanner", err);
         });
-        // If the dialog is closing (isOpen becomes false), clear the ref
-        // This ensures a fresh scanner instance if the dialog is opened again
         if (!isOpen) {
           html5QrcodeScannerRef.current = null;
         }
       }
     };
-  }, [isOpen, onScanSuccess, onClose]); // Dependencies are correct
+  }, [isOpen, onScanSuccess, onClose]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
