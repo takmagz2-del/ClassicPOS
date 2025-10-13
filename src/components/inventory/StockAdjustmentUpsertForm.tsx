@@ -59,7 +59,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     defaultValues: {
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
-      items: initialStockAdjustment?.items || [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+      items: initialStockAdjustment?.items || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Added productName
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
@@ -78,7 +78,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Added productName
         notes: undefined,
       });
     }
@@ -122,7 +122,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   const items = form.watch("items");
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
+    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]); // Added productName
   };
 
   const handleRemoveItem = (index: number) => {
@@ -135,7 +135,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -296,6 +296,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
+              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ isFormDisabled }}
             />
           </CardContent>

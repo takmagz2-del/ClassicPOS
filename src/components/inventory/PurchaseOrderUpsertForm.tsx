@@ -147,8 +147,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     item: PurchaseOrderItem,
     index: number,
     control: Control<PurchaseOrderFormValues>,
-    errors: FieldErrors<PurchaseOrderFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
+    errors: FieldErrors<PurchaseOrderFormValues>
   ) => (
     <>
       <FormField
@@ -157,7 +156,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={extraProps?.isFormDisabled}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -182,7 +181,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           <FormItem>
             <FormLabel>Quantity</FormLabel>
             <FormControl>
-              <Input type="number" min="1" {...field} disabled={extraProps?.isFormDisabled} />
+              <Input type="number" min="1" {...field} disabled={isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -195,7 +194,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>
             <FormControl>
-              <Input type="number" step="0.01" min="0.01" {...field} disabled={extraProps?.isFormDisabled} />
+              <Input type="number" step="0.01" min="0.01" {...field} disabled={isFormDisabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -361,7 +360,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderPurchaseOrderItem}
-              extraProps={{ isFormDisabled }}
+              isRemoveButtonDisabled={isFormDisabled}
             />
           </CardContent>
         </Card>
