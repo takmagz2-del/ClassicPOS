@@ -102,24 +102,24 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
 
   useEffect(() => {
-    if (initialTransfer) {
-      form.reset({
-        transferDate: new Date(initialTransfer.transferDate),
-        transferFromStoreId: initialTransfer.transferFromStoreId,
-        transferToStoreId: initialTransfer.transferToStoreId,
-        items: initialTransfer.items,
-        notes: initialTransfer.notes || undefined,
-      });
-    } else {
-      form.reset({
-        transferDate: startOfDay(new Date()),
-        transferFromStoreId: "",
-        transferToStoreId: "",
-        items: [{ productId: "", productName: "", quantity: 1 }],
-        notes: undefined,
-      });
-    }
-  }, [initialTransfer, form]);
+      if (initialTransfer) {
+        form.reset({
+          transferDate: new Date(initialTransfer.transferDate),
+          transferFromStoreId: initialTransfer.transferFromStoreId,
+          transferToStoreId: initialTransfer.transferToStoreId,
+          items: initialTransfer.items,
+          notes: initialTransfer.notes || undefined,
+        });
+      } else {
+        form.reset({
+          transferDate: startOfDay(new Date()),
+          transferFromStoreId: "",
+          transferToStoreId: "",
+          items: [{ productId: "", productName: "", quantity: 1 }], // Ensure all required fields are initialized
+          notes: undefined,
+        });
+      }
+    }, [initialTransfer, form]);
 
   // Effect to automatically populate productName
   useEffect(() => {
@@ -288,7 +288,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
-              items={items as TransferOfGoodsItem[]}
+              items={items} // No longer need type assertion here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<TransferOfGoodsFormValues>}
               errors={form.formState.errors as FieldErrors<TransferOfGoodsFormValues>}

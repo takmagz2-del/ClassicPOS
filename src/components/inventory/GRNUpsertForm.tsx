@@ -107,7 +107,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
+      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Ensure all required fields are initialized
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -136,7 +136,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Ensure all required fields are initialized
         notes: undefined,
       });
     }
@@ -232,7 +232,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Link to Purchase Order (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a Purchase Order" />
@@ -260,7 +260,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO || isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isLinkedToPO || isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a supplier" />
@@ -336,7 +336,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Receiving Store</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a receiving store" />
@@ -364,7 +364,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, GRNItem>
-              items={items as GRNItem[]}
+              items={items} // No longer need type assertion here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<GRNFormValues>}
               errors={form.formState.errors as FieldErrors<GRNFormValues>}

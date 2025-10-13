@@ -80,7 +80,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Ensure all required fields are initialized
         notes: undefined,
       });
     }
@@ -200,7 +200,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           render={({ field }) => (
             <FormItem>
               <FormLabel>Store</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a store" />
@@ -228,7 +228,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           </CardHeader>
           <CardContent>
             <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
-              items={items as StockAdjustmentItem[]}
+              items={items} // No longer need type assertion here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<StockAdjustmentFormValues>}
               errors={form.formState.errors as FieldErrors<StockAdjustmentFormValues>}

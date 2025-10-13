@@ -88,7 +88,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ productId: "", quantity: 1, unitCost: 0.01 }],
+        items: [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensure all required fields are initialized
         notes: undefined,
       });
     }
@@ -153,7 +153,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={isFormDisabled}>
+              <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a supplier" />
@@ -296,7 +296,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
-              items={items as PurchaseOrderItem[]}
+              items={items} // No longer need type assertion here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<PurchaseOrderFormValues>}
               errors={form.formState.errors as FieldErrors<PurchaseOrderFormValues>}
