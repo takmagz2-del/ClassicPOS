@@ -22,7 +22,7 @@ import { formatCurrency } from "@/lib/utils";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import { useTax } from "@/context/TaxContext";
 import { PaymentMethod } from "@/types/payment";
-import { Printer, Scan, Hold } from "lucide-react"; // Added Hold icon
+import { Printer, Scan, Hand } from "lucide-react";
 import SaleRightPanelTabs from "@/components/sales/SaleRightPanelTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,10 +32,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog";
+import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // Corrected import path
 import { useAuth } from "@/components/auth/AuthContext";
 import { InventoryHistoryType } from "@/types/inventory";
-import HeldSalesList from "@/components/sales/HeldSalesList"; // New import
+import HeldSalesList from "@/components/sales/HeldSalesList";
 
 const Sales = () => {
   const { salesHistory, addSale, holdSale, resumeSale } = useSales();
@@ -58,7 +58,7 @@ const Sales = () => {
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
-  const [currentSaleId, setCurrentSaleId] = useState<string>(crypto.randomUUID()); // New: Unique ID for the current sale being built
+  const [currentSaleId, setCurrentSaleId] = useState<string>(crypto.randomUUID());
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
 
@@ -341,7 +341,7 @@ const Sales = () => {
         <h1 className="text-3xl font-bold">New Sale</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleHoldSale} disabled={cartItems.length === 0}>
-            <Hold className="mr-2 h-4 w-4" /> Hold Sale
+            <Hand className="mr-2 h-4 w-4" /> Hold Sale
           </Button>
           <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
             <Scan className="mr-2 h-4 w-4" /> Scan Barcode

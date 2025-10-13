@@ -36,10 +36,11 @@ const Accounting = () => {
     const refunds = transactions.filter(t => t.type === 'refund');
 
     const grossSales = sales.reduce((sum, sale) => sum + sale.subtotal, 0);
-    const discounts = sales.reduce((sum, sale) => sum + (sale.discountAmount || 0) + (sale.loyaltyPointsUsed ? sale.loyaltyPointsUsed / 100 : 0), 0);
+    const discounts = sales.reduce((sum, sale) => sum + (sale.discountAmount || 0), 0);
+    const loyaltyPointsRedeemedAmount = sales.reduce((sum, sale) => sum + (sale.loyaltyPointsDiscountAmount || 0), 0); // Separated loyalty points
     const totalRefunds = refunds.reduce((sum, refund) => sum + Math.abs(refund.total), 0);
     
-    const netSales = grossSales - discounts - totalRefunds;
+    const netSales = grossSales - discounts - loyaltyPointsRedeemedAmount - totalRefunds; // Updated netSales calculation
 
     const cogs = transactions.reduce((sum, transaction) => {
       const transactionCost = transaction.items.reduce((itemSum, item) => itemSum + (item.cost * item.quantity), 0);
@@ -47,11 +48,12 @@ const Accounting = () => {
     }, 0);
 
     const taxesCollected = transactions.reduce((sum, transaction) => sum + transaction.tax, 0);
-    const grossProfit = netSales - cogs;
+    const grossProfit = netSales - cogs; // grossProfit calculation remains the same based on netSales
 
     return {
       grossSales,
       discounts,
+      loyaltyPointsRedeemedAmount, // Include in return
       totalRefunds,
       netSales,
       cogs,
@@ -168,6 +170,10 @@ const Accounting = () => {
               <TableRow>
                 <TableCell className="pl-8 text-muted-foreground">Discounts</TableCell>
                 <TableCell className="text-right text-red-600 dark:text-red-400">-{formatCurrency(financialSummary.discounts, currentCurrency)}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="pl-8 text-muted-foreground">Loyalty Points Redeemed</TableCell> {/* New row */}
+                <TableCell className="text-right text-red-600 dark:text-red-400">-{formatCurrency(financialSummary.loyaltyPointsRedeemedAmount, currentCurrency)}</TableCell> {/* New row */}
               </TableRow>
               <TableRow>
                 <TableCell className="pl-8 text-muted-foreground">Refunds</TableCell>

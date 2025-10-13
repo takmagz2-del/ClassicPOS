@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useSales } from "@/context/SaleContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
@@ -53,6 +53,7 @@ const Reports = () => {
     productCategorySales,
     topSellingProducts,
     salesByPaymentMethod,
+    totalLoyaltyPointsRedeemed, // New: total loyalty points redeemed
   } = useMemo(() => {
     let filteredTransactions = salesHistory;
 
@@ -86,11 +87,16 @@ const Reports = () => {
     }
 
     const totalRev = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
+    
+    // Calculate total loyalty points redeemed
+    const loyaltyPointsRedeemed = filteredTransactions.reduce((sum, transaction) => sum + (transaction.loyaltyPointsDiscountAmount || 0), 0);
+
     const totalCOGS = filteredTransactions.reduce((sum, transaction) => {
       const transactionCost = transaction.items.reduce((itemSum, item) => itemSum + (item.cost * item.quantity), 0);
       return sum + transactionCost;
     }, 0);
-    const profit = totalRev - totalCOGS;
+    
+    const profit = totalRev - totalCOGS; // Profit is calculated from total revenue after all discounts
     const margin = totalRev > 0 ? (profit / totalRev) * 100 : 0;
 
     const actualSales = filteredTransactions.filter(t => t.type === "sale");
@@ -159,6 +165,7 @@ const Reports = () => {
       productCategorySales,
       topSellingProducts,
       salesByPaymentMethod,
+      totalLoyaltyPointsRedeemed: loyaltyPointsRedeemed, // Return new value
     };
   }, [salesHistory, dateRange, typeFilter, employeeFilter, products, getCategoryName, getPaymentMethodName, users]);
 
@@ -271,6 +278,22 @@ const Reports = () => {
           </CardContent>
         </Card>
       </div>
+
+      {totalLoyaltyPointsRedeemed > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Loyalty Points Redeemed</CardTitle>
+            <CardDescription>
+              Total value of loyalty points used as discounts in the selected period.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              -{formatCurrency(totalLoyaltyPointsRedeemed, currentCurrency)}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
