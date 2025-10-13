@@ -151,7 +151,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>Phone (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 555-123-4567" {...field} />
+                <Input placeholder="e.g., 555-123-4567" {...field} value={field.value || ""} /> {/* Added || "" */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,7 +164,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
+                <Input placeholder="e.g., 123 Main St, Anytown" {...field} value={field.value || ""} /> {/* Added || "" */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,7 +177,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>VAT Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., GB123456789" {...field} />
+                <Input placeholder="e.g., GB123456789" {...field} value={field.value || ""} /> {/* Added || "" */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -190,7 +190,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>TIN Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123-456-789" {...field} />
+                <Input placeholder="e.g., 123-456-789" {...field} value={field.value || ""} /> {/* Added || "" */}
               </FormControl>
               <FormMessage />
             </FormItem>
