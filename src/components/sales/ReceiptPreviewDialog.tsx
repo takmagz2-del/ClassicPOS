@@ -23,6 +23,7 @@ import { sendPrintJobToBackend } from "@/services/printService";
 import { usePrinterSettings } from "@/context/PrinterSettingsContext";
 import { useCategories } from "@/context/CategoryContext";
 import { toast } from "sonner"; // Import toast
+import { useAuth } from "@/components/auth/AuthContext"; // New import
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   const { printerSettings } = usePrinterSettings();
   const { products } = useProducts();
   const { getCategoryName } = useCategories();
+  const { users } = useAuth(); // Get all users to find employee names
 
   const handlePrint = async () => {
     await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
@@ -58,6 +60,9 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
 
   const subtotalAfterAllDiscounts = sale.subtotal - (sale.discountAmount || 0) - loyaltyPointsDiscountAmount;
   const pointsEarnedThisSale = Math.floor(subtotalAfterAllDiscounts);
+
+  const employeeWhoMadeSale = sale.employeeId ? users.find(u => u.id === sale.employeeId)?.email : undefined;
+  const employeeWhoHeldSale = sale.heldByEmployeeId ? users.find(u => u.id === sale.heldByEmployeeId)?.email : undefined;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -89,6 +94,18 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             <span>Sale ID:</span>
             <span>{sale.id.substring(0, 8)}</span>
           </div>
+          {employeeWhoMadeSale && (
+            <div className="flex justify-between text-xs mb-1">
+              <span>Processed By:</span>
+              <span>{employeeWhoMadeSale}</span>
+            </div>
+          )}
+          {employeeWhoHeldSale && (
+            <div className="flex justify-between text-xs mb-2">
+              <span>Held By:</span>
+              <span>{employeeWhoHeldSale}</span>
+            </div>
+          )}
 
           {receiptSettings.showCustomerInfo && customer && (
             <>
