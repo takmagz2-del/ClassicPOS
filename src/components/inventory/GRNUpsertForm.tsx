@@ -81,7 +81,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
 
   const selectedPurchaseOrderId = form.watch("purchaseOrderId");
   const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
-  const isFormDisabled = isEditMode && initialGRN?.status === "approved"; // Centralized disabling logic
+  const isFormDisabled = isEditMode && initialGRN?.status === "approved";
 
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
@@ -189,7 +189,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     index: number,
     control: Control<GRNFormValues>,
     errors: FieldErrors<GRNFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -391,7 +391,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderGRNItem}
-              isRemoveButtonDisabled={isLinkedToPO || isFormDisabled}
               extraProps={{ isLinkedToPO, isFormDisabled }}
             />
           </CardContent>

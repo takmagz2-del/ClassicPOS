@@ -155,7 +155,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
   const items = form.watch("items");
   const transferFromStoreId = form.watch("transferFromStoreId");
-  const isFormDisabled = isEditMode && initialTransfer?.status !== "pending"; // Centralized disabling logic
+  const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1 }]);
@@ -177,7 +177,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     index: number,
     control: Control<TransferOfGoodsFormValues>,
     errors: FieldErrors<TransferOfGoodsFormValues>,
-    extraProps?: { transferFromStoreId?: string; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { transferFromStoreId?: string; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -325,7 +325,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderTransferOfGoodsItem}
-              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ transferFromStoreId, isFormDisabled }}
             />
           </CardContent>

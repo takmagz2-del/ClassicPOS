@@ -135,7 +135,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     index: number,
     control: Control<StockAdjustmentFormValues>,
     errors: FieldErrors<StockAdjustmentFormValues>,
-    extraProps?: { isLinkedToPO?: boolean; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; isFormDisabled?: boolean }
   ) => (
     <>
       <FormField
@@ -296,7 +296,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
               control={form.control}
               errors={form.formState.errors}
               renderItem={renderStockAdjustmentItem}
-              isRemoveButtonDisabled={isFormDisabled}
               extraProps={{ isFormDisabled }}
             />
           </CardContent>

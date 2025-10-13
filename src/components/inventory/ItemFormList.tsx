@@ -16,9 +16,9 @@ interface ItemFormListProps<TItem> {
     control: Control<any>,
     errors: FieldErrors<any>,
     // Optional props that might be needed by specific item renderers
-    extraProps?: { isLinkedToPO?: boolean; transferFromStoreId?: string; isRemoveDisabled?: boolean; isFormDisabled?: boolean }
+    extraProps?: { isLinkedToPO?: boolean; transferFromStoreId?: string; isFormDisabled?: boolean }
   ) => React.ReactNode;
-  isRemoveButtonDisabled?: boolean; // New prop to disable remove buttons
+  // Removed isRemoveButtonDisabled prop
   extraProps?: { isLinkedToPO?: boolean; transferFromStoreId?: string; isFormDisabled?: boolean }; // Pass through extra props
 }
 
@@ -28,7 +28,6 @@ const ItemFormList = <TItem,>({
   control,
   errors,
   renderItem,
-  isRemoveButtonDisabled = false,
   extraProps,
 }: ItemFormListProps<TItem>) => {
   return (
@@ -36,10 +35,9 @@ const ItemFormList = <TItem,>({
       {items.map((item, index) => (
         <div key={index} className="flex items-end gap-2 border-b pb-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
-            {renderItem(item, index, control, errors, { ...extraProps, isRemoveDisabled })}
+            {renderItem(item, index, control, errors, extraProps)}
           </div>
-          {/* The disabled state for the remove button is now passed via extraProps to renderItem */}
-          {items.length > 0 && !isRemoveButtonDisabled && (
+          {items.length > 0 && (
             <Button type="button" variant="ghost" size="icon" onClick={() => onRemoveItem(index)} disabled={extraProps?.isFormDisabled}>
               <XCircle className="h-5 w-5 text-destructive" />
               <span className="sr-only">Remove Item</span>
