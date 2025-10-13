@@ -364,7 +364,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, GRNItem>
-              items={items} // No longer need type assertion here
+              items={items as GRNItem[]}
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<GRNFormValues>}
               errors={form.formState.errors as FieldErrors<GRNFormValues>}
