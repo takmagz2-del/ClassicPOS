@@ -81,7 +81,13 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
             <FormItem>
               <FormLabel>Quantity</FormLabel>
               <FormControl>
-                <Input type="number" min="1" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
+                <Input
+                  type="number"
+                  min="1"
+                  {...field}
+                  value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                  disabled={isFormDisabled}
+                /> {/* Type assertion */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +103,14 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
             <FormItem>
               <FormLabel>Unit Cost</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" min="0.01" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  {...field}
+                  value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                  disabled={isFormDisabled}
+                /> {/* Type assertion */}
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -138,7 +151,13 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
               <FormItem>
                 <FormLabel>Quantity</FormLabel>
                 <FormControl>
-                  <Input type="number" min="1" {...field} value={field.value as number} disabled={isFormDisabled} /> {/* Type assertion */}
+                  <Input
+                    type="number"
+                    min="1"
+                    {...field}
+                    value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                    disabled={isFormDisabled}
+                  /> {/* Type assertion */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -151,7 +170,12 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
               <FormItem className="sm:col-span-3">
                 <FormLabel>Reason</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Damaged stock, Found item" {...field} value={field.value as string} disabled={isFormDisabled} /> {/* Type assertion */}
+                  <Input
+                    placeholder="e.g., Damaged stock, Found item"
+                    {...field}
+                    value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                    disabled={isFormDisabled}
+                  /> {/* Type assertion */}
                 </FormControl>
                 <FormMessage />
               </FormItem>
