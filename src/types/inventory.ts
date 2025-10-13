@@ -6,6 +6,7 @@ import { User } from "./user"; // For linking users (approvedBy, receivedBy)
 
 // --- Purchase Order (Basic for GRN linking) ---
 export type PurchaseOrderStatus = "pending" | "completed" | "cancelled";
+export const PURCHASE_ORDER_STATUSES = ["pending", "completed", "cancelled"] as const; // Runtime array for Zod
 
 export interface PurchaseOrderItem {
   productId: string;
