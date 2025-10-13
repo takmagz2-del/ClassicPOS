@@ -23,52 +23,53 @@ const BarcodeScannerDialog = ({ isOpen, onClose, onScanSuccess }: BarcodeScanner
   const html5QrcodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    let scanner = html5QrcodeScannerRef.current;
+    const handleScanSuccess = (decodedText: string) => {
+      onScanSuccess(decodedText);
+      toast.success(`Scanned: ${decodedText}`);
+      onClose(); // Close dialog on successful scan
+    };
+
+    const handleScanError = (errorMessage: string) => {
+      // console.warn(`Barcode scan error: ${errorMessage}`); // Suppress verbose errors
+      // If a critical error occurs during initialization, you might want to close the dialog
+      // For example, if camera access is denied.
+      if (errorMessage.includes("NotAllowedError") || errorMessage.includes("NotFoundError")) {
+        toast.error("Failed to start scanner: Camera access denied or no camera found.");
+        onClose();
+      }
+    };
 
     if (isOpen) {
-      if (!scanner) {
-        scanner = new Html5QrcodeScanner(
-          qrcodeRegionId,
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            disableFlip: false,
-            formatsToSupport: [
-              Html5QrcodeSupportedFormats.EAN_13,
-              Html5QrcodeSupportedFormats.CODE_39,
-              Html5QrcodeSupportedFormats.CODE_128,
-              Html5QrcodeSupportedFormats.QR_CODE,
-            ],
-          },
-          false // verbose
-        );
-        html5QrcodeScannerRef.current = scanner;
-      }
+      // Create a new scanner instance every time the dialog opens
+      const scanner = new Html5QrcodeScanner(
+        qrcodeRegionId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          disableFlip: false,
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.QR_CODE,
+          ],
+        },
+        false // verbose
+      );
+      html5QrcodeScannerRef.current = scanner; // Store the new instance
 
-      const handleScanSuccess = (decodedText: string) => {
-        onScanSuccess(decodedText);
-        toast.success(`Scanned: ${decodedText}`);
-        onClose();
-      };
-
-      const handleScanError = (errorMessage: string) => {
-        // console.warn(`Barcode scan error: ${errorMessage}`);
-      };
-
-      if (scanner && !scanner.isScanning) {
-        scanner.render(handleScanSuccess, handleScanError);
-      }
+      // Render the scanner. Errors during rendering are passed to handleScanError.
+      scanner.render(handleScanSuccess, handleScanError);
     }
 
     return () => {
       const currentScanner = html5QrcodeScannerRef.current;
-      if (currentScanner && currentScanner.isScanning) {
-        currentScanner.stop().catch((err) => {
-          console.error("Failed to stop html5QrcodeScanner", err);
+      if (currentScanner) {
+        // Use clear() to stop the scanner and clean up resources
+        currentScanner.clear().catch((err) => {
+          console.error("Failed to clear html5QrcodeScanner", err);
         });
-        if (!isOpen) {
-          html5QrcodeScannerRef.current = null;
-        }
+        html5QrcodeScannerRef.current = null; // Clear the ref so a new instance is created next time
       }
     };
   }, [isOpen, onScanSuccess, onClose]);
