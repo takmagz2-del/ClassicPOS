@@ -8,7 +8,10 @@ import { useStores } from "./StoreContext";
 
 interface InventoryHistoryContextType {
   history: InventoryHistoryEntry[];
-  addHistoryEntry: (entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName"> & { productName?: string }) => void;
+  addHistoryEntry: (
+    entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName" | "productName"> &
+           ({ productId?: never; productName?: never } | { productId: string; productName: string })
+  ) => void;
 }
 
 const InventoryHistoryContext = createContext<InventoryHistoryContextType | undefined>(undefined);
@@ -32,14 +35,17 @@ export const InventoryHistoryProvider = ({ children }: { children: ReactNode }) 
     }
   }, [history]);
 
-  const addHistoryEntry = useCallback((entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName"> & { productName?: string }) => {
+  const addHistoryEntry = useCallback((entry: Omit<InventoryHistoryEntry, "id" | "date" | "userName" | "storeName" | "productName"> &
+  ({ productId?: never; productName?: never } | { productId: string; productName: string })) => {
+    const storeName = entry.storeId ? stores.find(s => s.id === entry.storeId)?.name : undefined;
+
     const newEntry: InventoryHistoryEntry = {
       ...entry,
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       userName: user?.email || "System",
-      storeName: entry.storeId ? stores.find(s => s.id === entry.storeId)?.name : undefined,
-      // productName is now expected to be passed directly in the entry object
+      storeName: storeName,
+      productName: entry.productName, // productName is now guaranteed by type if productId is present
     };
     setHistory((prev) => [...prev, newEntry]);
   }, [user, stores]); // Removed 'products' from dependencies
