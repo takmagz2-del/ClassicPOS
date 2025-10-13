@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns"; // Import startOfDay
 import { Calendar } from "@/components/ui/calendar";
 import { GoodsReceivedNote, GRNItem, GRNStatus } from "@/types/inventory";
 import { useSuppliers } from "@/context/SupplierContext";
@@ -65,7 +65,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       purchaseOrderId: initialGRN?.purchaseOrderId || "",
       supplierId: initialGRN?.supplierId || "",
       referenceNo: initialGRN?.referenceNo || "",
-      receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : new Date(),
+      receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()), // Use startOfDay
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items.map(item => ({
         productId: item.productId,
@@ -119,7 +119,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         purchaseOrderId: "",
         supplierId: "",
         referenceNo: "",
-        receivedDate: new Date(),
+        receivedDate: startOfDay(new Date()), // Use startOfDay
         receivingStoreId: "",
         items: [{ productId: "", quantityReceived: 1, unitCost: 0 }],
         notes: "",

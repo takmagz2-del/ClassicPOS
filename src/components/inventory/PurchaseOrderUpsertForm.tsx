@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, PlusCircle, MinusCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns"; // Import startOfDay
 import { Calendar } from "@/components/ui/calendar";
 import { PurchaseOrder, PurchaseOrderItem, PurchaseOrderStatus, PURCHASE_ORDER_STATUSES } from "@/types/inventory"; // Import PURCHASE_ORDER_STATUSES
 import { useSuppliers } from "@/context/SupplierContext";
@@ -60,7 +60,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     defaultValues: {
       supplierId: initialPurchaseOrder?.supplierId || "",
       referenceNo: initialPurchaseOrder?.referenceNo || "",
-      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : new Date(),
+      orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()), // Use startOfDay
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending", // Use string literal "pending"
       items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0 }],
@@ -83,7 +83,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       form.reset({
         supplierId: "",
         referenceNo: "",
-        orderDate: new Date(),
+        orderDate: startOfDay(new Date()), // Use startOfDay
         expectedDeliveryDate: undefined,
         status: "pending", // Use string literal "pending"
         items: [{ productId: "", quantity: 1, unitCost: 0 }],
