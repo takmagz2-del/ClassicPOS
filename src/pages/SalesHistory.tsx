@@ -34,6 +34,7 @@ const SalesHistory = () => {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
+  const [customerFilter, setCustomerFilter] = useState<string>("all"); // New state for customer filter
   const [sortKey, setSortKey] = useState<keyof Sale>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -90,7 +91,12 @@ const SalesHistory = () => {
       filteredSales = filteredSales.filter((sale) => sale.type === typeFilter);
     }
 
-    // 5. Sort
+    // 5. Filter by customer
+    if (customerFilter !== "all") {
+      filteredSales = filteredSales.filter((sale) => sale.customerId === customerFilter);
+    }
+
+    // 6. Sort
     const sortedSales = [...filteredSales].sort((a, b) => {
       let compareValue = 0;
       if (sortKey === "date") {
@@ -102,7 +108,7 @@ const SalesHistory = () => {
     });
 
     return sortedSales;
-  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, sortKey, sortOrder]);
+  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, customerFilter, sortKey, sortOrder]);
 
   const handleViewReceipt = (sale: Sale) => {
     setSelectedSaleForReceipt(sale);
@@ -241,6 +247,20 @@ const SalesHistory = () => {
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="sale">Sale</SelectItem>
                 <SelectItem value="refund">Refund</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={customerFilter} onValueChange={setCustomerFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Customer" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Customers</SelectItem>
+                {customers.map((customer) => (
+                  <SelectItem key={customer.id} value={customer.id}>
+                    {customer.name} ({customer.email})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
