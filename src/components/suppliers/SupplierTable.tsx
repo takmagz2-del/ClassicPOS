@@ -30,6 +30,8 @@ const SupplierTable = ({ suppliers, onEditSupplier, onDeleteSupplier }: Supplier
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead>VAT Number</TableHead> {/* New TableHead */}
+            <TableHead>TIN Number</TableHead> {/* New TableHead */}
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -42,6 +44,8 @@ const SupplierTable = ({ suppliers, onEditSupplier, onDeleteSupplier }: Supplier
                 <TableCell>{supplier.email || "N/A"}</TableCell>
                 <TableCell>{supplier.phone || "N/A"}</TableCell>
                 <TableCell>{supplier.address || "N/A"}</TableCell>
+                <TableCell>{supplier.vatNumber || "N/A"}</TableCell> {/* New TableCell */}
+                <TableCell>{supplier.tinNumber || "N/A"}</TableCell> {/* New TableCell */}
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditSupplier(supplier)}>
                     <Edit className="h-4 w-4" />
@@ -56,7 +60,7 @@ const SupplierTable = ({ suppliers, onEditSupplier, onDeleteSupplier }: Supplier
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center"> {/* Updated colspan */}
                 No suppliers found.
               </TableCell>
             </TableRow>

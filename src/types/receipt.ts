@@ -8,4 +8,5 @@ export interface ReceiptSettings {
   showSku: boolean;
   showCategory: boolean;
   showCustomerInfo: boolean;
+  showVatTin: boolean; // New: Whether to show VAT/TIN numbers on the receipt
 }

@@ -102,6 +102,18 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
                 <span>Email:</span>
                 <span>{customer.email}</span>
               </div>
+              {receiptSettings.showVatTin && customer.vatNumber && (
+                <div className="flex justify-between text-xs">
+                  <span>VAT Number:</span>
+                  <span>{customer.vatNumber}</span>
+                </div>
+              )}
+              {receiptSettings.showVatTin && customer.tinNumber && (
+                <div className="flex justify-between text-xs">
+                  <span>TIN Number:</span>
+                  <span>{customer.tinNumber}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs">
                 <span>Current Loyalty Points:</span>
                 <span>{customer.loyaltyPoints}</span>

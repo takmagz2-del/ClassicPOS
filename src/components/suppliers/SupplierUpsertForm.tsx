@@ -24,6 +24,8 @@ const formSchema = z.object({
   phone: z.string().optional().or(z.literal("")),
   address: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
+  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
+  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
 });
 
 type SupplierFormValues = z.infer<typeof formSchema>;
@@ -46,6 +48,8 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
       phone: "",
       address: "",
       notes: "",
+      vatNumber: "", // Default for new field
+      tinNumber: "", // Default for new field
     },
   });
 
@@ -57,6 +61,8 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
       phone: "",
       address: "",
       notes: "",
+      vatNumber: "",
+      tinNumber: "",
     });
   }, [initialSupplier, form]);
 
@@ -133,6 +139,32 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., 123 Industrial Way" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="vatNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>VAT Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., GB123456789" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tinNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>TIN Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 123-456-789" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

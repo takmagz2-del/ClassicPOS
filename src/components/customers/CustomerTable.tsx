@@ -30,6 +30,8 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Address</TableHead>
+            <TableHead>VAT Number</TableHead> {/* New TableHead */}
+            <TableHead>TIN Number</TableHead> {/* New TableHead */}
             <TableHead className="text-right">Loyalty Points</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
@@ -46,6 +48,8 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
                 <TableCell>{customer.email}</TableCell>
                 <TableCell>{customer.phone || "N/A"}</TableCell>
                 <TableCell>{customer.address || "N/A"}</TableCell>
+                <TableCell>{customer.vatNumber || "N/A"}</TableCell> {/* New TableCell */}
+                <TableCell>{customer.tinNumber || "N/A"}</TableCell> {/* New TableCell */}
                 <TableCell className="text-right">{customer.loyaltyPoints}</TableCell>
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditCustomer(customer)}>
@@ -61,7 +65,7 @@ const CustomerTable = ({ customers, onEditCustomer, onDeleteCustomer }: Customer
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center"> {/* Updated colspan */}
                 No customers found.
               </TableCell>
             </TableRow>

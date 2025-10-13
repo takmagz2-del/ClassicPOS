@@ -29,6 +29,8 @@ const formSchema = z.object({
   loyaltyPoints: z.coerce.number().int().min(0, {
     message: "Loyalty points must be a non-negative integer.",
   }).default(0),
+  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
+  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
 });
 
 type CustomerFormValues = z.infer<typeof formSchema>;
@@ -50,6 +52,8 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
       phone: "",
       address: "",
       loyaltyPoints: 0,
+      vatNumber: "", // Default for new field
+      tinNumber: "", // Default for new field
     },
   });
 
@@ -61,6 +65,8 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
       phone: "",
       address: "",
       loyaltyPoints: 0,
+      vatNumber: "",
+      tinNumber: "",
     });
   }, [initialCustomer, form]);
 
@@ -73,6 +79,8 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
           phone: values.phone,
           address: values.address,
           loyaltyPoints: values.loyaltyPoints,
+          vatNumber: values.vatNumber, // New field
+          tinNumber: values.tinNumber, // New field
         }
       : { // Explicitly construct the object for add mode
           id: crypto.randomUUID(),
@@ -81,6 +89,8 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
           phone: values.phone,
           address: values.address,
           loyaltyPoints: values.loyaltyPoints,
+          vatNumber: values.vatNumber, // New field
+          tinNumber: values.tinNumber, // New field
         };
 
     onCustomerSubmit(customerToSubmit);
@@ -139,6 +149,32 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., 123 Main St, Anytown" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="vatNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>VAT Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., GB123456789" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tinNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>TIN Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 123-456-789" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

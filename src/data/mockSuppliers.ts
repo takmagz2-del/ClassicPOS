@@ -9,6 +9,8 @@ export const mockSuppliers: Supplier[] = [
     phone: "111-222-3333",
     address: "456 Tech Drive, Silicon Valley, CA",
     notes: "Primary supplier for electronics and gadgets.",
+    vatNumber: "VAT123456789",
+    tinNumber: "TIN987654321",
   },
   {
     id: "sup-2",
@@ -18,6 +20,7 @@ export const mockSuppliers: Supplier[] = [
     phone: "444-555-6666",
     address: "789 Business Rd, Office City, NY",
     notes: "Supplier for office furniture and supplies.",
+    vatNumber: "VAT987654321",
   },
   {
     id: "sup-3",

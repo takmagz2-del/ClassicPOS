@@ -30,6 +30,7 @@ const formSchema = z.object({
   showSku: z.boolean(),
   showCategory: z.boolean(),
   showCustomerInfo: z.boolean(),
+  showVatTin: z.boolean(), // New: Schema for showVatTin
 });
 
 type ReceiptSettingsFormValues = z.infer<typeof formSchema>;
@@ -194,6 +195,27 @@ const ReceiptSettingsForm = () => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="showVatTin"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Show VAT/TIN Numbers</FormLabel>
+                  <FormDescription>
+                    Display customer's VAT and TIN numbers on the receipt if available.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={!form.watch("showCustomerInfo")} // Disable if showCustomerInfo is false
                   />
                 </FormControl>
               </FormItem>
