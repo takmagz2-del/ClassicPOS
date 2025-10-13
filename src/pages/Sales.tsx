@@ -250,8 +250,9 @@ const Sales = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 overflow-y-auto">
-        <div className="md:col-span-1 flex flex-col gap-4 flex-1">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-y-auto">
+        {/* Left Panel: Customer Selector & Product Selector */}
+        <div className="flex flex-col gap-4 lg:w-1/3 xl:w-1/4">
           <CustomerSelector
             customers={customers}
             selectedCustomerId={selectedCustomerId}
@@ -259,7 +260,9 @@ const Sales = () => {
           />
           <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
         </div>
-        <div className="md:col-span-2 flex flex-col gap-4 flex-1">
+
+        {/* Right Panel: Sale Cart, Discounts, Summary, Payment */}
+        <div className="flex flex-col gap-4 flex-1">
           <SaleCart
             cartItems={cartItems}
             onUpdateQuantity={handleUpdateCartItemQuantity}
