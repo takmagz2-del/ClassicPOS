@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { Control, FieldErrors } from "react-hook-form"; // Import Control and FieldErrors types
 import {
   FormControl,
   FormField,
@@ -24,6 +24,8 @@ interface ItemFormListProps {
   formType: "purchaseOrder" | "grn" | "stockAdjustment" | "transfer";
   isLinkedToPO?: boolean; // Specific to GRN form
   transferFromStoreId?: string; // Specific to Transfer form
+  control: Control<any>; // Add control prop
+  errors: FieldErrors<any>; // Add errors prop
 }
 
 const ItemFormList = ({
@@ -34,9 +36,10 @@ const ItemFormList = ({
   formType,
   isLinkedToPO = false,
   transferFromStoreId,
+  control, // Destructure control
+  errors, // Destructure errors
 }: ItemFormListProps) => {
-  const { control, formState, setError, clearErrors } = useFormContext();
-  const { errors } = formState;
+  // Removed useFormContext
 
   const getAvailableProducts = (itemProductId?: string) => {
     if (formType === "transfer" && transferFromStoreId) {

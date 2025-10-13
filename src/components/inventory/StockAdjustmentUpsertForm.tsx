@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, FormProvider } from "react-hook-form"; // Import FormProvider
+import { useForm } from "react-hook-form"; // Removed FormProvider import
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -129,107 +129,108 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   };
 
   return (
-    <FormProvider {...form}> {/* Wrap with FormProvider */}
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="adjustmentDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Adjustment Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="storeId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Store</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+    // Removed FormProvider
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="adjustmentDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Adjustment Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a store" />
-                    </SelectTrigger>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
                   </FormControl>
-                  <SelectContent>
-                    {stores.map((store) => (
-                      <SelectItem key={store.id} value={store.id}>
-                        {store.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Items to Adjust</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ItemFormList
-                items={items}
-                products={products}
-                onAddItem={handleAddItem}
-                onRemoveItem={handleRemoveItem}
-                formType="stockAdjustment"
-              />
-            </CardContent>
-          </Card>
-
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes (Optional)</FormLabel>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="storeId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Store</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a store" />
+                  </SelectTrigger>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <SelectContent>
+                  {stores.map((store) => (
+                    <SelectItem key={store.id} value={store.id}>
+                      {store.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button type="submit" className="w-full">
-            {isEditMode ? "Save Changes" : "Create Adjustment"}
-          </Button>
-        </form>
-      </Form>
-    </FormProvider>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Items to Adjust</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ItemFormList
+              items={items}
+              products={products}
+              onAddItem={handleAddItem}
+              onRemoveItem={handleRemoveItem}
+              formType="stockAdjustment"
+              control={form.control} // Pass control
+              errors={form.formState.errors} // Pass errors
+            />
+          </CardContent>
+        </Card>
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes (Optional)</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Any additional notes for this stock adjustment..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
+          {isEditMode ? "Save Changes" : "Create Adjustment"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 
