@@ -288,7 +288,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
-              items={items as TransferOfGoodsItem[]}
+              items={items as TransferOfGoodsItem[]} // Explicit cast here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<TransferOfGoodsFormValues>}
               errors={form.formState.errors as FieldErrors<TransferOfGoodsFormValues>}

@@ -228,7 +228,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           </CardHeader>
           <CardContent>
             <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
-              items={items as StockAdjustmentItem[]}
+              items={items as StockAdjustmentItem[]} // Explicit cast here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<StockAdjustmentFormValues>}
               errors={form.formState.errors as FieldErrors<StockAdjustmentFormValues>}

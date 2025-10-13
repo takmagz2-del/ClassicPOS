@@ -296,7 +296,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
-              items={items as PurchaseOrderItem[]}
+              items={items as PurchaseOrderItem[]} // Explicit cast here
               onRemoveItem={handleRemoveItem}
               control={form.control as Control<PurchaseOrderFormValues>}
               errors={form.formState.errors as FieldErrors<PurchaseOrderFormValues>}
