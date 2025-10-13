@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form"; // Corrected import for useForm
-import { zodResolver } from "@hookform/resolvers/zod"; // Added import for zodResolver
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,6 +19,7 @@ import { Product } from "@/types/product";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCategories } from "@/context/CategoryContext";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -32,9 +34,14 @@ const formSchema = z.object({
   cost: z.coerce.number().min(0, {
     message: "Cost must be a non-negative number.",
   }),
+  wholesalePrice: z.coerce.number().min(0, { // New: Wholesale price validation
+    message: "Wholesale price must be a non-negative number.",
+  }),
   stock: z.coerce.number().int().min(0, {
     message: "Stock must be a non-negative integer.",
   }),
+  trackStock: z.boolean(), // New: Track stock switch
+  availableForSale: z.boolean(), // New: Available for sale switch
   sku: z.string().min(3, {
     message: "SKU must be at least 3 characters.",
   }),
@@ -60,7 +67,10 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       categoryId: "",
       price: 0,
       cost: 0,
+      wholesalePrice: 0, // Default for new field
       stock: 0,
+      trackStock: true, // Default to true
+      availableForSale: true, // Default to true
       sku: "",
       imageUrl: "",
     },
@@ -73,7 +83,10 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       categoryId: "",
       price: 0,
       cost: 0,
+      wholesalePrice: 0,
       stock: 0,
+      trackStock: true,
+      availableForSale: true,
       sku: "",
       imageUrl: "",
     });
@@ -89,7 +102,10 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         categoryId: values.categoryId,
         price: values.price,
         cost: values.cost,
+        wholesalePrice: values.wholesalePrice, // New field
         stock: values.stock,
+        trackStock: values.trackStock, // New field
+        availableForSale: values.availableForSale, // New field
         sku: values.sku,
         imageUrl: values.imageUrl,
       };
@@ -100,7 +116,10 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         categoryId: values.categoryId,
         price: values.price,
         cost: values.cost,
+        wholesalePrice: values.wholesalePrice, // New field
         stock: values.stock,
+        trackStock: values.trackStock, // New field
+        availableForSale: values.availableForSale, // New field
         sku: values.sku,
         imageUrl: values.imageUrl,
       };
@@ -111,6 +130,8 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
     onClose();
     form.reset();
   };
+
+  const trackStock = form.watch("trackStock");
 
   return (
     <Form {...form}>
@@ -157,7 +178,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Price</FormLabel>
+              <FormLabel>Retail Price</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" {...field} />
               </FormControl>
@@ -170,7 +191,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
           name="cost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cost</FormLabel>
+              <FormLabel>Cost Price</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" placeholder="e.g., 850.00" {...field} />
               </FormControl>
@@ -180,14 +201,67 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         />
         <FormField
           control={form.control}
+          name="wholesalePrice"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Wholesale Price</FormLabel>
+              <FormControl>
+                <Input type="number" step="0.01" placeholder="e.g., 750.00" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="trackStock"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Track Stock</FormLabel>
+                <FormDescription>
+                  Enable to manage inventory levels for this product.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="stock"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Stock</FormLabel>
+              <FormLabel>Stock Quantity</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" {...field} disabled={!trackStock} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="availableForSale"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Available for Sale</FormLabel>
+                <FormDescription>
+                  Toggle visibility and purchasability in the sales terminal.
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />

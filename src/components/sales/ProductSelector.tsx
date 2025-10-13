@@ -28,8 +28,8 @@ const LOW_STOCK_THRESHOLD = 10;
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
-  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // New state for stock status filter
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]); // New state for price range
+  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const { currentCurrency } = useCurrency();
   const { categories } = useCategories();
   
@@ -37,11 +37,9 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [previewImageAlt, setPreviewImageAlt] = useState("");
 
-  // Calculate min/max price dynamically from products
   const minPrice = useMemo(() => products.length > 0 ? Math.min(...products.map(p => p.price)) : 0, [products]);
   const maxPrice = useMemo(() => products.length > 0 ? Math.max(...products.map(p => p.price)) : 10000, [products]);
 
-  // Reset price range when min/max prices change (e.g., products data updates)
   React.useEffect(() => {
     setPriceRange([minPrice, maxPrice]);
   }, [minPrice, maxPrice]);
@@ -51,21 +49,26 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     setSearchTerm(value);
 
     const matchingProduct = products.find(
-      (p) => p.sku.toLowerCase() === value.toLowerCase() || p.id.toLowerCase() === value.toLowerCase()
+      (p) => (p.sku.toLowerCase() === value.toLowerCase() || p.id.toLowerCase() === value.toLowerCase()) && p.availableForSale
     );
 
     if (matchingProduct) {
-      if (matchingProduct.stock > 0) {
+      if (matchingProduct.trackStock && matchingProduct.stock <= 0) {
+        toast.error(`${matchingProduct.name} is out of stock.`);
+      } else {
         onAddProductToCart(matchingProduct, 1);
         setSearchTerm("");
-      } else {
-        toast.error(`${matchingProduct.name} is out of stock.`);
       }
     }
   };
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      // Only show products marked as available for sale
+      if (!product.availableForSale) {
+        return false;
+      }
+
       const matchesSearchTerm =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -75,14 +78,15 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
 
       let matchesStockStatus = true;
       if (stockStatusFilter === "in-stock") {
-        matchesStockStatus = product.stock > 0;
+        matchesStockStatus = product.trackStock && product.stock > 0;
       } else if (stockStatusFilter === "low-stock") {
-        matchesStockStatus = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+        matchesStockStatus = product.trackStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
       } else if (stockStatusFilter === "out-of-stock") {
-        matchesStockStatus = product.stock === 0;
+        matchesStockStatus = product.trackStock && product.stock === 0;
+      } else if (stockStatusFilter === "not-tracked") { // New filter option for non-tracked stock
+        matchesStockStatus = !product.trackStock;
       }
 
-      // New: Filter by price range
       const matchesPriceRange =
         product.price >= priceRange[0] && product.price <= priceRange[1];
 
@@ -94,7 +98,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     setSearchTerm("");
     setSelectedCategoryId("all");
     setStockStatusFilter("all");
-    setPriceRange([minPrice, maxPrice]); // Reset to full range
+    setPriceRange([minPrice, maxPrice]);
   };
 
   const handleImageClick = (imageUrl: string, altText: string) => {
@@ -108,7 +112,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
       <CardHeader>
         <CardTitle>Select Products</CardTitle>
         <div className="flex flex-col gap-3 mt-2">
-          {/* Search Input */}
           <div className="relative">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -119,7 +122,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
             />
           </div>
 
-          {/* Filters Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
               <SelectTrigger>
@@ -144,6 +146,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                 <SelectItem value="in-stock">In Stock</SelectItem>
                 <SelectItem value="low-stock">Low Stock (&le;{LOW_STOCK_THRESHOLD})</SelectItem>
                 <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                <SelectItem value="not-tracked">Not Tracked</SelectItem> {/* New filter option */}
               </SelectContent>
             </Select>
 
@@ -156,7 +159,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
             </Button>
           </div>
 
-          {/* Price Range Slider */}
           <div className="space-y-2">
             <Label className="text-xs">Price Range: {formatCurrency(priceRange[0], currentCurrency)} - {formatCurrency(priceRange[1], currentCurrency)}</Label>
             <Slider
@@ -184,13 +186,13 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                   key={product.id}
                   className={cn(
                     "cursor-pointer hover:shadow-lg transition-shadow overflow-hidden",
-                    product.stock <= 0 && "opacity-50 cursor-not-allowed"
+                    product.trackStock && product.stock <= 0 && "opacity-50 cursor-not-allowed"
                   )}
                   onClick={() => {
-                    if (product.stock > 0) {
-                      onAddProductToCart(product, 1);
-                    } else {
+                    if (product.trackStock && product.stock <= 0) {
                       toast.error(`${product.name} is out of stock.`);
+                    } else {
+                      onAddProductToCart(product, 1);
                     }
                   }}
                 >
@@ -216,12 +218,16 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                       <p className="text-[0.65rem] text-muted-foreground mt-1">SKU: {product.sku}</p>
                       <p className="text-[0.65rem] text-muted-foreground">
                         Stock: {" "}
-                        {product.stock === 0 ? (
-                          <Badge variant="destructive">Out of Stock</Badge>
-                        ) : product.stock <= LOW_STOCK_THRESHOLD ? (
-                          <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({product.stock})</Badge>
+                        {product.trackStock ? (
+                          product.stock === 0 ? (
+                            <Badge variant="destructive">Out of Stock</Badge>
+                          ) : product.stock <= LOW_STOCK_THRESHOLD ? (
+                            <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({product.stock})</Badge>
+                          ) : (
+                            <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({product.stock})</Badge>
+                          )
                         ) : (
-                          <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({product.stock})</Badge>
+                          <Badge variant="secondary">N/A</Badge>
                         )}
                       </p>
                     </div>

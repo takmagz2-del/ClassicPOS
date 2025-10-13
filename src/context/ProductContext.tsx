@@ -7,11 +7,11 @@ import { mockProducts } from "@/data/mockProducts";
 interface ProductContextType {
   products: Product[];
   updateProductStock: (productId: string, newStock: number) => void;
-  increaseProductStock: (productId: string, quantity: number) => void; // New function
+  increaseProductStock: (productId: string, quantity: number) => void;
   updateProduct: (updatedProduct: Product) => void;
   addProduct: (newProduct: Product) => void;
   deleteProduct: (productId: string) => void;
-  reassignProductsToCategory: (oldCategoryId: string, newCategoryId: string) => void; // New function
+  reassignProductsToCategory: (oldCategoryId: string, newCategoryId: string) => void;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);

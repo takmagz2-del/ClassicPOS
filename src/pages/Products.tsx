@@ -31,7 +31,7 @@ const Products = () => {
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
-  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // 'all', 'in-stock', 'low-stock', 'out-of-stock'
+  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // 'all', 'in-stock', 'low-stock', 'out-of-stock', 'not-tracked'
   const [sortKey, setSortKey] = useState<keyof Product>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
@@ -70,11 +70,13 @@ const Products = () => {
 
       let matchesStockStatus = true;
       if (stockStatusFilter === "in-stock") {
-        matchesStockStatus = product.stock > 0;
+        matchesStockStatus = product.trackStock && product.stock > 0;
       } else if (stockStatusFilter === "low-stock") {
-        matchesStockStatus = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+        matchesStockStatus = product.trackStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
       } else if (stockStatusFilter === "out-of-stock") {
-        matchesStockStatus = product.stock === 0;
+        matchesStockStatus = product.trackStock && product.stock === 0;
+      } else if (stockStatusFilter === "not-tracked") {
+        matchesStockStatus = !product.trackStock;
       }
 
       return matchesSearchTerm && matchesCategory && matchesStockStatus;
@@ -85,7 +87,7 @@ const Products = () => {
       let compareValue = 0;
       if (sortKey === "name" || sortKey === "sku") {
         compareValue = a[sortKey].localeCompare(b[sortKey]);
-      } else if (sortKey === "price" || sortKey === "stock" || sortKey === "cost") {
+      } else if (sortKey === "price" || sortKey === "stock" || sortKey === "cost" || sortKey === "wholesalePrice") {
         compareValue = a[sortKey] - b[sortKey];
       } else if (sortKey === "categoryId") {
         const categoryA = categories.find(cat => cat.id === a.categoryId)?.name || "";
@@ -192,6 +194,7 @@ const Products = () => {
                 <SelectItem value="in-stock">In Stock</SelectItem>
                 <SelectItem value="low-stock">Low Stock (&le;{LOW_STOCK_THRESHOLD})</SelectItem>
                 <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                <SelectItem value="not-tracked">Not Tracked</SelectItem>
               </SelectContent>
             </Select>
 

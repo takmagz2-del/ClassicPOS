@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/product";
-import { Edit, Trash2, ImageIcon, ArrowUpDown } from "lucide-react";
+import { Edit, Trash2, ImageIcon, ArrowUpDown, Check, X } from "lucide-react"; // Added Check and X icons
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { useCategories } from "@/context/CategoryContext";
-import ImagePreviewDialog from "@/components/common/ImagePreviewDialog"; // Import the new component
+import ImagePreviewDialog from "@/components/common/ImagePreviewDialog";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge"; // Import Badge
 
 interface ProductTableProps {
   products: Product[];
@@ -31,7 +32,6 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
   const { currentCurrency } = useCurrency();
   const { getCategoryName } = useCategories();
   
-  // State for image preview dialog
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [previewImageAlt, setPreviewImageAlt] = useState("");
@@ -95,7 +95,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
                 onClick={() => onSort("price")}
                 className="group px-0 hover:bg-transparent justify-end"
               >
-                Price
+                Retail Price
                 {renderSortIcon("price")}
               </Button>
             </TableHead>
@@ -105,8 +105,18 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
                 onClick={() => onSort("cost")}
                 className="group px-0 hover:bg-transparent justify-end"
               >
-                Cost
+                Cost Price
                 {renderSortIcon("cost")}
+              </Button>
+            </TableHead>
+            <TableHead className="text-right">
+              <Button
+                variant="ghost"
+                onClick={() => onSort("wholesalePrice")}
+                className="group px-0 hover:bg-transparent justify-end"
+              >
+                Wholesale Price
+                {renderSortIcon("wholesalePrice")}
               </Button>
             </TableHead>
             <TableHead className="text-right">
@@ -119,6 +129,8 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
                 {renderSortIcon("stock")}
               </Button>
             </TableHead>
+            <TableHead className="text-center">Track Stock</TableHead>
+            <TableHead className="text-center">Available for Sale</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -147,7 +159,16 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
                 <TableCell>{product.sku}</TableCell>
                 <TableCell className="text-right">{formatCurrency(product.price, currentCurrency)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(product.cost, currentCurrency)}</TableCell>
-                <TableCell className="text-right">{product.stock}</TableCell>
+                <TableCell className="text-right">{formatCurrency(product.wholesalePrice, currentCurrency)}</TableCell>
+                <TableCell className="text-right">
+                  {product.trackStock ? product.stock : <Badge variant="secondary">N/A</Badge>}
+                </TableCell>
+                <TableCell className="text-center">
+                  {product.trackStock ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-red-500 mx-auto" />}
+                </TableCell>
+                <TableCell className="text-center">
+                  {product.availableForSale ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-red-500 mx-auto" />}
+                </TableCell>
                 <TableCell className="text-center flex justify-center items-center space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => onEditProduct(product)}>
                     <Edit className="h-4 w-4" />
@@ -162,7 +183,7 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="h-24 text-center">
+              <TableCell colSpan={11} className="h-24 text-center">
                 No products found.
               </TableCell>
             </TableRow>
@@ -170,7 +191,6 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct, onSort, sortKe
         </TableBody>
       </Table>
       
-      {/* Image Preview Dialog */}
       <ImagePreviewDialog
         isOpen={isImagePreviewOpen}
         onClose={() => setIsImagePreviewOpen(false)}
