@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
-import { PaymentMethod, defaultPaymentMethods } from "@/types/payment";
+import { PaymentMethod } from "@/types/payment";
+import { mockPaymentMethods } from "@/data/mockPaymentMethods"; // Updated import
 import { toast } from "sonner";
 
 interface PaymentMethodContextType {
@@ -18,9 +19,9 @@ export const PaymentMethodProvider = ({ children }: { children: ReactNode }) => 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(() => {
     if (typeof window !== "undefined") {
       const storedMethods = localStorage.getItem("paymentMethods");
-      return storedMethods ? JSON.parse(storedMethods) : defaultPaymentMethods;
+      return storedMethods ? JSON.parse(storedMethods) : mockPaymentMethods; // Use mockPaymentMethods as initial
     }
-    return defaultPaymentMethods;
+    return mockPaymentMethods;
   });
 
   useEffect(() => {
@@ -52,13 +53,10 @@ export const PaymentMethodProvider = ({ children }: { children: ReactNode }) => 
 
   const deletePaymentMethod = useCallback((id: string) => {
     const methodToDelete = paymentMethods.find(pm => pm.id === id);
-    if (methodToDelete && defaultPaymentMethods.some(dpm => dpm.id === methodToDelete.id)) {
-      toast.error(`Cannot delete default payment method "${methodToDelete.name}".`);
-      return;
-    }
+    if (!methodToDelete) return; // Should not happen if UI is correct
 
     setPaymentMethods((prevMethods) => prevMethods.filter((pm) => pm.id !== id));
-    toast.info("Payment method deleted.");
+    toast.info(`Payment method "${methodToDelete.name}" deleted.`);
   }, [paymentMethods]);
 
   const getPaymentMethodName = useCallback((id: string) => {

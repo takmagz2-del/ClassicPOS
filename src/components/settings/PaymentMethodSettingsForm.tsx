@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription, // Added FormDescription import
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { usePaymentMethods } from "@/context/PaymentMethodContext";
-import { PaymentMethod, defaultPaymentMethods } from "@/types/payment";
+import { PaymentMethod } from "@/types/payment"; // Removed defaultPaymentMethods import
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Edit, PlusCircle } from "lucide-react";
@@ -112,8 +112,7 @@ const PaymentMethodSettingsForm = () => {
     }
   };
 
-  const isDefaultMethod = (method: PaymentMethod) =>
-    defaultPaymentMethods.some(dpm => dpm.id === method.id);
+  // Removed isDefaultMethod check, all methods are now editable/deletable
 
   return (
     <div className="space-y-6">
@@ -135,15 +134,14 @@ const PaymentMethodSettingsForm = () => {
                       {method.isCashEquivalent && "Cash/Card "}
                       {method.isCredit && "Credit "}
                       {method.isBNPL && "BNPL "}
-                      {isDefaultMethod(method) && "(Default)"}
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(method)} disabled={isDefaultMethod(method)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleEditClick(method)}>
                       <Edit className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(method)} disabled={isDefaultMethod(method)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(method)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                       <span className="sr-only">Delete</span>
                     </Button>
@@ -174,7 +172,7 @@ const PaymentMethodSettingsForm = () => {
                   <FormItem>
                     <FormLabel>Method Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Store Credit" {...field} disabled={editingMethod && isDefaultMethod(editingMethod)} />
+                      <Input placeholder="e.g., Store Credit" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,7 +195,6 @@ const PaymentMethodSettingsForm = () => {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          disabled={editingMethod && isDefaultMethod(editingMethod)}
                         />
                       </FormControl>
                     </FormItem>
@@ -218,7 +215,6 @@ const PaymentMethodSettingsForm = () => {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          disabled={editingMethod && isDefaultMethod(editingMethod)}
                         />
                       </FormControl>
                     </FormItem>
@@ -239,7 +235,6 @@ const PaymentMethodSettingsForm = () => {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          disabled={editingMethod && isDefaultMethod(editingMethod)}
                         />
                       </FormControl>
                     </FormItem>
@@ -263,16 +258,11 @@ const PaymentMethodSettingsForm = () => {
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the payment method{" "}
               <span className="font-semibold text-foreground">"{methodToDelete?.name}"</span>.
-              {methodToDelete && isDefaultMethod(methodToDelete) && (
-                <p className="text-red-500 mt-2">
-                  This is a default payment method and cannot be deleted.
-                </p>
-              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={methodToDelete && isDefaultMethod(methodToDelete)}>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
