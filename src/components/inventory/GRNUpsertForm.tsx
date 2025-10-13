@@ -46,9 +46,12 @@ const formSchema = z.object({
 
 type GRNFormValues = z.infer<typeof formSchema>;
 
+// Define a type for the data expected by addGRN in the context
+type NewGRNData = Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "receivingStoreName" | "approvedByUserName" | "approvalDate">;
+
 interface GRNUpsertFormProps {
   initialGRN?: GoodsReceivedNote;
-  onGRNSubmit: (grn: GoodsReceivedNote | Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "receivingStoreName" | "approvedByUserName" | "approvalDate">) => void;
+  onGRNSubmit: (grn: GoodsReceivedNote | NewGRNData) => void; // Refined type
   onClose: () => void;
 }
 
@@ -77,6 +80,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   });
 
   const selectedPurchaseOrderId = form.watch("purchaseOrderId");
+  const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
 
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
@@ -152,7 +156,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       notes: values.notes,
     };
 
-    let grnToSubmit: GoodsReceivedNote | Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "receivingStoreName" | "approvedByUserName" | "approvalDate">;
+    let grnToSubmit: GoodsReceivedNote | NewGRNData; // Use the refined type
 
     if (isEditMode) {
       grnToSubmit = {
@@ -218,7 +222,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Supplier</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={!!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none"}>
+              <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a supplier" />
@@ -315,7 +319,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Received Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={!!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none"}>
+            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isLinkedToPO}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add Item
             </Button>
           </CardHeader>
@@ -329,7 +333,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none"}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLinkedToPO}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a product" />
@@ -354,7 +358,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                       <FormItem>
                         <FormLabel>Quantity Received</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" {...field} />
+                          <Input type="number" min="1" {...field} disabled={isLinkedToPO} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -367,14 +371,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                       <FormItem>
                         <FormLabel>Unit Cost</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" min="0.01" {...field} />
+                          <Input type="number" step="0.01" min="0.01" {...field} disabled={isLinkedToPO} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                {items.length > 1 && (!selectedPurchaseOrderId || selectedPurchaseOrderId === "none") && (
+                {items.length > 1 && !isLinkedToPO && (
                   <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
                     <XCircle className="h-5 w-5 text-destructive" />
                     <span className="sr-only">Remove Item</span>
