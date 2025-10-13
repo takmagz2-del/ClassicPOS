@@ -28,7 +28,7 @@ import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHis
 const SalesHistory = () => {
   const { salesHistory, refundSale, settleSale } = useSales();
   const { customers } = useCustomers();
-  const { updateProductStock } = useProducts(); // Use updateProductStock
+  const { updateProductStock, products } = useProducts(); // Destructure products here
   const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
 
   const [searchTerm, setSearchTerm] = useState<string>("");
