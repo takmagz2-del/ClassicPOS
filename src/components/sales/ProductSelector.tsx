@@ -14,38 +14,54 @@ import { ImageIcon, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import ImagePreviewDialog from "@/components/common/ImagePreviewDialog"; // Import the new component
-import { Button } from "@/components/ui/button"; // Import Button for Reset Filters
-import { Badge } from "@/components/ui/badge"; // Import Badge for stock status
+import ImagePreviewDialog from "@/components/common/ImagePreviewDialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductSelectorProps {
   products: Product[];
   onAddProductToCart: (product: Product, quantity: number) => void;
 }
 
-const LOW_STOCK_THRESHOLD = 10; // Define what "low stock" means
+const LOW_STOCK_THRESHOLD = 10;
 
 const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
-  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all"); // 'all', 'in-stock', 'low-stock', 'out-of-stock'
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]); // Default wide range
+  const [stockStatusFilter, setStockStatusFilter] = useState<string>("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const { currentCurrency } = useCurrency();
   const { categories } = useCategories();
   
-  // State for image preview dialog
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [previewImageAlt, setPreviewImageAlt] = useState("");
 
-  // Calculate min and max price for slider
   const minPrice = useMemo(() => products.length > 0 ? Math.min(...products.map(p => p.price)) : 0, [products]);
   const maxPrice = useMemo(() => products.length > 0 ? Math.max(...products.map(p => p.price)) : 10000, [products]);
 
-  // Update price range when min/max changes (e.g., on initial load or product updates)
   React.useEffect(() => {
     setPriceRange([minPrice, maxPrice]);
   }, [minPrice, maxPrice]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Check if the input matches a product SKU or ID for quick add
+    const matchingProduct = products.find(
+      (p) => p.sku.toLowerCase() === value.toLowerCase() || p.id.toLowerCase() === value.toLowerCase()
+    );
+
+    if (matchingProduct) {
+      if (matchingProduct.stock > 0) {
+        onAddProductToCart(matchingProduct, 1);
+        setSearchTerm(""); // Clear search after adding
+      } else {
+        toast.error(`${matchingProduct.name} is out of stock.`);
+      }
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -72,7 +88,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     });
   }, [products, searchTerm, selectedCategoryId, stockStatusFilter, priceRange]);
 
-  // Reset filters function
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedCategoryId("all");
@@ -97,7 +112,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
             <Input
               placeholder="Search by name or SKU..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="pl-8"
             />
           </div>
@@ -181,7 +196,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                     <div 
                       className="w-full h-24 bg-muted flex items-center justify-center cursor-pointer"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent card click event
+                        e.stopPropagation();
                         if (product.imageUrl) {
                           handleImageClick(product.imageUrl, product.name);
                         }
@@ -218,7 +233,6 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
         </ScrollArea>
       </CardContent>
       
-      {/* Image Preview Dialog */}
       <ImagePreviewDialog
         isOpen={isImagePreviewOpen}
         onClose={() => setIsImagePreviewOpen(false)}
