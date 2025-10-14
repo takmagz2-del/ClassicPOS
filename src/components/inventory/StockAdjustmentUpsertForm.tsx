@@ -30,8 +30,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
 
-// Define item schema with required fields
+// Define item schema with required fields, including an ID
 const stockAdjustmentItemSchema = z.object({
+  id: z.string(), // Added ID
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
@@ -64,7 +65,9 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     defaultValues: {
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
-      items: initialStockAdjustment?.items?.length ? initialStockAdjustment.items : [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+      items: initialStockAdjustment?.items?.length
+        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Generate ID for new item
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
@@ -76,14 +79,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items,
+        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })), // Ensure IDs on reset
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }], // Generate ID for new item
         notes: undefined,
       });
     }
@@ -110,16 +113,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   }, [form, products]);
 
   const onSubmit = (values: StockAdjustmentFormValues) => {
-    const adjustmentItems: StockAdjustmentItem[] = values.items.map(item => {
-      const product = products.find(p => p.id === item.productId);
-      return {
-        productId: item.productId,
-        productName: product?.name || "Unknown Product",
-        adjustmentType: item.adjustmentType,
-        quantity: item.quantity,
-        reason: item.reason,
-      };
-    });
+    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
+    const adjustmentItems: Omit<StockAdjustmentItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
 
     const baseAdjustment = {
       adjustmentDate: values.adjustmentDate.toISOString(),
@@ -147,7 +142,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   const items = form.watch("items") as z.infer<typeof stockAdjustmentItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
+    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
   };
 
   const handleRemoveItem = (index: number) => {

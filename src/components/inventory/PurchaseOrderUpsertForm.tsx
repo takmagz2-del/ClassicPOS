@@ -30,8 +30,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
 
-// Define item schema with required fields
+// Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
+  id: z.string(), // Added ID
   productId: z.string().min(1, { message: "Product is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
@@ -68,7 +69,9 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
-      items: initialPurchaseOrder?.items?.length ? initialPurchaseOrder.items : [{ productId: "", quantity: 1, unitCost: 0.01 }],
+      items: initialPurchaseOrder?.items?.length
+        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
+        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }], // Generate ID for new item
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -81,7 +84,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: new Date(initialPurchaseOrder.orderDate),
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items,
+        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })), // Ensure IDs on reset
         notes: initialPurchaseOrder.notes || undefined,
       });
     } else {
@@ -91,7 +94,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ productId: "", quantity: 1, unitCost: 0.01 }],
+        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }], // Generate ID for new item
         notes: undefined,
       });
     }
@@ -100,11 +103,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
-    const orderItems: PurchaseOrderItem[] = values.items.map(item => ({
-      productId: item.productId,
-      quantity: item.quantity,
-      unitCost: item.unitCost,
-    }));
+    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
+    const orderItems: Omit<PurchaseOrderItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
 
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
@@ -137,7 +137,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const items = form.watch("items") as z.infer<typeof purchaseOrderItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]);
+    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);
   };
 
   const handleRemoveItem = (index: number) => {

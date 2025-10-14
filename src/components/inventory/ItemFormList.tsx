@@ -5,7 +5,13 @@ import { Control, FieldErrors } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 
-interface ItemFormListProps<TFormValues extends { items: TItem[] }, TItem> {
+// Extend TItem to ensure it has an 'id' property
+interface ItemWithId {
+  id: string;
+  [key: string]: any; // Allow other properties
+}
+
+interface ItemFormListProps<TFormValues extends { items: TItem[] }, TItem extends ItemWithId> {
   items: TItem[];
   onRemoveItem: (index: number) => void;
   control: Control<TFormValues>;
@@ -21,7 +27,7 @@ interface ItemFormListProps<TFormValues extends { items: TItem[] }, TItem> {
   isFormDisabled?: boolean;
 }
 
-const ItemFormList = <TFormValues extends { items: TItem[] }, TItem>({
+const ItemFormList = <TFormValues extends { items: TItem[] }, TItem extends ItemWithId>({
   items,
   onRemoveItem,
   control,
@@ -33,7 +39,7 @@ const ItemFormList = <TFormValues extends { items: TItem[] }, TItem>({
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
-        <div key={index} className="flex items-end gap-2 border-b pb-4">
+        <div key={item.id} className="flex items-end gap-2 border-b pb-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
             {renderItem(item, index, control, errors, isFormDisabled)}
           </div>

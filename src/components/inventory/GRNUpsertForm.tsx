@@ -32,8 +32,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
 
-// Define item schema with required fields
+// Define item schema with required fields, including an ID
 const grnItemSchema = z.object({
+  id: z.string(), // Added ID
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -76,13 +77,9 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       referenceNo: initialGRN?.referenceNo || "",
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
-      items: initialGRN?.items?.length ? initialGRN.items.map(item => ({
-        productId: item.productId,
-        productName: item.productName,
-        quantityReceived: item.quantityReceived,
-        unitCost: item.unitCost,
-        totalCost: item.totalCost,
-      })) : [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+      items: initialGRN?.items?.length
+        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Generate ID for new item
       notes: initialGRN?.notes || undefined,
     },
   });
@@ -99,6 +96,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         form.setValue("items", po.items.map(item => {
           const product = products.find(p => p.id === item.productId);
           return {
+            id: crypto.randomUUID(), // Generate new ID for GRN item from PO item
             productId: item.productId,
             productName: product?.name || "Unknown Product",
             quantityReceived: item.quantity,
@@ -110,7 +108,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
+      form.setValue("items", [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Generate ID for new item
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -124,11 +122,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         receivedDate: new Date(initialGRN.receivedDate),
         receivingStoreId: initialGRN.receivingStoreId,
         items: initialGRN.items.map(item => ({
-          productId: item.productId,
-          productName: item.productName,
-          quantityReceived: item.quantityReceived,
-          unitCost: item.unitCost,
-          totalCost: item.totalCost,
+          ...item,
+          id: item.id || crypto.randomUUID(), // Ensure IDs on reset
         })),
         notes: initialGRN.notes || undefined,
       });
@@ -139,7 +134,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Generate ID for new item
         notes: undefined,
       });
     }
@@ -175,16 +170,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 
-    const grnItems: GRNItem[] = values.items.map(item => {
-      const product = products.find(p => p.id === item.productId);
-      return {
-        productId: item.productId,
-        productName: product?.name || "Unknown Product",
-        quantityReceived: item.quantityReceived,
-        unitCost: item.unitCost,
-        totalCost: item.quantityReceived * item.unitCost,
-      };
-    });
+    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
+    const grnItems: Omit<GRNItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
 
     const baseGRN = {
       purchaseOrderId: values.purchaseOrderId === "none" ? undefined : values.purchaseOrderId,
@@ -216,7 +203,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const items = form.watch("items") as z.infer<typeof grnItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
+    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
   };
 
   const handleRemoveItem = (index: number) => {

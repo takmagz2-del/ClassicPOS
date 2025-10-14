@@ -30,8 +30,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields"; // Import the new component
 
-// Define a schema for the items with required fields
+// Define a schema for the items with required fields, including an ID
 const itemSchema = z.object({
+  id: z.string(), // Added ID
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -72,7 +73,9 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : startOfDay(new Date()),
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
-      items: initialTransfer?.items?.length ? initialTransfer.items : [{ productId: "", productName: "", quantity: 1 }],
+      items: initialTransfer?.items?.length
+        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }], // Generate ID for new item
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -110,7 +113,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: new Date(initialTransfer.transferDate),
           transferFromStoreId: initialTransfer.transferFromStoreId,
           transferToStoreId: initialTransfer.transferToStoreId,
-          items: initialTransfer.items,
+          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })), // Ensure IDs on reset
           notes: initialTransfer.notes || undefined,
         });
       } else {
@@ -118,7 +121,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: startOfDay(new Date()),
           transferFromStoreId: "",
           transferToStoreId: "",
-          items: [{ productId: "", productName: "", quantity: 1 }],
+          items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }], // Generate ID for new item
           notes: undefined,
         });
       }
@@ -145,14 +148,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   }, [form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
-    const transferItems: TransferOfGoodsItem[] = values.items.map(item => {
-      const product = products.find(p => p.id === item.productId);
-      return {
-        productId: item.productId,
-        productName: product?.name || "Unknown Product",
-        quantity: item.quantity,
-      };
-    });
+    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
+    const transferItems: Omit<TransferOfGoodsItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
 
     const baseTransfer = {
       transferDate: values.transferDate.toISOString(),
@@ -183,7 +180,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { productId: "", productName: "", quantity: 1 }]);
+    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }]);
   };
 
   const handleRemoveItem = (index: number) => {
