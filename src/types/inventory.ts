@@ -9,6 +9,7 @@ export type PurchaseOrderStatus = "pending" | "completed" | "cancelled";
 export const PURCHASE_ORDER_STATUSES = ["pending", "completed", "cancelled"] as const; // Runtime array for Zod
 
 export interface PurchaseOrderItem {
+  id: string; // Added ID
   productId: string;
   quantity: number;
   unitCost: number;
@@ -31,6 +32,7 @@ export interface PurchaseOrder {
 export type GRNStatus = "pending" | "approved" | "rejected";
 
 export interface GRNItem {
+  id: string; // Added ID
   productId: string;
   productName: string; // Denormalized for easier display
   quantityReceived: number;
@@ -63,6 +65,7 @@ export enum AdjustmentType {
 }
 
 export interface StockAdjustmentItem {
+  id: string; // Added ID
   productId: string;
   productName: string; // Denormalized
   adjustmentType: AdjustmentType;
@@ -86,6 +89,7 @@ export interface StockAdjustment {
 export type TransferStatus = "pending" | "in-transit" | "received" | "rejected";
 
 export interface TransferOfGoodsItem {
+  id: string; // Added ID
   productId: string;
   productName: string; // Denormalized
   quantity: number;
