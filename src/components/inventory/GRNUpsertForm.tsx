@@ -236,24 +236,21 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a Purchase Order" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="none">No Purchase Order</SelectItem>
-                  {availablePurchaseOrders.map((po) => (
-                    <SelectItem key={po.id} value={po.id}>
-                      {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Linking to a PO will pre-fill supplier and item details.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="none">No Purchase Order</SelectItem>
+                {availablePurchaseOrders.map((po) => (
+                  <SelectItem key={po.id} value={po.id}>
+                    {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
         <FormField
           control={form.control}
           name="supplierId"
