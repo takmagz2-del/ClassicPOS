@@ -144,7 +144,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     onClose();
   };
 
-  const items = form.watch("items");
+  const items = form.watch("items") as z.infer<typeof stockAdjustmentItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);

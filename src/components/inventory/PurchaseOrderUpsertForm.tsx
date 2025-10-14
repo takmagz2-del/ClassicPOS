@@ -134,7 +134,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  const items = form.watch("items");
+  const items = form.watch("items") as z.infer<typeof purchaseOrderItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", quantity: 1, unitCost: 0.01 }]);

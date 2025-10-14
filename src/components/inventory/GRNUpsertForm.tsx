@@ -213,7 +213,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  const items = form.watch("items");
+  const items = form.watch("items") as z.infer<typeof grnItemSchema>[]; // Explicitly cast
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);

@@ -178,7 +178,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
-  const items = form.watch("items");
+  const items = form.watch("items") as z.infer<typeof itemSchema>[]; // Explicitly cast
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
