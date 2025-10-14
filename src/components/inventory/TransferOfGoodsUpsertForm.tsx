@@ -148,8 +148,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   }, [form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
-    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
-    const transferItems: Omit<TransferOfGoodsItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
+    // The items from the form already have IDs and match the TransferOfGoodsItem interface
+    const transferItems: TransferOfGoodsItem[] = values.items;
 
     const baseTransfer = {
       transferDate: values.transferDate.toISOString(),
@@ -168,6 +168,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         id: initialTransfer!.id,
       };
     } else {
+      // For new transfers, we pass Omit<TransferOfGoods, ...>
+      // The context will generate the ID and populate denormalized names
       transferToSubmit = baseTransfer;
     }
 

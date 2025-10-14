@@ -170,8 +170,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 
-    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
-    const grnItems: Omit<GRNItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
+    // The items from the form already have IDs and match the GRNItem interface
+    const grnItems: GRNItem[] = values.items;
 
     const baseGRN = {
       purchaseOrderId: values.purchaseOrderId === "none" ? undefined : values.purchaseOrderId,
@@ -193,6 +193,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         id: initialGRN!.id,
       };
     } else {
+      // For new GRNs, we pass Omit<GoodsReceivedNote, ...>
+      // The context will generate the ID and populate denormalized names
       grnToSubmit = baseGRN;
     }
 

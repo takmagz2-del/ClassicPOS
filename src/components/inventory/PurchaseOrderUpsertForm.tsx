@@ -103,8 +103,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
-    // Remove the temporary 'id' from items before submitting if it's not part of the backend model
-    const orderItems: Omit<PurchaseOrderItem, 'id'>[] = values.items.map(({ id, ...rest }) => rest);
+    // The items from the form already have IDs and match the PurchaseOrderItem interface
+    const orderItems: PurchaseOrderItem[] = values.items;
 
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
@@ -127,6 +127,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         supplierName: initialPurchaseOrder!.supplierName,
       };
     } else {
+      // For new orders, we pass Omit<PurchaseOrder, "id" | "supplierName">
+      // The context will generate the ID and populate supplierName
       orderToSubmit = formValuesWithoutSupplierName;
     }
 
