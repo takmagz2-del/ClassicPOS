@@ -291,7 +291,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
-              items={items}
+              items={items || []}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}

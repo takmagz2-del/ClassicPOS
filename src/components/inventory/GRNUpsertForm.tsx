@@ -364,7 +364,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, z.infer<typeof grnItemSchema>>
-              items={items}
+              items={items || []}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}

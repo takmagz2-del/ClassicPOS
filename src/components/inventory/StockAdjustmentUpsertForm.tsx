@@ -231,7 +231,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           </CardHeader>
           <CardContent>
             <ItemFormList<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
-              items={items}
+              items={items || []}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}

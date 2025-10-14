@@ -299,7 +299,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
-              items={items}
+              items={items || []}
               onRemoveItem={handleRemoveItem}
               control={form.control}
               errors={form.formState.errors}
