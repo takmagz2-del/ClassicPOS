@@ -28,18 +28,21 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
-import ProductItemFields from "./ProductItemFields"; // Import the new component
+import ProductItemFields from "./ProductItemFields";
+
+// Define item schema with required fields
+const stockAdjustmentItemSchema = z.object({
+  productId: z.string().min(1, { message: "Product is required." }),
+  productName: z.string().min(1, { message: "Product name is required." }),
+  adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
+  quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
+  reason: z.string().min(3, { message: "Reason for adjustment is required." }),
+});
 
 const formSchema = z.object({
   adjustmentDate: z.date({ required_error: "Adjustment date is required." }),
   storeId: z.string().min(1, { message: "Store is required." }),
-  items: z.array(z.object({
-    productId: z.string().min(1, { message: "Product is required." }),
-    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
-    adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
-    quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
-    reason: z.string().min(3, { message: "Reason for adjustment is required." }),
-  })).min(1, { message: "At least one item is required for adjustment." }),
+  items: z.array(stockAdjustmentItemSchema).min(1, { message: "At least one item is required for adjustment." }),
   notes: z.string().optional().or(z.literal("")),
 });
 
@@ -61,12 +64,12 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     defaultValues: {
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
-      items: initialStockAdjustment?.items || [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+      items: initialStockAdjustment?.items?.length ? initialStockAdjustment.items : [{ productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
 
-  const isFormDisabled = false; // Stock adjustments are always editable in this mock, no status to disable by
+  const isFormDisabled = false;
 
   useEffect(() => {
     if (initialStockAdjustment) {
@@ -227,16 +230,16 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
-              items={items as StockAdjustmentItem[]} // Explicit cast here
+            <ItemFormList<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
+              items={items}
               onRemoveItem={handleRemoveItem}
-              control={form.control as Control<StockAdjustmentFormValues>}
-              errors={form.formState.errors as FieldErrors<StockAdjustmentFormValues>}
+              control={form.control}
+              errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<StockAdjustmentFormValues, StockAdjustmentItem>
+                <ProductItemFields<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
                   index={idx}
-                  control={ctrl as Control<StockAdjustmentFormValues>}
-                  errors={errs as FieldErrors<StockAdjustmentFormValues>}
+                  control={ctrl}
+                  errors={errs}
                   isFormDisabled={isDisabled}
                   itemType="stockAdjustment"
                 />

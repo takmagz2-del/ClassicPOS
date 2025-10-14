@@ -30,15 +30,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields"; // Import the new component
 
+// Define a schema for the items with required fields
+const itemSchema = z.object({
+  productId: z.string().min(1, { message: "Product is required." }),
+  productName: z.string().min(1, { message: "Product name is required." }),
+  quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
+});
+
 const formSchema = z.object({
   transferDate: z.date({ required_error: "Transfer date is required." }),
   transferFromStoreId: z.string().min(1, { message: "Originating store is required." }),
   transferToStoreId: z.string().min(1, { message: "Destination store is required." }),
-  items: z.array(z.object({
-    productId: z.string().min(1, { message: "Product is required." }),
-    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
-    quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
-  })).min(1, { message: "At least one item is required for transfer." }),
+  items: z.array(itemSchema).min(1, { message: "At least one item is required for transfer." }),
   notes: z.string().optional().or(z.literal("")),
 }).superRefine((data, ctx) => {
   if (data.transferFromStoreId && data.transferToStoreId && data.transferFromStoreId === data.transferToStoreId) {
@@ -69,7 +72,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferDate: initialTransfer?.transferDate ? new Date(initialTransfer.transferDate) : startOfDay(new Date()),
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
-      items: initialTransfer?.items || [{ productId: "", productName: "", quantity: 1 }],
+      items: initialTransfer?.items?.length ? initialTransfer.items : [{ productId: "", productName: "", quantity: 1 }],
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -115,7 +118,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: startOfDay(new Date()),
           transferFromStoreId: "",
           transferToStoreId: "",
-          items: [{ productId: "", productName: "", quantity: 1 }], // Ensure all required fields are initialized
+          items: [{ productId: "", productName: "", quantity: 1 }],
           notes: undefined,
         });
       }
@@ -287,16 +290,16 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
-              items={items as TransferOfGoodsItem[]} // Explicit cast here
+            <ItemFormList<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
+              items={items}
               onRemoveItem={handleRemoveItem}
-              control={form.control as Control<TransferOfGoodsFormValues>}
-              errors={form.formState.errors as FieldErrors<TransferOfGoodsFormValues>}
+              control={form.control}
+              errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<TransferOfGoodsFormValues, TransferOfGoodsItem>
+                <ProductItemFields<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
                   index={idx}
-                  control={ctrl as Control<TransferOfGoodsFormValues>}
-                  errors={errs as FieldErrors<TransferOfGoodsFormValues>}
+                  control={ctrl}
+                  errors={errs}
                   isFormDisabled={isDisabled}
                   itemType="transferOfGoods"
                   transferFromStoreId={transferFromStoreId}

@@ -30,7 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
 
-// Define required item schema for form validation
+// Define item schema with required fields
 const purchaseOrderItemSchema = z.object({
   productId: z.string().min(1, { message: "Product is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),

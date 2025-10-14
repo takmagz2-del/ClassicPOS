@@ -30,7 +30,16 @@ import { usePurchaseOrders } from "@/context/PurchaseOrderContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
-import ProductItemFields from "./ProductItemFields"; // Import the new component
+import ProductItemFields from "./ProductItemFields";
+
+// Define item schema with required fields
+const grnItemSchema = z.object({
+  productId: z.string().min(1, { message: "Product is required." }),
+  productName: z.string().min(1, { message: "Product name is required." }),
+  quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
+  unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
+  totalCost: z.coerce.number().min(0, { message: "Total cost must be a non-negative number." }),
+});
 
 const formSchema = z.object({
   purchaseOrderId: z.string().optional().or(z.literal("")),
@@ -38,13 +47,7 @@ const formSchema = z.object({
   referenceNo: z.string().min(1, { message: "Reference number is required." }),
   receivedDate: z.date({ required_error: "Received date is required." }),
   receivingStoreId: z.string().min(1, { message: "Receiving store is required." }),
-  items: z.array(z.object({
-    productId: z.string().min(1, { message: "Product is required." }),
-    productName: z.string().min(1, { message: "Product name is required." }), // Added productName to schema
-    quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
-    unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
-    totalCost: z.coerce.number().min(0, { message: "Total cost must be a non-negative number." }), // Added totalCost to schema
-  })).min(1, { message: "At least one item is required." }),
+  items: z.array(grnItemSchema).min(1, { message: "At least one item is required." }),
   notes: z.string().optional().or(z.literal("")),
 });
 
@@ -73,20 +76,20 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       referenceNo: initialGRN?.referenceNo || "",
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
-      items: initialGRN?.items.map(item => ({
+      items: initialGRN?.items?.length ? initialGRN.items.map(item => ({
         productId: item.productId,
         productName: item.productName,
         quantityReceived: item.quantityReceived,
         unitCost: item.unitCost,
         totalCost: item.totalCost,
-      })) || [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+      })) : [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
       notes: initialGRN?.notes || undefined,
     },
   });
 
   const selectedPurchaseOrderId = form.watch("purchaseOrderId");
   const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
-  const isFormDisabled = isEditMode && initialGRN?.status === "approved"; // Centralized disabling logic
+  const isFormDisabled = isEditMode && initialGRN?.status === "approved";
 
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
@@ -107,7 +110,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Ensure all required fields are initialized
+      form.setValue("items", [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -136,7 +139,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Ensure all required fields are initialized
+        items: [{ productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -360,16 +363,16 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<GRNFormValues, GRNItem>
-              items={items as GRNItem[]} // Explicit cast here
+            <ItemFormList<GRNFormValues, z.infer<typeof grnItemSchema>>
+              items={items}
               onRemoveItem={handleRemoveItem}
-              control={form.control as Control<GRNFormValues>}
-              errors={form.formState.errors as FieldErrors<GRNFormValues>}
+              control={form.control}
+              errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<GRNFormValues, GRNItem>
+                <ProductItemFields<GRNFormValues, z.infer<typeof grnItemSchema>>
                   index={idx}
-                  control={ctrl as Control<GRNFormValues>}
-                  errors={errs as FieldErrors<GRNFormValues>}
+                  control={ctrl}
+                  errors={errs}
                   isFormDisabled={isLinkedToPO || isDisabled}
                   itemType="grn"
                 />
