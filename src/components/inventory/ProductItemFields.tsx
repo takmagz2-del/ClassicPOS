@@ -53,7 +53,7 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Product</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}> {/* Changed to field.value || "" */}
+            <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a product" />
@@ -85,9 +85,9 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
                   type="number"
                   min="1"
                   {...field}
-                  value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                  value={field.value === undefined || field.value === null ? "" : field.value}
                   disabled={isFormDisabled}
-                /> {/* Type assertion */}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,9 +108,9 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
                   step="0.01"
                   min="0.01"
                   {...field}
-                  value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                  value={field.value === undefined || field.value === null ? "" : field.value}
                   disabled={isFormDisabled}
-                /> {/* Type assertion */}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,7 +126,7 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}> {/* Changed to field.value || "" */}
+                <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -155,9 +155,9 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
                     type="number"
                     min="1"
                     {...field}
-                    value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                    value={field.value === undefined || field.value === null ? "" : field.value}
                     disabled={isFormDisabled}
-                  /> {/* Type assertion */}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -173,9 +173,9 @@ const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
                   <Input
                     placeholder="e.g., Damaged stock, Found item"
                     {...field}
-                    value={field.value === undefined || field.value === null ? "" : field.value} // Safer handling
+                    value={field.value === undefined || field.value === null ? "" : field.value}
                     disabled={isFormDisabled}
-                  /> {/* Type assertion */}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
