@@ -28,7 +28,14 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
-import ProductItemFields from "./ProductItemFields"; // Import the new component
+import ProductItemFields from "./ProductItemFields";
+
+// Define required item schema for form validation
+const purchaseOrderItemSchema = z.object({
+  productId: z.string().min(1, { message: "Product is required." }),
+  quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
+  unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
+});
 
 const formSchema = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required." }),
@@ -36,11 +43,7 @@ const formSchema = z.object({
   orderDate: z.date({ required_error: "Order date is required." }),
   expectedDeliveryDate: z.date().optional(),
   status: z.enum(PURCHASE_ORDER_STATUSES),
-  items: z.array(z.object({
-    productId: z.string().min(1, { message: "Product is required." }),
-    quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
-    unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
-  })).min(1, { message: "At least one item is required." }),
+  items: z.array(purchaseOrderItemSchema).min(1, { message: "At least one item is required." }),
   notes: z.string().optional().or(z.literal("")),
 });
 
@@ -65,7 +68,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       orderDate: initialPurchaseOrder?.orderDate ? new Date(initialPurchaseOrder.orderDate) : startOfDay(new Date()),
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
-      items: initialPurchaseOrder?.items || [{ productId: "", quantity: 1, unitCost: 0.01 }],
+      items: initialPurchaseOrder?.items?.length ? initialPurchaseOrder.items : [{ productId: "", quantity: 1, unitCost: 0.01 }],
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -88,7 +91,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ productId: "", quantity: 1, unitCost: 0.01 }], // Ensure all required fields are initialized
+        items: [{ productId: "", quantity: 1, unitCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -295,16 +298,16 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             </Button>
           </CardHeader>
           <CardContent>
-            <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
-              items={items as PurchaseOrderItem[]} // Explicit cast here
+            <ItemFormList<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
+              items={items}
               onRemoveItem={handleRemoveItem}
-              control={form.control as Control<PurchaseOrderFormValues>}
-              errors={form.formState.errors as FieldErrors<PurchaseOrderFormValues>}
+              control={form.control}
+              errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<PurchaseOrderFormValues, PurchaseOrderItem>
+                <ProductItemFields<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
                   index={idx}
-                  control={ctrl as Control<PurchaseOrderFormValues>}
-                  errors={errs as FieldErrors<PurchaseOrderFormValues>}
+                  control={ctrl}
+                  errors={errs}
                   isFormDisabled={isDisabled}
                   itemType="purchaseOrder"
                 />
