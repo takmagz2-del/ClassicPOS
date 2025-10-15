@@ -7,11 +7,11 @@ import { PlusCircle, XCircle } from "lucide-react";
 
 // Extend TItem to ensure it has an 'id' property
 interface ItemWithId {
-  id: string;
+  id?: string; // Changed to optional
   [key: string]: any; // Allow other properties
 }
 
-interface ItemFormListProps<TFormValues extends { items?: TItem[] }, TItem extends ItemWithId> { // Changed: items is now optional in TFormValues constraint
+interface ItemFormListProps<TFormValues extends { items?: TItem[] }, TItem extends ItemWithId> {
   items: TItem[]; // This prop is still required and always an array
   onRemoveItem: (index: number) => void;
   onAddItem: () => void; // New: Callback to add a new item
@@ -29,7 +29,7 @@ interface ItemFormListProps<TFormValues extends { items?: TItem[] }, TItem exten
   renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode; // New: Optional custom add button renderer
 }
 
-const ItemFormList = <TFormValues extends { items?: TItem[] }, TItem extends ItemWithId>({ // Changed: items is now optional in TFormValues constraint
+const ItemFormList = <TFormValues extends { items?: TItem[] }, TItem extends ItemWithId>({
   items,
   onRemoveItem,
   onAddItem, // Destructure new prop

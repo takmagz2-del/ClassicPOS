@@ -10,7 +10,7 @@ import GrnItemFields from "./GrnItemFields";
 import StockAdjustmentItemFields from "./StockAdjustmentItemFields";
 import TransferOfGoodsItemFields from "./TransferOfGoodsItemFields";
 
-interface ProductItemFieldsProps<TFormValues, TItem> {
+interface ProductItemFieldsProps<TFormValues extends { items?: TItem[] }, TItem> { // Changed: items is now optional in TFormValues constraint
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -19,7 +19,7 @@ interface ProductItemFieldsProps<TFormValues, TItem> {
   transferFromStoreId?: string; // Specific for TransferOfGoods
 }
 
-const ProductItemFields = <TFormValues extends { items: TItem[] }, TItem>({
+const ProductItemFields = <TFormValues extends { items?: TItem[] }, TItem>({ // Changed: items is now optional in TFormValues constraint
   index,
   control,
   errors,
