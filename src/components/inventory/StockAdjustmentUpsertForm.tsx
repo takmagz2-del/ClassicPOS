@@ -66,7 +66,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
       items: initialStockAdjustment?.items?.length
-        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as StockAdjustmentItem[]
+        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id })) as StockAdjustmentItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }] as StockAdjustmentItem[],
       notes: initialStockAdjustment?.notes || undefined,
     },
@@ -79,7 +79,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as StockAdjustmentItem[],
+        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id })) as StockAdjustmentItem[],
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {

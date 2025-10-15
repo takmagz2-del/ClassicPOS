@@ -74,7 +74,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items?.length
-        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as TransferOfGoodsItem[]
+        ? initialTransfer.items.map(item => ({ ...item, id: item.id })) as TransferOfGoodsItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }] as TransferOfGoodsItem[],
       notes: initialTransfer?.notes || undefined,
     },
@@ -111,7 +111,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: new Date(initialTransfer.transferDate),
           transferFromStoreId: initialTransfer.transferFromStoreId,
           transferToStoreId: initialTransfer.transferToStoreId,
-          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as TransferOfGoodsItem[],
+          items: initialTransfer.items.map(item => ({ ...item, id: item.id })) as TransferOfGoodsItem[],
           notes: initialTransfer.notes || undefined,
         });
       } else {

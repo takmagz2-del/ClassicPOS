@@ -70,7 +70,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items?.length
-        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as PurchaseOrderItem[]
+        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id })) as PurchaseOrderItem[]
         : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
       notes: initialPurchaseOrder?.notes || undefined,
     },
@@ -84,7 +84,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: new Date(initialPurchaseOrder.orderDate),
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as PurchaseOrderItem[],
+        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id })) as PurchaseOrderItem[],
         notes: initialPurchaseOrder.notes || undefined,
       });
     } else {

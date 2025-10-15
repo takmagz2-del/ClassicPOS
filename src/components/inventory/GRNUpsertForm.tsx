@@ -78,7 +78,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items?.length
-        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as GRNItem[]
+        ? initialGRN.items.map(item => ({ ...item, id: item.id })) as GRNItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }] as GRNItem[],
       notes: initialGRN?.notes || undefined,
     },
@@ -123,7 +123,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         receivingStoreId: initialGRN.receivingStoreId,
         items: initialGRN.items.map(item => ({
           ...item,
-          id: item.id || crypto.randomUUID(),
+          id: item.id,
         })) as GRNItem[],
         notes: initialGRN.notes || undefined,
       });
@@ -230,6 +230,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
+                <SelectItem value="none">No Purchase Order</SelectItem>
                 {availablePurchaseOrders.map((po) => (
                   <SelectItem key={po.id} value={po.id}>
                     {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
