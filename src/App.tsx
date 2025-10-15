@@ -43,19 +43,19 @@ function App() {
               <SupplierProvider>
                 <CategoryProvider>
                   <CustomerProvider>
-                    <SaleProvider>
-                      <CurrencyProvider>
-                        <ReceiptSettingsProvider>
-                          <PrinterSettingsProvider>
-                            <TaxProvider>
-                              <PaymentMethodProvider>
-                                <LoyaltySettingsProvider>
-                                  <InventoryHistoryProvider>
-                                    <ProductProvider>
-                                      <PurchaseOrderProvider>
-                                        <GRNProvider>
-                                          <StockAdjustmentProvider>
-                                            <TransferOfGoodsProvider>
+                    <CurrencyProvider>
+                      <ReceiptSettingsProvider>
+                        <PrinterSettingsProvider>
+                          <TaxProvider>
+                            <PaymentMethodProvider>
+                              <LoyaltySettingsProvider>
+                                <InventoryHistoryProvider>
+                                  <ProductProvider>
+                                    <PurchaseOrderProvider>
+                                      <GRNProvider>
+                                        <StockAdjustmentProvider>
+                                          <TransferOfGoodsProvider>
+                                            <SaleProvider>
                                               <Toaster richColors position="top-right" />
                                               <GlobalLoader />
                                               <Routes>
@@ -82,19 +82,19 @@ function App() {
                                                 </Route>
                                                 <Route path="*" element={<NotFound />} />
                                               </Routes>
-                                            </TransferOfGoodsProvider>
-                                          </StockAdjustmentProvider>
-                                        </GRNProvider>
-                                      </PurchaseOrderProvider>
-                                    </ProductProvider>
-                                  </InventoryHistoryProvider>
-                                </LoyaltySettingsProvider>
-                              </PaymentMethodProvider>
-                            </TaxProvider>
-                          </PrinterSettingsProvider>
-                        </ReceiptSettingsProvider>
-                      </CurrencyProvider>
-                    </SaleProvider>
+                                            </SaleProvider>
+                                          </TransferOfGoodsProvider>
+                                        </StockAdjustmentProvider>
+                                      </GRNProvider>
+                                    </PurchaseOrderProvider>
+                                  </ProductProvider>
+                                </InventoryHistoryProvider>
+                              </LoyaltySettingsProvider>
+                            </PaymentMethodProvider>
+                          </TaxProvider>
+                        </PrinterSettingsProvider>
+                      </ReceiptSettingsProvider>
+                    </CurrencyProvider>
                   </CustomerProvider>
                 </CategoryProvider>
               </SupplierProvider>
