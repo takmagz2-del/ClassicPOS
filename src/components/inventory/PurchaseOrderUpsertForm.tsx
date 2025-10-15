@@ -32,7 +32,7 @@ import ProductItemFields from "./ProductItemFields";
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
-  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
+  id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
@@ -70,8 +70,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items?.length
-        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
-        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }], // Generate ID for new item
+        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
+        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }],
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -84,7 +84,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: new Date(initialPurchaseOrder.orderDate),
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })), // Ensure IDs on reset
+        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })),
         notes: initialPurchaseOrder.notes || undefined,
       });
     } else {
@@ -94,7 +94,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }], // Generate ID for new item
+        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -103,8 +103,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
-    // The items from the form already have IDs and match the PurchaseOrderItem interface
-    const orderItems: PurchaseOrderItem[] = values.items as PurchaseOrderItem[]; // Explicitly cast
+    const orderItems: PurchaseOrderItem[] = values.items;
 
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
@@ -127,8 +126,6 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         supplierName: initialPurchaseOrder!.supplierName,
       };
     } else {
-      // For new orders, we pass Omit<PurchaseOrder, "id" | "supplierName">
-      // The context will generate the ID and populate supplierName
       orderToSubmit = formValuesWithoutSupplierName;
     }
 
@@ -136,7 +133,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  const items = form.watch("items") as z.infer<typeof purchaseOrderItemSchema>[]; // Explicitly cast
+  const items = form.watch("items") as z.infer<typeof purchaseOrderItemSchema>[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);

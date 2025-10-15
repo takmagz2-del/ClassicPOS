@@ -32,7 +32,7 @@ import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 // Define a schema for the items with required fields, including an ID
 const itemSchema = z.object({
-  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
+  id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -74,8 +74,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items?.length
-        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
-        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }], // Generate ID for new item
+        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }],
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -85,12 +85,10 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     const subscription = form.watch((value, { name, type }) => {
       if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
         const items = value.items;
-        const transferFromStoreId = value.transferFromStoreId; // Get the selected 'from' store ID
+        const transferFromStoreId = value.transferFromStoreId;
         if (items && transferFromStoreId) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
-            // In a real multi-store inventory, you'd check stock for the specific `transferFromStoreId`
-            // For this mock, we're checking against the global product stock.
             if (product && product.trackStock && item.quantity > product.stock) {
               form.setError(`items.${index}.quantity`, {
                 type: "manual",
@@ -113,7 +111,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: new Date(initialTransfer.transferDate),
           transferFromStoreId: initialTransfer.transferFromStoreId,
           transferToStoreId: initialTransfer.transferToStoreId,
-          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })), // Ensure IDs on reset
+          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })),
           notes: initialTransfer.notes || undefined,
         });
       } else {
@@ -121,7 +119,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: startOfDay(new Date()),
           transferFromStoreId: "",
           transferToStoreId: "",
-          items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }], // Generate ID for new item
+          items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }],
           notes: undefined,
         });
       }
@@ -148,8 +146,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   }, [form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
-    // The items from the form already have IDs and match the TransferOfGoodsItem interface
-    const transferItems: TransferOfGoodsItem[] = values.items as TransferOfGoodsItem[]; // Explicitly cast
+    const transferItems: TransferOfGoodsItem[] = values.items;
 
     const baseTransfer = {
       transferDate: values.transferDate.toISOString(),
@@ -168,8 +165,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         id: initialTransfer!.id,
       };
     } else {
-      // For new transfers, we pass Omit<TransferOfGoods, ...>
-      // The context will generate the ID and populate denormalized names
       transferToSubmit = baseTransfer;
     }
 
@@ -177,7 +172,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
-  const items = form.watch("items") as z.infer<typeof itemSchema>[]; // Explicitly cast
+  const items = form.watch("items") as z.infer<typeof itemSchema>[];
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 

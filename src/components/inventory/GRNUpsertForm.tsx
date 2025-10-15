@@ -34,7 +34,7 @@ import ProductItemFields from "./ProductItemFields";
 
 // Define item schema with required fields, including an ID
 const grnItemSchema = z.object({
-  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
+  id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -78,8 +78,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items?.length
-        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) // Ensure existing items have IDs
-        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Generate ID for new item
+        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
       notes: initialGRN?.notes || undefined,
     },
   });
@@ -96,7 +96,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         form.setValue("items", po.items.map(item => {
           const product = products.find(p => p.id === item.productId);
           return {
-            id: crypto.randomUUID(), // Generate new ID for GRN item from PO item
+            id: crypto.randomUUID(),
             productId: item.productId,
             productName: product?.name || "Unknown Product",
             quantityReceived: item.quantity,
@@ -108,7 +108,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]); // Generate ID for new item
+      form.setValue("items", [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -123,7 +123,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         receivingStoreId: initialGRN.receivingStoreId,
         items: initialGRN.items.map(item => ({
           ...item,
-          id: item.id || crypto.randomUUID(), // Ensure IDs on reset
+          id: item.id || crypto.randomUUID(),
         })),
         notes: initialGRN.notes || undefined,
       });
@@ -134,7 +134,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }], // Generate ID for new item
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
         notes: undefined,
       });
     }
@@ -170,8 +170,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 
-    // The items from the form already have IDs and match the GRNItem interface
-    const grnItems: GRNItem[] = values.items as GRNItem[]; // Explicitly cast
+    const grnItems: GRNItem[] = values.items;
 
     const baseGRN = {
       purchaseOrderId: values.purchaseOrderId === "none" ? undefined : values.purchaseOrderId,
@@ -193,8 +192,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         id: initialGRN!.id,
       };
     } else {
-      // For new GRNs, we pass Omit<GoodsReceivedNote, ...>
-      // The context will generate the ID and populate denormalized names
       grnToSubmit = baseGRN;
     }
 
@@ -202,7 +199,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  const items = form.watch("items") as z.infer<typeof grnItemSchema>[]; // Explicitly cast
+  const items = form.watch("items") as z.infer<typeof grnItemSchema>[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
