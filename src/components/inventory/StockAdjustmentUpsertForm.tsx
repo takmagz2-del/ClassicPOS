@@ -47,7 +47,7 @@ const formSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
 });
 
-type StockAdjustmentFormValues = z.infer<typeof formSchema>;
+export type StockAdjustmentFormValues = z.infer<typeof formSchema>;
 
 interface StockAdjustmentUpsertFormProps {
   initialStockAdjustment?: StockAdjustment;
@@ -223,14 +223,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             <CardTitle className="text-base">Items to Adjust</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
+            <ItemFormList<StockAdjustmentFormValues>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<StockAdjustmentFormValues, StockAdjustmentItem>
+                <ProductItemFields<StockAdjustmentFormValues>
                   index={idx}
                   control={ctrl}
                   errors={errs}

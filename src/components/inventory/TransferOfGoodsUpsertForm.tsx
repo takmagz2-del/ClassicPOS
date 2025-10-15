@@ -54,7 +54,7 @@ const formSchema = z.object({
   }
 });
 
-type TransferOfGoodsFormValues = z.infer<typeof formSchema>;
+export type TransferOfGoodsFormValues = z.infer<typeof formSchema>;
 
 interface TransferOfGoodsUpsertFormProps {
   initialTransfer?: TransferOfGoods;
@@ -283,14 +283,14 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             <CardTitle className="text-base">Items to Transfer</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
+            <ItemFormList<TransferOfGoodsFormValues>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<TransferOfGoodsFormValues, TransferOfGoodsItem>
+                <ProductItemFields<TransferOfGoodsFormValues>
                   index={idx}
                   control={ctrl}
                   errors={errs}

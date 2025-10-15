@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, Control, FieldErrors, Path } from "react-hook-form"; // Import Path
+import { useForm, Control, FieldErrors, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
-import { ItemWithId } from "./ItemFormList"; // Import ItemWithId
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
@@ -49,7 +48,7 @@ const formSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
 });
 
-type PurchaseOrderFormValues = z.infer<typeof formSchema>;
+export type PurchaseOrderFormValues = z.infer<typeof formSchema>;
 
 interface PurchaseOrderUpsertFormProps {
   initialPurchaseOrder?: PurchaseOrder;
@@ -233,7 +232,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           name="expectedDeliveryDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Expected Delivery Date (Optional)</Label>
+              <FormLabel>Expected Delivery Date (Optional)</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>

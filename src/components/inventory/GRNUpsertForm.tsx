@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import * as z from "zod"; // Corrected import
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -52,7 +52,7 @@ const formSchema = z.object({
   notes: z.string().optional().or(z.literal("")),
 });
 
-type GRNFormValues = z.infer<typeof formSchema>;
+export type GRNFormValues = z.infer<typeof formSchema>;
 
 type NewGRNData = Omit<GoodsReceivedNote, "id" | "status" | "supplierName" | "receivingStoreName" | "approvedByUserName" | "approvalDate">;
 
@@ -348,14 +348,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             <CardTitle className="text-base">Received Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<GRNFormValues, GRNItem>
+            <ItemFormList<GRNFormValues>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<GRNFormValues, GRNItem>
+                <ProductItemFields<GRNFormValues>
                   index={idx}
                   control={ctrl}
                   errors={errs}
