@@ -3,7 +3,7 @@
 import React from "react";
 import { Control, FieldErrors } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { XCircle } from "lucide-react";
+import { PlusCircle, XCircle } from "lucide-react";
 
 // Extend TItem to ensure it has an 'id' property
 interface ItemWithId {
@@ -14,6 +14,7 @@ interface ItemWithId {
 interface ItemFormListProps<TFormValues extends { items: TItem[] }, TItem extends ItemWithId> {
   items: TItem[];
   onRemoveItem: (index: number) => void;
+  onAddItem: () => void; // New: Callback to add a new item
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   renderItem: (
@@ -25,16 +26,19 @@ interface ItemFormListProps<TFormValues extends { items: TItem[] }, TItem extend
   ) => React.ReactNode;
   isRemoveButtonDisabled?: boolean;
   isFormDisabled?: boolean;
+  renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode; // New: Optional custom add button renderer
 }
 
 const ItemFormList = <TFormValues extends { items: TItem[] }, TItem extends ItemWithId>({
   items,
   onRemoveItem,
+  onAddItem, // Destructure new prop
   control,
   errors,
   renderItem,
   isRemoveButtonDisabled = false,
   isFormDisabled = false,
+  renderAddButton, // Destructure new prop
 }: ItemFormListProps<TFormValues, TItem>) => {
   return (
     <div className="space-y-4">
@@ -56,6 +60,15 @@ const ItemFormList = <TFormValues extends { items: TItem[] }, TItem extends Item
           {errors.items.message as string}
         </p>
       )}
+      <div className="flex justify-end">
+        {renderAddButton ? (
+          renderAddButton(onAddItem, isFormDisabled)
+        ) : (
+          <Button type="button" variant="outline" size="sm" onClick={onAddItem} disabled={isFormDisabled}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add Item
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

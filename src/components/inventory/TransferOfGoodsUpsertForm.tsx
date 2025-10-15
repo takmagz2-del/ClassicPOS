@@ -32,7 +32,7 @@ import ProductItemFields from "./ProductItemFields"; // Import the new component
 
 // Define a schema for the items with required fields, including an ID
 const itemSchema = z.object({
-  id: z.string(), // Added ID
+  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -282,16 +282,14 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Items to Transfer</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isFormDisabled}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
-              items={items || []}
+              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
               onRemoveItem={handleRemoveItem}
+              onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (

@@ -32,7 +32,7 @@ import ProductItemFields from "./ProductItemFields";
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
-  id: z.string(), // Added ID
+  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
   productId: z.string().min(1, { message: "Product is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
@@ -293,16 +293,14 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Order Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isFormDisabled}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
-              items={items || []}
+              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
               onRemoveItem={handleRemoveItem}
+              onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (

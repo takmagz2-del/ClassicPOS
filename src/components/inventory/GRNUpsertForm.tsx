@@ -34,7 +34,7 @@ import ProductItemFields from "./ProductItemFields";
 
 // Define item schema with required fields, including an ID
 const grnItemSchema = z.object({
-  id: z.string(), // Added ID
+  id: z.string().uuid(), // Changed to .uuid() to make it explicitly required and a UUID
   productId: z.string().min(1, { message: "Product is required." }),
   productName: z.string().min(1, { message: "Product name is required." }),
   quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
@@ -345,16 +345,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         />
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Received Items</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={handleAddItem} disabled={isLinkedToPO || isFormDisabled}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Item
-            </Button>
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, z.infer<typeof grnItemSchema>>
-              items={items || []}
+              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
               onRemoveItem={handleRemoveItem}
+              onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
