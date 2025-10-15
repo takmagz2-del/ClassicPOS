@@ -96,7 +96,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith("items.")) {
-        const items = (value.items || []) as z.infer<typeof stockAdjustmentItemSchema>[];
+        const items = (value.items || []) as StockAdjustmentItem[]; // Explicitly cast here
         if (items) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
@@ -140,7 +140,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   };
 
   // Explicitly cast the result of form.watch("items") and provide a fallback
-  const items = (form.watch("items") || []) as z.infer<typeof stockAdjustmentItemSchema>[];
+  const items = (form.watch("items") || []) as StockAdjustmentItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
@@ -223,14 +223,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             <CardTitle className="text-base">Items to Adjust</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
+            <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
+                <ProductItemFields<StockAdjustmentFormValues, StockAdjustmentItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}

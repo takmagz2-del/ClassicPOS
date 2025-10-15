@@ -144,7 +144,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith("items.")) {
-        const items = (value.items || []) as z.infer<typeof grnItemSchema>[];
+        const items = (value.items || []) as GRNItem[]; // Explicitly cast here
         if (items) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
@@ -201,7 +201,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   };
 
   // Explicitly cast the result of form.watch("items") and provide a fallback
-  const items = (form.watch("items") || []) as z.infer<typeof grnItemSchema>[];
+  const items = (form.watch("items") || []) as GRNItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
@@ -348,14 +348,14 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             <CardTitle className="text-base">Received Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<GRNFormValues, z.infer<typeof grnItemSchema>>
+            <ItemFormList<GRNFormValues, GRNItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<GRNFormValues, z.infer<typeof grnItemSchema>>
+                <ProductItemFields<GRNFormValues, GRNItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}

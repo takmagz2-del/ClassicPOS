@@ -135,7 +135,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   };
 
   // Explicitly cast the result of form.watch("items") and provide a fallback
-  const items = (form.watch("items") || []) as z.infer<typeof purchaseOrderItemSchema>[];
+  const items = (form.watch("items") || []) as PurchaseOrderItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);
@@ -296,14 +296,14 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <CardTitle className="text-base">Order Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
+            <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
+                <ProductItemFields<PurchaseOrderFormValues, PurchaseOrderItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}

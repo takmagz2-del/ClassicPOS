@@ -84,7 +84,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
-        const items = (value.items || []) as z.infer<typeof itemSchema>[];
+        const items = (value.items || []) as TransferOfGoodsItem[]; // Explicitly cast here
         const transferFromStoreId = value.transferFromStoreId;
         if (items && transferFromStoreId) {
           items.forEach((item, index) => {
@@ -129,7 +129,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith("items.")) {
-        const items = (value.items || []) as z.infer<typeof itemSchema>[];
+        const items = (value.items || []) as TransferOfGoodsItem[]; // Explicitly cast here
         if (items) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
@@ -160,7 +160,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     let transferToSubmit: Omit<TransferOfGoods, "id" | "status" | "transferFromStoreName" | "transferToStoreName" | "approvedByUserName" | "approvalDate" | "receivedByUserName" | "receivedDate"> | TransferOfGoods;
 
     if (isEditMode) {
-      transferToSubmit = {
+    transferToSubmit = {
         ...initialTransfer!,
         ...baseTransfer,
         id: initialTransfer!.id,
@@ -174,7 +174,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   };
 
   // Explicitly cast the result of form.watch("items") and provide a fallback
-  const items = (form.watch("items") || []) as z.infer<typeof itemSchema>[];
+  const items = (form.watch("items") || []) as TransferOfGoodsItem[];
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 
@@ -283,14 +283,14 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             <CardTitle className="text-base">Items to Transfer</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
+            <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
+                <ProductItemFields<TransferOfGoodsFormValues, TransferOfGoodsItem>
                   index={idx}
                   control={ctrl}
                   errors={errs}
