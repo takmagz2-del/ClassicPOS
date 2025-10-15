@@ -104,7 +104,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
     // The items from the form already have IDs and match the PurchaseOrderItem interface
-    const orderItems: PurchaseOrderItem[] = values.items;
+    const orderItems: PurchaseOrderItem[] = values.items as PurchaseOrderItem[]; // Explicitly cast
 
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
@@ -298,7 +298,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           </CardHeader>
           <CardContent>
             <ItemFormList<PurchaseOrderFormValues, z.infer<typeof purchaseOrderItemSchema>>
-              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
+              items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}

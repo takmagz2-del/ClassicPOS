@@ -149,7 +149,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
     // The items from the form already have IDs and match the TransferOfGoodsItem interface
-    const transferItems: TransferOfGoodsItem[] = values.items;
+    const transferItems: TransferOfGoodsItem[] = values.items as TransferOfGoodsItem[]; // Explicitly cast
 
     const baseTransfer = {
       transferDate: values.transferDate.toISOString(),
@@ -287,7 +287,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           </CardHeader>
           <CardContent>
             <ItemFormList<TransferOfGoodsFormValues, z.infer<typeof itemSchema>>
-              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
+              items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}

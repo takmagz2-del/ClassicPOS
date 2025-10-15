@@ -114,7 +114,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
 
   const onSubmit = (values: StockAdjustmentFormValues) => {
     // The items from the form already have IDs and match the StockAdjustmentItem interface
-    const adjustmentItems: StockAdjustmentItem[] = values.items;
+    const adjustmentItems: StockAdjustmentItem[] = values.items as StockAdjustmentItem[]; // Explicitly cast
 
     const baseAdjustment = {
       adjustmentDate: values.adjustmentDate.toISOString(),
@@ -225,7 +225,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
           </CardHeader>
           <CardContent>
             <ItemFormList<StockAdjustmentFormValues, z.infer<typeof stockAdjustmentItemSchema>>
-              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
+              items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}

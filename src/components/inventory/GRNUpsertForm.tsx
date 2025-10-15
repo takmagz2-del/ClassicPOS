@@ -171,7 +171,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 
     // The items from the form already have IDs and match the GRNItem interface
-    const grnItems: GRNItem[] = values.items;
+    const grnItems: GRNItem[] = values.items as GRNItem[]; // Explicitly cast
 
     const baseGRN = {
       purchaseOrderId: values.purchaseOrderId === "none" ? undefined : values.purchaseOrderId,
@@ -350,7 +350,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           </CardHeader>
           <CardContent>
             <ItemFormList<GRNFormValues, z.infer<typeof grnItemSchema>>
-              items={items} // Removed || [] as items is now guaranteed to be an array by Zod
+              items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
