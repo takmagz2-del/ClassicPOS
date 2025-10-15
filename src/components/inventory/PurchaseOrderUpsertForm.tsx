@@ -103,7 +103,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 
-    const orderItems: PurchaseOrderItem[] = values.items;
+    // Explicitly cast values.items to PurchaseOrderItem[]
+    const orderItems: PurchaseOrderItem[] = values.items as PurchaseOrderItem[];
 
     const formValuesWithoutSupplierName = {
       supplierId: values.supplierId,
@@ -133,6 +134,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
+  // Explicitly cast the result of form.watch("items")
   const items = form.watch("items") as z.infer<typeof purchaseOrderItemSchema>[];
 
   const handleAddItem = () => {

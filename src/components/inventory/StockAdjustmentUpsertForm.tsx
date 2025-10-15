@@ -113,7 +113,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   }, [form, products]);
 
   const onSubmit = (values: StockAdjustmentFormValues) => {
-    const adjustmentItems: StockAdjustmentItem[] = values.items;
+    // Explicitly cast values.items to StockAdjustmentItem[]
+    const adjustmentItems: StockAdjustmentItem[] = values.items as StockAdjustmentItem[];
 
     const baseAdjustment = {
       adjustmentDate: values.adjustmentDate.toISOString(),
@@ -138,6 +139,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     onClose();
   };
 
+  // Explicitly cast the result of form.watch("items")
   const items = form.watch("items") as z.infer<typeof stockAdjustmentItemSchema>[];
 
   const handleAddItem = () => {

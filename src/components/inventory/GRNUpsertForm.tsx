@@ -170,7 +170,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);
 
-    const grnItems: GRNItem[] = values.items;
+    // Explicitly cast values.items to GRNItem[]
+    const grnItems: GRNItem[] = values.items as GRNItem[];
 
     const baseGRN = {
       purchaseOrderId: values.purchaseOrderId === "none" ? undefined : values.purchaseOrderId,
@@ -199,6 +200,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
+  // Explicitly cast the result of form.watch("items")
   const items = form.watch("items") as z.infer<typeof grnItemSchema>[];
 
   const handleAddItem = () => {

@@ -146,7 +146,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   }, [form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
-    const transferItems: TransferOfGoodsItem[] = values.items;
+    // Explicitly cast values.items to TransferOfGoodsItem[]
+    const transferItems: TransferOfGoodsItem[] = values.items as TransferOfGoodsItem[];
 
     const baseTransfer = {
       transferDate: values.transferDate.toISOString(),
@@ -172,6 +173,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
+  // Explicitly cast the result of form.watch("items")
   const items = form.watch("items") as z.infer<typeof itemSchema>[];
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
@@ -232,7 +234,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           name="transferFromStoreId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>From Store (Origin)</FormLabel>
+              <FormLabel>From Store (Origin)</Label>
               <Select onValueChange={field.onChange} value={field.value || ""} disabled={isFormDisabled}>
                 <FormControl>
                   <SelectTrigger>
