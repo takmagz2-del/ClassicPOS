@@ -201,7 +201,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   };
 
   // Explicitly declare the type of 'items' with a type assertion
-  const items = (form.watch("items") || []) as GRNItem[];
+  const items = form.watch("items") as GRNItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);

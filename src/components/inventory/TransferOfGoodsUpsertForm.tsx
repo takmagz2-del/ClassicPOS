@@ -174,7 +174,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   };
 
   // Explicitly declare the type of 'items' with a type assertion
-  const items = (form.watch("items") || []) as TransferOfGoodsItem[];
+  const items = form.watch("items") as TransferOfGoodsItem[];
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";
 

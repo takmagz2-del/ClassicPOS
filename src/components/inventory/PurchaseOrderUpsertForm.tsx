@@ -135,7 +135,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   };
 
   // Explicitly declare the type of 'items' with a type assertion
-  const items = (form.watch("items") || []) as PurchaseOrderItem[];
+  const items = form.watch("items") as PurchaseOrderItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);
