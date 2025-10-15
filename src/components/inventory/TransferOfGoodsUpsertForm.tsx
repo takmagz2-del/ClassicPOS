@@ -84,7 +84,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
-        const items = value.items;
+        const items = (value.items || []) as z.infer<typeof itemSchema>[];
         const transferFromStoreId = value.transferFromStoreId;
         if (items && transferFromStoreId) {
           items.forEach((item, index) => {
@@ -129,7 +129,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith("items.")) {
-        const items = value.items;
+        const items = (value.items || []) as z.infer<typeof itemSchema>[];
         if (items) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);

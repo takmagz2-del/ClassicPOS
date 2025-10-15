@@ -144,7 +144,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith("items.")) {
-        const items = value.items;
+        const items = (value.items || []) as z.infer<typeof grnItemSchema>[];
         if (items) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
