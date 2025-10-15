@@ -140,7 +140,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
   };
 
   // Explicitly declare the type of 'items' with a type assertion
-  const items = form.watch("items") as StockAdjustmentItem[];
+  const items = (form.watch("items") || []) as StockAdjustmentItem[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
