@@ -4,12 +4,16 @@ import { Store } from "./store"; // For linking stores
 import { Supplier } from "./supplier"; // For linking suppliers
 import { User } from "./user"; // For linking users (approvedBy, receivedBy)
 
+// --- Base Item for all inventory-related lists ---
+export interface BaseInventoryItem {
+  id: string;
+}
+
 // --- Purchase Order (Basic for GRN linking) ---
 export type PurchaseOrderStatus = "pending" | "completed" | "cancelled";
 export const PURCHASE_ORDER_STATUSES = ["pending", "completed", "cancelled"] as const; // Runtime array for Zod
 
-export interface PurchaseOrderItem {
-  id: string; // Added ID
+export interface PurchaseOrderItem extends BaseInventoryItem {
   productId: string;
   quantity: number;
   unitCost: number;
@@ -31,8 +35,7 @@ export interface PurchaseOrder {
 // --- Goods Received Note (GRN) ---
 export type GRNStatus = "pending" | "approved" | "rejected";
 
-export interface GRNItem {
-  id: string; // Added ID
+export interface GRNItem extends BaseInventoryItem {
   productId: string;
   productName: string; // Denormalized for easier display
   quantityReceived: number;
@@ -64,8 +67,7 @@ export enum AdjustmentType {
   Decrease = "decrease",
 }
 
-export interface StockAdjustmentItem {
-  id: string; // Added ID
+export interface StockAdjustmentItem extends BaseInventoryItem {
   productId: string;
   productName: string; // Denormalized
   adjustmentType: AdjustmentType;
@@ -88,8 +90,7 @@ export interface StockAdjustment {
 // --- Transfer of Goods (TOG) ---
 export type TransferStatus = "pending" | "in-transit" | "received" | "rejected";
 
-export interface TransferOfGoodsItem {
-  id: string; // Added ID
+export interface TransferOfGoodsItem extends BaseInventoryItem {
   productId: string;
   productName: string; // Denormalized
   quantity: number;

@@ -296,7 +296,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <CardTitle className="text-base">Order Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<PurchaseOrderFormValues>
+            <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}

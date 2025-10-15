@@ -4,22 +4,17 @@ import React from "react";
 import { Control, FieldErrors, FieldValues } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
+import { BaseInventoryItem } from "@/types/inventory"; // Import BaseInventoryItem
 
-// Extend TItem to ensure it has an 'id' property
-interface ItemWithId {
-  id: string; // Changed to required
-  [key: string]: any; // Allow other properties
-}
-
-// Constrain TFormValues to ensure it has an 'items' array of ItemWithId
-interface ItemFormListProps<TFormValues extends FieldValues> {
-  items: ItemWithId[]; // Directly use ItemWithId[]
+// Constrain TFormValues to ensure it has an 'items' array of BaseInventoryItem
+interface ItemFormListProps<TFormValues extends FieldValues, TItem extends BaseInventoryItem> {
+  items: TItem[]; // Directly use TItem[]
   onRemoveItem: (index: number) => void;
-  onAddItem: () => void; // New: Callback to add a new item
+  onAddItem: () => void;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   renderItem: (
-    item: ItemWithId, // Changed to ItemWithId
+    item: TItem, // Changed to TItem
     index: number,
     control: Control<TFormValues>,
     errors: FieldErrors<TFormValues>,
@@ -27,20 +22,20 @@ interface ItemFormListProps<TFormValues extends FieldValues> {
   ) => React.ReactNode;
   isRemoveButtonDisabled?: boolean;
   isFormDisabled?: boolean;
-  renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode; // New: Optional custom add button renderer
+  renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode;
 }
 
-const ItemFormList = <TFormValues extends FieldValues>({
+const ItemFormList = <TFormValues extends FieldValues, TItem extends BaseInventoryItem>({
   items,
   onRemoveItem,
-  onAddItem, // Destructure new prop
+  onAddItem,
   control,
   errors,
   renderItem,
   isRemoveButtonDisabled = false,
   isFormDisabled = false,
-  renderAddButton, // Destructure new prop
-}: ItemFormListProps<TFormValues>) => {
+  renderAddButton,
+}: ItemFormListProps<TFormValues, TItem>) => {
   return (
     <div className="space-y-4">
       {items.map((item, index) => (

@@ -283,7 +283,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
             <CardTitle className="text-base">Items to Transfer</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<TransferOfGoodsFormValues>
+            <ItemFormList<TransferOfGoodsFormValues, TransferOfGoodsItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}

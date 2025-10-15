@@ -223,7 +223,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
             <CardTitle className="text-base">Items to Adjust</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<StockAdjustmentFormValues>
+            <ItemFormList<StockAdjustmentFormValues, StockAdjustmentItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}

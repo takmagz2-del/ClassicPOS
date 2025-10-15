@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Control, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod"; // Corrected import
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -348,7 +348,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             <CardTitle className="text-base">Received Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<GRNFormValues>
+            <ItemFormList<GRNFormValues, GRNItem>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
