@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
 import {
   FormControl,
   FormField,
@@ -12,14 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface PurchaseOrderItemFieldsProps<TFormValues, TItem> {
+interface PurchaseOrderItemFieldsProps<TFormValues extends FieldValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const PurchaseOrderItemFields = <TFormValues extends { items: TItem[] }, TItem>({
+const PurchaseOrderItemFields = <TFormValues extends FieldValues, TItem>({
   index,
   control,
   errors,

@@ -1,17 +1,18 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
 
 // Extend TItem to ensure it has an 'id' property
 interface ItemWithId {
-  id?: string; // Changed to optional
+  id: string; // Changed to required
   [key: string]: any; // Allow other properties
 }
 
-interface ItemFormListProps<TFormValues extends { items?: TItem[] }, TItem extends ItemWithId> {
+// Constrain TFormValues to ensure it has an 'items' array of ItemWithId
+interface ItemFormListProps<TFormValues extends { items: ItemWithId[] }, TItem extends ItemWithId> {
   items: TItem[]; // This prop is still required and always an array
   onRemoveItem: (index: number) => void;
   onAddItem: () => void; // New: Callback to add a new item
@@ -29,7 +30,7 @@ interface ItemFormListProps<TFormValues extends { items?: TItem[] }, TItem exten
   renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode; // New: Optional custom add button renderer
 }
 
-const ItemFormList = <TFormValues extends { items?: TItem[] }, TItem extends ItemWithId>({
+const ItemFormList = <TFormValues extends { items: ItemWithId[] }, TItem extends ItemWithId>({
   items,
   onRemoveItem,
   onAddItem, // Destructure new prop

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
 import {
   FormControl,
   FormField,
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface TransferOfGoodsItemFieldsProps<TFormValues, TItem> {
+interface TransferOfGoodsItemFieldsProps<TFormValues extends FieldValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -20,7 +20,7 @@ interface TransferOfGoodsItemFieldsProps<TFormValues, TItem> {
   transferFromStoreId?: string; // To pass to ProductSelectField for filtering
 }
 
-const TransferOfGoodsItemFields = <TFormValues extends { items: TItem[] }, TItem>({
+const TransferOfGoodsItemFields = <TFormValues extends FieldValues, TItem>({
   index,
   control,
   errors,

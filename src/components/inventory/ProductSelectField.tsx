@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
 import {
   FormControl,
   FormField,
@@ -12,7 +12,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/context/ProductContext";
 
-interface ProductSelectFieldProps<TFormValues, TItem> {
+interface ProductSelectFieldProps<TFormValues extends FieldValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -21,7 +21,7 @@ interface ProductSelectFieldProps<TFormValues, TItem> {
   filterByStoreId?: string; 
 }
 
-const ProductSelectField = <TFormValues extends { items: TItem[] }, TItem>({
+const ProductSelectField = <TFormValues extends FieldValues, TItem>({
   index,
   control,
   errors,

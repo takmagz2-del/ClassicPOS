@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
 import {
   FormControl,
   FormField,
@@ -14,14 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdjustmentType } from "@/types/inventory";
 import ProductSelectField from "./ProductSelectField";
 
-interface StockAdjustmentItemFieldsProps<TFormValues, TItem> {
+interface StockAdjustmentItemFieldsProps<TFormValues extends FieldValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const StockAdjustmentItemFields = <TFormValues extends { items: TItem[] }, TItem>({
+const StockAdjustmentItemFields = <TFormValues extends FieldValues, TItem>({
   index,
   control,
   errors,

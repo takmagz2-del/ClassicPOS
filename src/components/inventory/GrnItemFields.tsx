@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors } from "react-hook-form";
+import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
 import {
   FormControl,
   FormField,
@@ -12,14 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface GrnItemFieldsProps<TFormValues, TItem> {
+interface GrnItemFieldsProps<TFormValues extends FieldValues, TItem> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const GrnItemFields = <TFormValues extends { items: TItem[] }, TItem>({
+const GrnItemFields = <TFormValues extends FieldValues, TItem>({
   index,
   control,
   errors,
