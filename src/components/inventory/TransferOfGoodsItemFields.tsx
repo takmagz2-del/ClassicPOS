@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface TransferOfGoodsItemFieldsProps<TFormValues extends FieldValues, TItem> {
+interface TransferOfGoodsItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -20,13 +20,13 @@ interface TransferOfGoodsItemFieldsProps<TFormValues extends FieldValues, TItem>
   transferFromStoreId?: string; // To pass to ProductSelectField for filtering
 }
 
-const TransferOfGoodsItemFields = <TFormValues extends FieldValues, TItem>({
+const TransferOfGoodsItemFields = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
   transferFromStoreId,
-}: TransferOfGoodsItemFieldsProps<TFormValues, TItem>) => {
+}: TransferOfGoodsItemFieldsProps<TFormValues>) => {
   return (
     <>
       <ProductSelectField
@@ -38,7 +38,7 @@ const TransferOfGoodsItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantity` as any}
+        name={`items.${index}.quantity`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity</FormLabel>

@@ -12,7 +12,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useProducts } from "@/context/ProductContext";
 
-interface ProductSelectFieldProps<TFormValues extends FieldValues, TItem> {
+interface ProductSelectFieldProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -21,13 +21,13 @@ interface ProductSelectFieldProps<TFormValues extends FieldValues, TItem> {
   filterByStoreId?: string; 
 }
 
-const ProductSelectField = <TFormValues extends FieldValues, TItem>({
+const ProductSelectField = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
   filterByStoreId,
-}: ProductSelectFieldProps<TFormValues, TItem>) => {
+}: ProductSelectFieldProps<TFormValues>) => {
   const { products } = useProducts();
 
   const getAvailableProducts = () => {
@@ -42,7 +42,7 @@ const ProductSelectField = <TFormValues extends FieldValues, TItem>({
   return (
     <FormField
       control={control}
-      name={`items.${index}.productId` as any}
+      name={`items.${index}.productId`}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Product</FormLabel>

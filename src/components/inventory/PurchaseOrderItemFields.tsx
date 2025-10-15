@@ -12,19 +12,19 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface PurchaseOrderItemFieldsProps<TFormValues extends FieldValues, TItem> {
+interface PurchaseOrderItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const PurchaseOrderItemFields = <TFormValues extends FieldValues, TItem>({
+const PurchaseOrderItemFields = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
-}: PurchaseOrderItemFieldsProps<TFormValues, TItem>) => {
+}: PurchaseOrderItemFieldsProps<TFormValues>) => {
   return (
     <>
       <ProductSelectField
@@ -35,7 +35,7 @@ const PurchaseOrderItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantity` as any}
+        name={`items.${index}.quantity`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity</FormLabel>
@@ -54,7 +54,7 @@ const PurchaseOrderItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.unitCost` as any}
+        name={`items.${index}.unitCost`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>

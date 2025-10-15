@@ -14,19 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdjustmentType } from "@/types/inventory";
 import ProductSelectField from "./ProductSelectField";
 
-interface StockAdjustmentItemFieldsProps<TFormValues extends FieldValues, TItem> {
+interface StockAdjustmentItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const StockAdjustmentItemFields = <TFormValues extends FieldValues, TItem>({
+const StockAdjustmentItemFields = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
-}: StockAdjustmentItemFieldsProps<TFormValues, TItem>) => {
+}: StockAdjustmentItemFieldsProps<TFormValues>) => {
   return (
     <>
       <ProductSelectField
@@ -37,7 +37,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.adjustmentType` as any}
+        name={`items.${index}.adjustmentType`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
@@ -61,7 +61,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantity` as any}
+        name={`items.${index}.quantity`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity</FormLabel>
@@ -80,7 +80,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.reason` as any}
+        name={`items.${index}.reason`}
         render={({ field }) => (
           <FormItem className="sm:col-span-3">
             <FormLabel>Reason</FormLabel>

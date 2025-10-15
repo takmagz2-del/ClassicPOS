@@ -11,7 +11,7 @@ import StockAdjustmentItemFields from "./StockAdjustmentItemFields";
 import TransferOfGoodsItemFields from "./TransferOfGoodsItemFields";
 
 // Define a more flexible TFormValues for ProductItemFields
-interface ProductItemFieldsProps<TFormValues extends FieldValues, TItem> {
+interface ProductItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
@@ -20,21 +20,21 @@ interface ProductItemFieldsProps<TFormValues extends FieldValues, TItem> {
   transferFromStoreId?: string; // Specific for TransferOfGoods
 }
 
-const ProductItemFields = <TFormValues extends FieldValues, TItem>({
+const ProductItemFields = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
   itemType,
   transferFromStoreId,
-}: ProductItemFieldsProps<TFormValues, TItem>) => {
+}: ProductItemFieldsProps<TFormValues>) => {
   switch (itemType) {
     case "purchaseOrder":
       return (
         <PurchaseOrderItemFields
           index={index}
-          control={control as Control<any>} // Cast to any to bypass deep type checking
-          errors={errors as FieldErrors<any>} // Cast to any
+          control={control}
+          errors={errors}
           isFormDisabled={isFormDisabled}
         />
       );
@@ -42,8 +42,8 @@ const ProductItemFields = <TFormValues extends FieldValues, TItem>({
       return (
         <GrnItemFields
           index={index}
-          control={control as Control<any>} // Cast to any
-          errors={errors as FieldErrors<any>} // Cast to any
+          control={control}
+          errors={errors}
           isFormDisabled={isFormDisabled}
         />
       );
@@ -51,8 +51,8 @@ const ProductItemFields = <TFormValues extends FieldValues, TItem>({
       return (
         <StockAdjustmentItemFields
           index={index}
-          control={control as Control<any>} // Cast to any
-          errors={errors as FieldErrors<any>} // Cast to any
+          control={control}
+          errors={errors}
           isFormDisabled={isFormDisabled}
         />
       );
@@ -60,8 +60,8 @@ const ProductItemFields = <TFormValues extends FieldValues, TItem>({
       return (
         <TransferOfGoodsItemFields
           index={index}
-          control={control as Control<any>} // Cast to any
-          errors={errors as FieldErrors<any>} // Cast to any
+          control={control}
+          errors={errors}
           isFormDisabled={isFormDisabled}
           transferFromStoreId={transferFromStoreId}
         />

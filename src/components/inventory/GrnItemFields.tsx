@@ -12,19 +12,19 @@ import {
 import { Input } from "@/components/ui/input";
 import ProductSelectField from "./ProductSelectField";
 
-interface GrnItemFieldsProps<TFormValues extends FieldValues, TItem> {
+interface GrnItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
 }
 
-const GrnItemFields = <TFormValues extends FieldValues, TItem>({
+const GrnItemFields = <TFormValues extends FieldValues>({
   index,
   control,
   errors,
   isFormDisabled,
-}: GrnItemFieldsProps<TFormValues, TItem>) => {
+}: GrnItemFieldsProps<TFormValues>) => {
   return (
     <>
       <ProductSelectField
@@ -35,7 +35,7 @@ const GrnItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantityReceived` as any}
+        name={`items.${index}.quantityReceived`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity Received</FormLabel>
@@ -54,7 +54,7 @@ const GrnItemFields = <TFormValues extends FieldValues, TItem>({
       />
       <FormField
         control={control}
-        name={`items.${index}.unitCost` as any}
+        name={`items.${index}.unitCost`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>
