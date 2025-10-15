@@ -200,8 +200,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items")
-  const items = form.watch("items") || []; // Ensure items is always an array
+  // Explicitly cast the result of form.watch("items") and provide a fallback
+  const items = (form.watch("items") || []) as z.infer<typeof grnItemSchema>[];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
