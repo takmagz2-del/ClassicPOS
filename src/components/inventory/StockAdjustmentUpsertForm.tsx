@@ -139,8 +139,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items")
-  const items = form.watch("items") as z.infer<typeof stockAdjustmentItemSchema>[];
+  // Explicitly cast the result of form.watch("items") with non-null assertion
+  const items = form.watch("items")! as z.infer<typeof stockAdjustmentItemSchema>[] || [];
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }]);
