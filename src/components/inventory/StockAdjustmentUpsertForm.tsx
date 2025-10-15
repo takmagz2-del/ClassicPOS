@@ -66,8 +66,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
       items: initialStockAdjustment?.items?.length
-        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
-        : [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as StockAdjustmentItem[]
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }] as StockAdjustmentItem[],
       notes: initialStockAdjustment?.notes || undefined,
     },
   });
@@ -79,14 +79,14 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })),
+        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as StockAdjustmentItem[],
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {
       form.reset({
         adjustmentDate: startOfDay(new Date()),
         storeId: "",
-        items: [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }],
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }] as StockAdjustmentItem[],
         notes: undefined,
       });
     }
@@ -139,7 +139,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items") and provide a fallback
+  // Explicitly declare the type of 'items' with a type assertion
   const items = (form.watch("items") || []) as StockAdjustmentItem[];
 
   const handleAddItem = () => {

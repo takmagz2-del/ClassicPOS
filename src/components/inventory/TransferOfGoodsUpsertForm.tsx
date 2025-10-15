@@ -74,8 +74,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items?.length
-        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
-        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }],
+        ? initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as TransferOfGoodsItem[]
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }] as TransferOfGoodsItem[],
       notes: initialTransfer?.notes || undefined,
     },
   });
@@ -111,7 +111,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: new Date(initialTransfer.transferDate),
           transferFromStoreId: initialTransfer.transferFromStoreId,
           transferToStoreId: initialTransfer.transferToStoreId,
-          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })),
+          items: initialTransfer.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as TransferOfGoodsItem[],
           notes: initialTransfer.notes || undefined,
         });
       } else {
@@ -119,7 +119,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: startOfDay(new Date()),
           transferFromStoreId: "",
           transferToStoreId: "",
-          items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }],
+          items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }] as TransferOfGoodsItem[],
           notes: undefined,
         });
       }
@@ -173,7 +173,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items") and provide a fallback
+  // Explicitly declare the type of 'items' with a type assertion
   const items = (form.watch("items") || []) as TransferOfGoodsItem[];
   const transferFromStoreId = form.watch("transferFromStoreId");
   const isFormDisabled = isEditMode && initialTransfer?.status !== "pending";

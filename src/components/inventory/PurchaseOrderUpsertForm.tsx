@@ -70,8 +70,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items?.length
-        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
-        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }],
+        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as PurchaseOrderItem[]
+        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
       notes: initialPurchaseOrder?.notes || undefined,
     },
   });
@@ -84,7 +84,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: new Date(initialPurchaseOrder.orderDate),
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })),
+        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as PurchaseOrderItem[],
         notes: initialPurchaseOrder.notes || undefined,
       });
     } else {
@@ -94,7 +94,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }],
+        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
         notes: undefined,
       });
     }
@@ -134,7 +134,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items") and provide a fallback
+  // Explicitly declare the type of 'items' with a type assertion
   const items = (form.watch("items") || []) as PurchaseOrderItem[];
 
   const handleAddItem = () => {

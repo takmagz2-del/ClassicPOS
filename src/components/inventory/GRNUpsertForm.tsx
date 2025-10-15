@@ -78,8 +78,8 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items?.length
-        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))
-        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+        ? initialGRN.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() })) as GRNItem[]
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }] as GRNItem[],
       notes: initialGRN?.notes || undefined,
     },
   });
@@ -103,12 +103,12 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
             unitCost: item.unitCost,
             totalCost: item.quantity * item.unitCost,
           };
-        }));
+        }) as GRNItem[]); // Explicit cast here
         form.setValue("notes", `Linked to PO: ${po.referenceNo}`);
       }
     } else if (!isEditMode) {
       form.setValue("supplierId", "");
-      form.setValue("items", [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }]);
+      form.setValue("items", [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }] as GRNItem[]); // Explicit cast here
       form.setValue("notes", undefined);
     }
   }, [selectedPurchaseOrderId, getPurchaseOrderById, form, isEditMode, products]);
@@ -124,7 +124,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         items: initialGRN.items.map(item => ({
           ...item,
           id: item.id || crypto.randomUUID(),
-        })),
+        })) as GRNItem[],
         notes: initialGRN.notes || undefined,
       });
     } else {
@@ -134,7 +134,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         referenceNo: "",
         receivedDate: startOfDay(new Date()),
         receivingStoreId: "",
-        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }],
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }] as GRNItem[],
         notes: undefined,
       });
     }
@@ -200,7 +200,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items") and provide a fallback
+  // Explicitly declare the type of 'items' with a type assertion
   const items = (form.watch("items") || []) as GRNItem[];
 
   const handleAddItem = () => {
@@ -230,7 +230,6 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="none">No Purchase Order</SelectItem>
                 {availablePurchaseOrders.map((po) => (
                   <SelectItem key={po.id} value={po.id}>
                     {po.referenceNo} ({suppliers.find(s => s.id === po.supplierId)?.name || "Unknown"})
