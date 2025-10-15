@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
 import {
   FormControl,
   FormField,
@@ -42,7 +42,7 @@ const ProductSelectField = <TFormValues extends FieldValues>({
   return (
     <FormField
       control={control}
-      name={`items.${index}.productId`}
+      name={`items.${index}.productId` as Path<TFormValues>} // Cast name prop
       render={({ field }) => (
         <FormItem>
           <FormLabel>Product</FormLabel>

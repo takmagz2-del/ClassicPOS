@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
 import {
   FormControl,
   FormField,
@@ -27,7 +27,7 @@ const GrnItemFields = <TFormValues extends FieldValues>({
 }: GrnItemFieldsProps<TFormValues>) => {
   return (
     <>
-      <ProductSelectField
+      <ProductSelectField<TFormValues> // Pass TFormValues
         index={index}
         control={control}
         errors={errors}
@@ -35,7 +35,7 @@ const GrnItemFields = <TFormValues extends FieldValues>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantityReceived`}
+        name={`items.${index}.quantityReceived` as Path<TFormValues>} // Cast name prop
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity Received</FormLabel>
@@ -54,7 +54,7 @@ const GrnItemFields = <TFormValues extends FieldValues>({
       />
       <FormField
         control={control}
-        name={`items.${index}.unitCost`}
+        name={`items.${index}.unitCost` as Path<TFormValues>} // Cast name prop
         render={({ field }) => (
           <FormItem>
             <FormLabel>Unit Cost</FormLabel>

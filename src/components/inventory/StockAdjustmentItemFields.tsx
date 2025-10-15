@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
 import {
   FormControl,
   FormField,
@@ -29,7 +29,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues>({
 }: StockAdjustmentItemFieldsProps<TFormValues>) => {
   return (
     <>
-      <ProductSelectField
+      <ProductSelectField<TFormValues> // Pass TFormValues
         index={index}
         control={control}
         errors={errors}
@@ -37,7 +37,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues>({
       />
       <FormField
         control={control}
-        name={`items.${index}.adjustmentType`}
+        name={`items.${index}.adjustmentType` as Path<TFormValues>} // Cast name prop
         render={({ field }) => (
           <FormItem>
             <FormLabel>Type</FormLabel>
@@ -61,7 +61,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues>({
       />
       <FormField
         control={control}
-        name={`items.${index}.quantity`}
+        name={`items.${index}.quantity` as Path<TFormValues>} // Cast name prop
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity</FormLabel>
@@ -80,7 +80,7 @@ const StockAdjustmentItemFields = <TFormValues extends FieldValues>({
       />
       <FormField
         control={control}
-        name={`items.${index}.reason`}
+        name={`items.${index}.reason` as Path<TFormValues>} // Cast name prop
         render={({ field }) => (
           <FormItem className="sm:col-span-3">
             <FormLabel>Reason</FormLabel>

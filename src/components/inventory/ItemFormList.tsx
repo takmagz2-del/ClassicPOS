@@ -12,14 +12,14 @@ interface ItemWithId {
 }
 
 // Constrain TFormValues to ensure it has an 'items' array of ItemWithId
-interface ItemFormListProps<TFormValues extends { items: ItemWithId[] }, TItem extends ItemWithId> {
-  items: TItem[]; // This prop is still required and always an array
+interface ItemFormListProps<TFormValues extends FieldValues> {
+  items: ItemWithId[]; // Directly use ItemWithId[]
   onRemoveItem: (index: number) => void;
   onAddItem: () => void; // New: Callback to add a new item
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   renderItem: (
-    item: TItem,
+    item: ItemWithId, // Changed to ItemWithId
     index: number,
     control: Control<TFormValues>,
     errors: FieldErrors<TFormValues>,
@@ -30,7 +30,7 @@ interface ItemFormListProps<TFormValues extends { items: ItemWithId[] }, TItem e
   renderAddButton?: (onAdd: () => void, isDisabled: boolean) => React.ReactNode; // New: Optional custom add button renderer
 }
 
-const ItemFormList = <TFormValues extends { items: ItemWithId[] }, TItem extends ItemWithId>({
+const ItemFormList = <TFormValues extends FieldValues>({
   items,
   onRemoveItem,
   onAddItem, // Destructure new prop
@@ -40,7 +40,7 @@ const ItemFormList = <TFormValues extends { items: ItemWithId[] }, TItem extends
   isRemoveButtonDisabled = false,
   isFormDisabled = false,
   renderAddButton, // Destructure new prop
-}: ItemFormListProps<TFormValues, TItem>) => {
+}: ItemFormListProps<TFormValues>) => {
   return (
     <div className="space-y-4">
       {items.map((item, index) => (

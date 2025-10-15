@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
-import { AdjustmentType } from "@/types/inventory"; // Ensure AdjustmentType is imported if needed by sub-components
 
 // Import the new specific item field components
 import PurchaseOrderItemFields from "./PurchaseOrderItemFields";
@@ -31,7 +30,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
   switch (itemType) {
     case "purchaseOrder":
       return (
-        <PurchaseOrderItemFields
+        <PurchaseOrderItemFields<TFormValues> // Pass TFormValues
           index={index}
           control={control}
           errors={errors}
@@ -40,7 +39,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "grn":
       return (
-        <GrnItemFields
+        <GrnItemFields<TFormValues> // Pass TFormValues
           index={index}
           control={control}
           errors={errors}
@@ -49,7 +48,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "stockAdjustment":
       return (
-        <StockAdjustmentItemFields
+        <StockAdjustmentItemFields<TFormValues> // Pass TFormValues
           index={index}
           control={control}
           errors={errors}
@@ -58,7 +57,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "transferOfGoods":
       return (
-        <TransferOfGoodsItemFields
+        <TransferOfGoodsItemFields<TFormValues> // Pass TFormValues
           index={index}
           control={control}
           errors={errors}

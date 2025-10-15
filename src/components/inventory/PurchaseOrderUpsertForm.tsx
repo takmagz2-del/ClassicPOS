@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, Control, FieldErrors } from "react-hook-form";
+import { useForm, Control, FieldErrors, Path } from "react-hook-form"; // Import Path
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
+import { ItemWithId } from "./ItemFormList"; // Import ItemWithId
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
@@ -232,7 +233,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
           name="expectedDeliveryDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Expected Delivery Date (Optional)</FormLabel>
+              <FormLabel>Expected Delivery Date (Optional)</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -296,14 +297,14 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
             <CardTitle className="text-base">Order Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <ItemFormList<PurchaseOrderFormValues, PurchaseOrderItem>
+            <ItemFormList<PurchaseOrderFormValues>
               items={items}
               onRemoveItem={handleRemoveItem}
               onAddItem={handleAddItem}
               control={form.control}
               errors={form.formState.errors}
               renderItem={(item, idx, ctrl, errs, isDisabled) => (
-                <ProductItemFields<PurchaseOrderFormValues, PurchaseOrderItem>
+                <ProductItemFields<PurchaseOrderFormValues>
                   index={idx}
                   control={ctrl}
                   errors={errs}
