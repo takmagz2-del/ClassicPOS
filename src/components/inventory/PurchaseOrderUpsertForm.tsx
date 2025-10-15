@@ -134,8 +134,8 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
     onClose();
   };
 
-  // Explicitly cast the result of form.watch("items") and provide a fallback
-  const items = (form.watch("items") || []) as z.infer<typeof purchaseOrderItemSchema>[];
+  // Explicitly cast the result of form.watch("items")
+  const items = form.watch("items") || []; // Ensure items is always an array
 
   const handleAddItem = () => {
     form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);
