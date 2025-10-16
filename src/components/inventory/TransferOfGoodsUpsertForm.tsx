@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Control, FieldErrors, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import *s z from "zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form as ShadcnForm,
