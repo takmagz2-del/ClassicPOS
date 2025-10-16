@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FieldError } from "react-hook-form"; // Import FieldError
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -158,12 +158,8 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
   };
 
   const trackStock = form.watch("trackStock");
-  const stockByStoreError = form.formState.errors.stockByStore;
-  let stockByStoreErrorMessage: string = '';
-
-  if (stockByStoreError && typeof stockByStoreError === 'object' && 'message' in stockByStoreError && typeof stockByStoreError.message === 'string') {
-    stockByStoreErrorMessage = stockByStoreError.message;
-  }
+  // Directly access the message property with a type assertion
+  const stockByStoreErrorMessage: string = (form.formState.errors.stockByStore as FieldError)?.message || '';
 
   return (
     <Form {...form}>
