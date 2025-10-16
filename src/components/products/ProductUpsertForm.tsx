@@ -159,7 +159,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
 
   const trackStock = form.watch("trackStock");
   const currentStockByStore = form.watch("stockByStore");
-  // Removed the problematic line: const stockByStoreErrorMessage = form.formState.errors.stockByStore?.message; // Extract message safely
+  const stockByStoreError = form.formState.errors.stockByStore; // Get the error object
 
   return (
     <Form {...form}>
@@ -294,9 +294,9 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             ) : (
               <p className="text-sm text-muted-foreground">No stores configured. Please add stores in settings to manage per-store stock.</p>
             )}
-            {form.formState.errors.stockByStore?.message && (
+            {stockByStoreError && stockByStoreError.message && ( // Use the local variable for explicit check
               <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.stockByStore.message}
+                {stockByStoreError.message}
               </p>
             )}
           </div>
