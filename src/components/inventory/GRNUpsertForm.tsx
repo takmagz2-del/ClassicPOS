@@ -37,10 +37,18 @@ import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater
 const grnItemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
-  productName: z.string().min(1, { message: "Product name is required." }),
+  productName: z.string().optional(), // Made optional
   quantityReceived: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
   totalCost: z.coerce.number().min(0, { message: "Total cost must be a non-negative number." }),
+}).superRefine((data, ctx) => {
+  if (data.productId && (!data.productName || data.productName.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Product name is required if a product is selected.",
+      path: ["productName"],
+    });
+  }
 });
 
 const formSchema = z.object({
@@ -108,7 +116,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
           return {
             id: crypto.randomUUID(),
             productId: item.productId,
-            productName: product?.name || "Unknown Product",
+            productName: product?.name || "", // Set to empty string if product not found
             quantityReceived: item.quantity,
             unitCost: item.unitCost,
             totalCost: item.quantity * item.unitCost,

@@ -35,10 +35,18 @@ import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater
 const stockAdjustmentItemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
-  productName: z.string().min(1, { message: "Product name is required." }),
+  productName: z.string().optional(), // Made optional
   adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   reason: z.string().min(3, { message: "Reason for adjustment is required." }),
+}).superRefine((data, ctx) => {
+  if (data.productId && (!data.productName || data.productName.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Product name is required if a product is selected.",
+      path: ["productName"],
+    });
+  }
 });
 
 const formSchema = z.object({
