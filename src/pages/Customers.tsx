@@ -11,6 +11,7 @@ import { PlusCircle } from "lucide-react";
 import { useCustomers } from "@/context/CustomerContext";
 import DeleteCustomerDialog from "@/components/customers/DeleteCustomerDialog";
 import { toast } from "sonner";
+import ExportCustomersDataButton from "@/components/customers/ExportCustomersDataButton"; // New import
 
 const Customers = () => {
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
@@ -41,6 +42,7 @@ const Customers = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Customers</h1>
         <div className="flex items-center gap-2">
+          <ExportCustomersDataButton customers={customers} filename="customer_list" /> {/* New Export Button */}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>

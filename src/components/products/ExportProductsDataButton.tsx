@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { Product } from "@/types/product";
 import { toast } from "sonner";
 import { useCategories } from "@/context/CategoryContext";
+import { format } from "date-fns"; // Fixed: Added missing import for format
 
 interface ExportProductsDataButtonProps {
   products: Product[];
