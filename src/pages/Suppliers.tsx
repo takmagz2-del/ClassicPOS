@@ -11,6 +11,7 @@ import SupplierTable from "@/components/suppliers/SupplierTable";
 import SupplierUpsertForm from "@/components/suppliers/SupplierUpsertForm";
 import DeleteSupplierDialog from "@/components/suppliers/DeleteSupplierDialog";
 import { toast } from "sonner";
+import ExportSuppliersDataButton from "@/components/suppliers/ExportSuppliersDataButton"; // New import
 
 const Suppliers = () => {
   const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
@@ -48,19 +49,22 @@ const Suppliers = () => {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Supplier Management</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Supplier
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Supplier</DialogTitle>
-            </DialogHeader>
-            <SupplierUpsertForm onSupplierSubmit={handleSupplierSubmit} onClose={() => setIsAddDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <ExportSuppliersDataButton suppliers={suppliers} filename="supplier_list" /> {/* New Export Button */}
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Supplier
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Supplier</DialogTitle>
+              </DialogHeader>
+              <SupplierUpsertForm onSupplierSubmit={handleSupplierSubmit} onClose={() => setIsAddDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>
