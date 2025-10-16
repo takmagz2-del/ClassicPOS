@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCategories } from "@/context/CategoryContext";
 import { Switch } from "@/components/ui/switch";
+import { useStores } from "@/context/StoreContext"; // Import useStores
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -34,18 +35,29 @@ const formSchema = z.object({
   cost: z.coerce.number().min(0, {
     message: "Cost must be a non-negative number.",
   }),
-  wholesalePrice: z.coerce.number().min(0, { // New: Wholesale price validation
+  wholesalePrice: z.coerce.number().min(0, {
     message: "Wholesale price must be a non-negative number.",
   }),
-  stock: z.coerce.number().int().min(0, {
-    message: "Stock must be a non-negative integer.",
-  }),
-  trackStock: z.boolean(), // New: Track stock switch
-  availableForSale: z.boolean(), // New: Available for sale switch
+  // Removed direct 'stock' field
+  trackStock: z.boolean(),
+  availableForSale: z.boolean(),
   sku: z.string().min(3, {
     message: "SKU must be at least 3 characters.",
   }),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
+  // New: stockByStore field
+  stockByStore: z.record(z.string(), z.coerce.number().int().min(0, { message: "Stock must be a non-negative integer." })).optional(),
+}).superRefine((data, ctx) => {
+  if (data.trackStock) {
+    const totalStock = data.stockByStore ? Object.values(data.stockByStore).reduce((sum, qty) => sum + qty, 0) : 0;
+    if (totalStock === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "If tracking stock, at least one store must have a quantity greater than 0.",
+        path: ["stockByStore"],
+      });
+    }
+  }
 });
 
 type ProductFormValues = z.infer<typeof formSchema>;
@@ -58,68 +70,76 @@ interface ProductUpsertFormProps {
 
 const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: ProductUpsertFormProps) => {
   const { categories } = useCategories();
+  const { stores } = useStores(); // Use stores context
   const isEditMode = !!initialProduct;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialProduct || {
-      name: "",
-      categoryId: "",
-      price: 0,
-      cost: 0,
-      wholesalePrice: 0, // Default for new field
-      stock: 0,
-      trackStock: true, // Default to true
-      availableForSale: true, // Default to true
-      sku: "",
-      imageUrl: "",
+    defaultValues: {
+      name: initialProduct?.name || "",
+      categoryId: initialProduct?.categoryId || "",
+      price: initialProduct?.price || 0,
+      cost: initialProduct?.cost || 0,
+      wholesalePrice: initialProduct?.wholesalePrice || 0,
+      trackStock: initialProduct?.trackStock ?? true,
+      availableForSale: initialProduct?.availableForSale ?? true,
+      sku: initialProduct?.sku || "",
+      imageUrl: initialProduct?.imageUrl || "",
+      stockByStore: initialProduct?.stockByStore || {}, // Initialize stockByStore
     },
   });
 
   // Reset form with new initialProduct if it changes (e.g., when editing a different product)
   useEffect(() => {
-    form.reset(initialProduct || {
-      name: "",
-      categoryId: "",
-      price: 0,
-      cost: 0,
-      wholesalePrice: 0,
-      stock: 0,
-      trackStock: true,
-      availableForSale: true,
-      sku: "",
-      imageUrl: "",
+    form.reset({
+      name: initialProduct?.name || "",
+      categoryId: initialProduct?.categoryId || "",
+      price: initialProduct?.price || 0,
+      cost: initialProduct?.cost || 0,
+      wholesalePrice: initialProduct?.wholesalePrice || 0,
+      trackStock: initialProduct?.trackStock ?? true,
+      availableForSale: initialProduct?.availableForSale ?? true,
+      sku: initialProduct?.sku || "",
+      imageUrl: initialProduct?.imageUrl || "",
+      stockByStore: initialProduct?.stockByStore || {},
     });
   }, [initialProduct, form]);
 
   const onSubmit = (values: ProductFormValues) => {
     let productToSubmit: Product;
 
+    // Calculate total stock from stockByStore if tracking is enabled
+    const calculatedTotalStock = values.trackStock && values.stockByStore
+      ? Object.values(values.stockByStore).reduce((sum, qty) => sum + qty, 0)
+      : 0; // If not tracking, or no stockByStore, total stock is 0 for non-tracked items
+
     if (isEditMode) {
       productToSubmit = {
-        id: initialProduct!.id, // Ensure ID is from initialProduct
+        id: initialProduct!.id,
         name: values.name,
         categoryId: values.categoryId,
         price: values.price,
         cost: values.cost,
-        wholesalePrice: values.wholesalePrice, // New field
-        stock: values.stock,
-        trackStock: values.trackStock, // New field
-        availableForSale: values.availableForSale, // New field
+        wholesalePrice: values.wholesalePrice,
+        stock: calculatedTotalStock, // Use calculated total stock
+        stockByStore: values.trackStock ? values.stockByStore : undefined, // Only include if tracking stock
+        trackStock: values.trackStock,
+        availableForSale: values.availableForSale,
         sku: values.sku,
         imageUrl: values.imageUrl,
       };
     } else {
       productToSubmit = {
-        id: crypto.randomUUID(), // Generate new ID for add
+        id: crypto.randomUUID(),
         name: values.name,
         categoryId: values.categoryId,
         price: values.price,
         cost: values.cost,
-        wholesalePrice: values.wholesalePrice, // New field
-        stock: values.stock,
-        trackStock: values.trackStock, // New field
-        availableForSale: values.availableForSale, // New field
+        wholesalePrice: values.wholesalePrice,
+        stock: calculatedTotalStock, // Use calculated total stock
+        stockByStore: values.trackStock ? values.stockByStore : undefined, // Only include if tracking stock
+        trackStock: values.trackStock,
+        availableForSale: values.availableForSale,
         sku: values.sku,
         imageUrl: values.imageUrl,
       };
@@ -132,6 +152,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
   };
 
   const trackStock = form.watch("trackStock");
+  const currentStockByStore = form.watch("stockByStore");
 
   return (
     <Form {...form}>
@@ -232,19 +253,48 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="stock"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Stock Quantity</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} disabled={!trackStock} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        {trackStock && (
+          <div className="space-y-4 rounded-lg border p-4">
+            <h3 className="text-base font-semibold">Stock Quantity by Store</h3>
+            {stores.length > 0 ? (
+              stores.map((store) => (
+                <FormField
+                  key={store.id}
+                  control={form.control}
+                  name={`stockByStore.${store.id}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{store.name} Stock</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          {...field}
+                          value={field.value ?? ""} // Ensure controlled component
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? undefined : parseInt(value, 10));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No stores configured. Please add stores in settings to manage per-store stock.</p>
+            )}
+            {form.formState.errors.stockByStore && (
+              <p className="text-sm font-medium text-destructive">
+                {form.formState.errors.stockByStore.message as string}
+              </p>
+            )}
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="availableForSale"
