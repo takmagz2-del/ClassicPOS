@@ -294,7 +294,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             ) : (
               <p className="text-sm text-muted-foreground">No stores configured. Please add stores in settings to manage per-store stock.</p>
             )}
-            {stockByStoreError?.message && (
+            {stockByStoreError?.message && ( // Safely access message property
               <p className="text-sm font-medium text-destructive">
                 {stockByStoreError.message}
               </p>
