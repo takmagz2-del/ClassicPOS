@@ -152,7 +152,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>Business Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., My Awesome Store" disabled={isLoading} {...field} />
+                <Input placeholder="e.g., My Awesome Store" disabled={isLoading} {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -213,7 +213,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>Phone Number (Optional)</FormLabel>
               <FormControl>
-                <Input type="tel" placeholder="e.g., +15551234567" disabled={isLoading} {...field} />
+                <Input type="tel" placeholder="e.g., +15551234567" disabled={isLoading} {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -226,7 +226,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>VAT Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., GB123456789" disabled={isLoading} {...field} />
+                <Input placeholder="e.g., GB123456789" disabled={isLoading} {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -239,7 +239,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>TIN Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123-456-789" disabled={isLoading} {...field} />
+                <Input placeholder="e.g., 123-456-789" disabled={isLoading} {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -252,7 +252,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>Current Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Enter current password" {...field} disabled={isLoading} />
+                <Input type="password" placeholder="Enter current password" {...field} disabled={isLoading} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -265,7 +265,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>New Password (optional)</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Leave blank to keep current" {...field} disabled={isLoading} />
+                <Input type="password" placeholder="Leave blank to keep current" {...field} disabled={isLoading} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -278,7 +278,7 @@ const UserProfileForm = () => {
             <FormItem>
               <FormLabel>Confirm New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Confirm new password" {...field} disabled={isLoading} />
+                <Input type="password" placeholder="Confirm new password" {...field} disabled={isLoading} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

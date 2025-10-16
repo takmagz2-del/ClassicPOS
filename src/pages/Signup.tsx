@@ -163,6 +163,7 @@ const Signup = () => {
                         placeholder="e.g., My Awesome Store"
                         disabled={isLoading}
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -230,6 +231,7 @@ const Signup = () => {
                         placeholder="e.g., +15551234567"
                         disabled={isLoading}
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -248,6 +250,7 @@ const Signup = () => {
                         placeholder="e.g., GB123456789"
                         disabled={isLoading}
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -266,6 +269,7 @@ const Signup = () => {
                         placeholder="e.g., 123-456-789"
                         disabled={isLoading}
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />

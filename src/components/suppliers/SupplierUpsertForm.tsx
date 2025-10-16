@@ -135,7 +135,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>Contact Person (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Jane Doe" {...field} />
+                <Input placeholder="e.g., Jane Doe" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -148,7 +148,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>Email (Optional)</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., contact@supplier.com" {...field} />
+                <Input type="email" placeholder="e.g., contact@supplier.com" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -161,7 +161,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>Phone (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 555-123-4567" {...field} />
+                <Input placeholder="e.g., 555-123-4567" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -174,7 +174,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123 Industrial Way" {...field} />
+                <Input placeholder="e.g., 123 Industrial Way" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -187,7 +187,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>VAT Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., GB123456789" {...field} />
+                <Input placeholder="e.g., GB123456789" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -200,7 +200,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>TIN Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123-456-789" {...field} />
+                <Input placeholder="e.g., 123-456-789" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -213,7 +213,7 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any relevant notes about this supplier..." {...field} />
+                <Textarea placeholder="Any relevant notes about this supplier..." {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
