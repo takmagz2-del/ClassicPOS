@@ -11,7 +11,12 @@ import { Controller, FormProvider, useFormContext,
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-const Form = FormProvider
+// Changed from `const Form = FormProvider` to a functional component wrapping FormProvider
+const Form = <TFieldValues extends FieldValues = FieldValues>(
+  props: React.ComponentProps<typeof FormProvider<TFieldValues>>
+) => {
+  return <FormProvider {...props} />
+}
 
 type FormFieldContextValue = {
   name: string
