@@ -75,7 +75,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       adjustmentDate: initialStockAdjustment?.adjustmentDate ? new Date(initialStockAdjustment.adjustmentDate) : startOfDay(new Date()),
       storeId: initialStockAdjustment?.storeId || "",
       items: initialStockAdjustment?.items?.length
-        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id })) as StockAdjustmentItem[]
+        ? initialStockAdjustment.items.map(item => ({ ...item, id: item.id, productName: item.productName || products.find(p => p.id === item.productId)?.name || "" })) as StockAdjustmentItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", adjustmentType: AdjustmentType.Increase, quantity: 1, reason: "" }] as StockAdjustmentItem[],
       notes: initialStockAdjustment?.notes || undefined,
     },
@@ -97,7 +97,11 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       form.reset({
         adjustmentDate: new Date(initialStockAdjustment.adjustmentDate),
         storeId: initialStockAdjustment.storeId,
-        items: initialStockAdjustment.items.map(item => ({ ...item, id: item.id })) as StockAdjustmentItem[],
+        items: initialStockAdjustment.items.map(item => ({
+          ...item,
+          id: item.id,
+          productName: item.productName || products.find(p => p.id === item.productId)?.name || "", // Ensure productName is string
+        })) as StockAdjustmentItem[],
         notes: initialStockAdjustment.notes || undefined,
       });
     } else {
@@ -108,7 +112,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         notes: undefined,
       });
     }
-  }, [initialStockAdjustment, form]);
+  }, [initialStockAdjustment, form, products]);
 
   const onSubmit = (values: StockAdjustmentFormValues) => {
     // Explicitly cast values.items to StockAdjustmentItem[]

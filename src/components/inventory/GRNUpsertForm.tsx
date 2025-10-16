@@ -87,7 +87,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
       receivedDate: initialGRN?.receivedDate ? new Date(initialGRN.receivedDate) : startOfDay(new Date()),
       receivingStoreId: initialGRN?.receivingStoreId || "",
       items: initialGRN?.items?.length
-        ? initialGRN.items.map(item => ({ ...item, id: item.id })) as GRNItem[]
+        ? initialGRN.items.map(item => ({ ...item, id: item.id, productName: item.productName || products.find(p => p.id === item.productId)?.name || "" })) as GRNItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", quantityReceived: 1, unitCost: 0.01, totalCost: 0.01 }] as GRNItem[],
       notes: initialGRN?.notes || undefined,
     },
@@ -142,6 +142,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         items: initialGRN.items.map(item => ({
           ...item,
           id: item.id,
+          productName: item.productName || products.find(p => p.id === item.productId)?.name || "", // Ensure productName is string
         })) as GRNItem[],
         notes: initialGRN.notes || undefined,
       });
@@ -156,7 +157,7 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
         notes: undefined,
       });
     }
-  }, [initialGRN, form]);
+  }, [initialGRN, form, products]);
 
   // Effect to automatically populate totalCost (productName is now handled by hook)
   useEffect(() => {

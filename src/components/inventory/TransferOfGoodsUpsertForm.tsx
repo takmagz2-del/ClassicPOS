@@ -83,7 +83,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
       transferFromStoreId: initialTransfer?.transferFromStoreId || "",
       transferToStoreId: initialTransfer?.transferToStoreId || "",
       items: initialTransfer?.items?.length
-        ? initialTransfer.items.map(item => ({ ...item, id: item.id })) as TransferOfGoodsItem[]
+        ? initialTransfer.items.map(item => ({ ...item, id: item.id, productName: item.productName || products.find(p => p.id === item.productId)?.name || "" })) as TransferOfGoodsItem[]
         : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1 }] as TransferOfGoodsItem[],
       notes: initialTransfer?.notes || undefined,
     },
@@ -132,7 +132,11 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           transferDate: new Date(initialTransfer.transferDate),
           transferFromStoreId: initialTransfer.transferFromStoreId,
           transferToStoreId: initialTransfer.transferToStoreId,
-          items: initialTransfer.items.map(item => ({ ...item, id: item.id })) as TransferOfGoodsItem[],
+          items: initialTransfer.items.map(item => ({
+            ...item,
+            id: item.id,
+            productName: item.productName || products.find(p => p.id === item.productId)?.name || "", // Ensure productName is string
+          })) as TransferOfGoodsItem[],
           notes: initialTransfer.notes || undefined,
         });
       } else {
@@ -144,7 +148,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           notes: undefined,
         });
       }
-    }, [initialTransfer, form]);
+    }, [initialTransfer, form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
     // Explicitly cast values.items to TransferOfGoodsItem[]
