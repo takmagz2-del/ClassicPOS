@@ -91,6 +91,12 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
 
   // Reset form with new initialProduct if it changes (e.g., when editing a different product)
   useEffect(() => {
+    // Ensure stockByStore has an entry for every store, defaulting to 0 if not present
+    const initialStockByStore: { [storeId: string]: number } = {};
+    stores.forEach(store => {
+      initialStockByStore[store.id] = initialProduct?.stockByStore?.[store.id] ?? 0;
+    });
+
     form.reset({
       name: initialProduct?.name || "",
       categoryId: initialProduct?.categoryId || "",
@@ -101,9 +107,9 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       availableForSale: initialProduct?.availableForSale ?? true,
       sku: initialProduct?.sku || "",
       imageUrl: initialProduct?.imageUrl || "",
-      stockByStore: initialProduct?.stockByStore || {},
+      stockByStore: initialStockByStore,
     });
-  }, [initialProduct, form]);
+  }, [initialProduct, form, stores]);
 
   const onSubmit = (values: ProductFormValues) => {
     let productToSubmit: Product;
@@ -275,7 +281,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
                           value={field.value ?? ""} // Ensure controlled component
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value === "" ? undefined : parseInt(value, 10));
+                            field.onChange(value === "" ? 0 : parseInt(value, 10)); // Set to 0 if empty
                           }}
                         />
                       </FormControl>
