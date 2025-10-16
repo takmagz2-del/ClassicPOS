@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues } from "react-hook-form";
+import { Control, FieldErrors, FieldValues, FieldError } from "react-hook-form"; // Import FieldError
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
 import { BaseInventoryItem } from "@/types/inventory"; // Import BaseInventoryItem
@@ -36,6 +36,9 @@ const ItemFormList = <TFormValues extends FieldValues, TItem extends BaseInvento
   isFormDisabled = false,
   renderAddButton,
 }: ItemFormListProps<TFormValues, TItem>) => {
+  // Safely access the top-level error message for the 'items' array
+  const itemsArrayError = errors.items as FieldError | undefined;
+
   return (
     <div className="space-y-4">
       {items.map((item, index) => (
@@ -55,9 +58,9 @@ const ItemFormList = <TFormValues extends FieldValues, TItem extends BaseInvento
           </Button>
         </div>
       ))}
-      {errors.items && (
+      {itemsArrayError?.message && ( // Display top-level error for the items array
         <p className="text-sm font-medium text-destructive">
-          {errors.items.message as string}
+          {itemsArrayError.message}
         </p>
       )}
       <div className="flex justify-end">
