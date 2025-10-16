@@ -295,7 +295,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             )}
             {form.formState.errors.stockByStore && form.formState.errors.stockByStore.message && (
               <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.stockByStore.message as string}
+                {form.formState.errors.stockByStore.message}
               </p>
             )}
           </div>
