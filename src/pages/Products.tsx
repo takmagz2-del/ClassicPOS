@@ -21,7 +21,7 @@ import { format } from "date-fns"; // Import format for filename
 const LOW_STOCK_THRESHOLD = 10;
 
 const Products = () => {
-  const { products, addProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, addProduct, updateProduct, deleteProduct, getEffectiveProductStock } = useProducts();
   const { categories } = useCategories();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -63,6 +63,8 @@ const Products = () => {
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter((product) => {
+      const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock for filtering
+
       const matchesSearchTerm =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -72,11 +74,11 @@ const Products = () => {
 
       let matchesStockStatus = true;
       if (stockStatusFilter === "in-stock") {
-        matchesStockStatus = product.trackStock && product.stock > 0;
+        matchesStockStatus = product.trackStock && effectiveStock > 0;
       } else if (stockStatusFilter === "low-stock") {
-        matchesStockStatus = product.trackStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+        matchesStockStatus = product.trackStock && effectiveStock > 0 && effectiveStock <= LOW_STOCK_THRESHOLD;
       } else if (stockStatusFilter === "out-of-stock") {
-        matchesStockStatus = product.trackStock && product.stock === 0;
+        matchesStockStatus = product.trackStock && effectiveStock === 0;
       } else if (stockStatusFilter === "not-tracked") {
         matchesStockStatus = !product.trackStock;
       }
@@ -89,8 +91,10 @@ const Products = () => {
       let compareValue = 0;
       if (sortKey === "name" || sortKey === "sku") {
         compareValue = a[sortKey].localeCompare(b[sortKey]);
-      } else if (sortKey === "price" || sortKey === "stock" || sortKey === "cost" || sortKey === "wholesalePrice") {
+      } else if (sortKey === "price" || sortKey === "cost" || sortKey === "wholesalePrice") {
         compareValue = a[sortKey] - b[sortKey];
+      } else if (sortKey === "stock") { // Sort by effective stock
+        compareValue = getEffectiveProductStock(a.id) - getEffectiveProductStock(b.id);
       } else if (sortKey === "categoryId") {
         const categoryA = categories.find(cat => cat.id === a.categoryId)?.name || "";
         const categoryB = categories.find(cat => cat.id === b.categoryId)?.name || "";
@@ -101,7 +105,7 @@ const Products = () => {
     });
 
     return filtered;
-  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, sortKey, sortOrder, categories]);
+  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, sortKey, sortOrder, categories, getEffectiveProductStock]);
 
   const handleSort = (key: keyof Product) => {
     if (sortKey === key) {

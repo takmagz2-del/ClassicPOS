@@ -28,13 +28,14 @@ const ProductSelectField = <TFormValues extends FieldValues>({
   isFormDisabled,
   filterByStoreId,
 }: ProductSelectFieldProps<TFormValues>) => {
-  const { products } = useProducts();
+  const { products, getEffectiveProductStock } = useProducts();
 
   const getAvailableProducts = () => {
-    // In a real multi-store app, you'd filter products based on stock in `filterByStoreId`
-    // For this mock, we'll just filter by trackStock and stock > 0 globally if a store ID is provided.
     if (filterByStoreId) {
-      return products.filter(p => p.trackStock && p.stock > 0);
+      return products.filter(p => {
+        const stockInStore = getEffectiveProductStock(p.id, filterByStoreId);
+        return p.trackStock && stockInStore > 0;
+      });
     }
     return products;
   };
@@ -56,7 +57,7 @@ const ProductSelectField = <TFormValues extends FieldValues>({
               {getAvailableProducts().map((product) => (
                 <SelectItem key={product.id} value={product.id}>
                   {product.name} (SKU: {product.sku})
-                  {filterByStoreId && product.trackStock && ` - Stock: ${product.stock}`}
+                  {filterByStoreId && product.trackStock && ` - Stock: ${getEffectiveProductStock(product.id, filterByStoreId)}`}
                 </SelectItem>
               ))}
             </SelectContent>

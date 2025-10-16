@@ -39,7 +39,7 @@ import HeldSalesList from "@/components/sales/HeldSalesList";
 
 const Sales = () => {
   const { salesHistory, addSale, holdSale, resumeSale } = useSales();
-  const { products, updateProductStock } = useProducts();
+  const { products, updateProductStock, getEffectiveProductStock } = useProducts();
   const { customers, updateCustomerLoyaltyPoints } = useCustomers();
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
@@ -76,13 +76,14 @@ const Sales = () => {
 
   const handleAddProductToCart = (product: Product, quantity: number) => {
     const existingItemIndex = cartItems.findIndex((item) => item.productId === product.id);
+    const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
 
     if (existingItemIndex > -1) {
       const updatedCart = cartItems.map((item, index) => {
         if (index === existingItemIndex) {
           const newQuantity = item.quantity + quantity;
-          if (product.trackStock && newQuantity > product.stock) {
-            toast.error(`Cannot add more than available stock for ${product.name}. Available: ${product.stock}`);
+          if (product.trackStock && newQuantity > effectiveStock) {
+            toast.error(`Cannot add more than available stock for ${product.name}. Available: ${effectiveStock}`);
             return item;
           }
           return { ...item, quantity: newQuantity };
@@ -91,8 +92,8 @@ const Sales = () => {
       });
       setCartItems(updatedCart);
     } else {
-      if (product.trackStock && quantity > product.stock) {
-        toast.error(`Cannot add more than available stock for ${product.name}. Available: ${product.stock}`);
+      if (product.trackStock && quantity > effectiveStock) {
+        toast.error(`Cannot add more than available stock for ${product.name}. Available: ${effectiveStock}`);
         return;
       }
       setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, cost: product.cost, quantity }]);
@@ -107,12 +108,14 @@ const Sales = () => {
     const productInStock = products.find(p => p.id === productId);
     if (!productInStock) return;
 
+    const effectiveStock = getEffectiveProductStock(productInStock.id); // Use effective stock
+
     if (newQuantity <= 0) {
       handleRemoveCartItem(productId);
       return;
     }
-    if (productInStock.trackStock && newQuantity > productInStock.stock) {
-      toast.error(`Cannot set quantity higher than available stock for ${productInStock.name}. Available: ${productInStock.stock}`);
+    if (productInStock.trackStock && newQuantity > effectiveStock) {
+      toast.error(`Cannot set quantity higher than available stock for ${productInStock.name}. Available: ${effectiveStock}`);
       return;
     }
 
@@ -226,13 +229,14 @@ const Sales = () => {
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
       if (product && product.trackStock) {
+        const currentStock = getEffectiveProductStock(product.id); // Use effective stock
         updateProductStock(
           product.id,
-          product.stock - soldItem.quantity,
+          currentStock - soldItem.quantity,
           InventoryHistoryType.SALE,
           newSale.id,
           `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`,
-          undefined,
+          undefined, // storeId is not specified for sales terminal, assumes global or default store
           currentUser?.id,
           soldItem.name
         );
@@ -274,7 +278,8 @@ const Sales = () => {
         toast.error(`${product.name} is not available for sale.`);
         return;
       }
-      if (product.trackStock && product.stock <= 0) {
+      const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+      if (product.trackStock && effectiveStock <= 0) {
         toast.error(`${product.name} is out of stock.`);
         return;
       }

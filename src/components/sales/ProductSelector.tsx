@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import ImagePreviewDialog from "@/components/common/ImagePreviewDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useProducts } from "@/context/ProductContext"; // Import useProducts
 
 interface ProductSelectorProps {
   products: Product[];
@@ -32,6 +33,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const { currentCurrency } = useCurrency();
   const { categories } = useCategories();
+  const { getEffectiveProductStock } = useProducts(); // Use getEffectiveProductStock from context
   
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState("");
@@ -53,7 +55,8 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     );
 
     if (matchingProduct) {
-      if (matchingProduct.trackStock && matchingProduct.stock <= 0) {
+      const effectiveStock = getEffectiveProductStock(matchingProduct.id); // Use effective stock
+      if (matchingProduct.trackStock && effectiveStock <= 0) {
         toast.error(`${matchingProduct.name} is out of stock.`);
       } else {
         onAddProductToCart(matchingProduct, 1);
@@ -69,6 +72,8 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
         return false;
       }
 
+      const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+
       const matchesSearchTerm =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -78,11 +83,11 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
 
       let matchesStockStatus = true;
       if (stockStatusFilter === "in-stock") {
-        matchesStockStatus = product.trackStock && product.stock > 0;
+        matchesStockStatus = product.trackStock && effectiveStock > 0;
       } else if (stockStatusFilter === "low-stock") {
-        matchesStockStatus = product.trackStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+        matchesStockStatus = product.trackStock && effectiveStock > 0 && effectiveStock <= LOW_STOCK_THRESHOLD;
       } else if (stockStatusFilter === "out-of-stock") {
-        matchesStockStatus = product.trackStock && product.stock === 0;
+        matchesStockStatus = product.trackStock && effectiveStock === 0;
       } else if (stockStatusFilter === "not-tracked") { // New filter option for non-tracked stock
         matchesStockStatus = !product.trackStock;
       }
@@ -92,7 +97,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
 
       return matchesSearchTerm && matchesCategory && matchesStockStatus && matchesPriceRange;
     });
-  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, priceRange]);
+  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, priceRange, getEffectiveProductStock]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -181,15 +186,17 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
         <ScrollArea className="flex-1 pr-4 -mr-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
+              filteredProducts.map((product) => {
+                const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+                return (
                 <Card
                   key={product.id}
                   className={cn(
                     "cursor-pointer hover:shadow-lg transition-shadow overflow-hidden",
-                    product.trackStock && product.stock <= 0 && "opacity-50 cursor-not-allowed"
+                    product.trackStock && effectiveStock <= 0 && "opacity-50 cursor-not-allowed"
                   )}
                   onClick={() => {
-                    if (product.trackStock && product.stock <= 0) {
+                    if (product.trackStock && effectiveStock <= 0) {
                       toast.error(`${product.name} is out of stock.`);
                     } else {
                       onAddProductToCart(product, 1);
@@ -219,12 +226,12 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                       <p className="text-[0.65rem] text-muted-foreground">
                         Stock: {" "}
                         {product.trackStock ? (
-                          product.stock === 0 ? (
+                          effectiveStock === 0 ? (
                             <Badge variant="destructive">Out of Stock</Badge>
-                          ) : product.stock <= LOW_STOCK_THRESHOLD ? (
-                            <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({product.stock})</Badge>
+                          ) : effectiveStock <= LOW_STOCK_THRESHOLD ? (
+                            <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({effectiveStock})</Badge>
                           ) : (
-                            <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({product.stock})</Badge>
+                            <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({effectiveStock})</Badge>
                           )
                         ) : (
                           <Badge variant="secondary">N/A</Badge>
@@ -233,10 +240,8 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            ) : (
-              <p className="col-span-full text-center text-muted-foreground py-10">No products match the current filters.</p>
-            )}
+              );
+            })}
           </div>
         </ScrollArea>
       </CardContent>

@@ -65,7 +65,7 @@ interface TransferOfGoodsUpsertFormProps {
 const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose }: TransferOfGoodsUpsertFormProps) => {
   const isEditMode = !!initialTransfer;
   const { stores } = useStores();
-  const { products } = useProducts();
+  const { products, getEffectiveProductStock } = useProducts(); // Use getEffectiveProductStock
 
   const form = useForm<TransferOfGoodsFormValues>({
     resolver: zodResolver(formSchema),
@@ -89,20 +89,23 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         if (items && transferFromStoreId) {
           items.forEach((item, index) => {
             const product = products.find(p => p.id === item.productId);
-            if (product && product.trackStock && item.quantity > product.stock) {
-              form.setError(`items.${index}.quantity`, {
-                type: "manual",
-                message: `Quantity exceeds available stock (${product.stock}).`,
-              });
-            } else {
-              form.clearErrors(`items.${index}.quantity`);
+            if (product && product.trackStock) {
+              const stockInFromStore = getEffectiveProductStock(product.id, transferFromStoreId);
+              if (item.quantity > stockInFromStore) {
+                form.setError(`items.${index}.quantity`, {
+                  type: "manual",
+                  message: `Quantity exceeds available stock (${stockInFromStore}) in ${stores.find(s => s.id === transferFromStoreId)?.name || "selected store"}.`,
+                });
+              } else {
+                form.clearErrors(`items.${index}.quantity`);
+              }
             }
           });
         }
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, products]);
+  }, [form, products, stores, getEffectiveProductStock]);
 
 
   useEffect(() => {

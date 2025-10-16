@@ -83,8 +83,15 @@ const Dashboard = () => {
       setSalesTodayChange("No sales yesterday or today");
     }
 
-    const stock = products.reduce((sum, product) => sum + product.stock, 0);
-    setProductsInStock(stock);
+    // Calculate total products in stock, considering stockByStore
+    const totalProductsInStock = products.reduce((sum, product) => {
+      if (product.stockByStore) {
+        return sum + Object.values(product.stockByStore).reduce((storeSum, qty) => storeSum + qty, 0);
+      }
+      return sum + product.stock;
+    }, 0);
+    setProductsInStock(totalProductsInStock);
+
     setActiveCustomersCount(customers.length);
 
     const thirtyDaysAgo = subDays(now, 29);

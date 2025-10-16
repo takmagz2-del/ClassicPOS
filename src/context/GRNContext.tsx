@@ -25,7 +25,7 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
   const { suppliers } = useSuppliers();
   const { stores } = useStores();
   const { user } = useAuth();
-  const { updateProductStock, products } = useProducts(); // Destructure products here
+  const { updateProductStock, products, getEffectiveProductStock } = useProducts(); // Destructure products and getEffectiveProductStock
   const { addHistoryEntry } = useInventoryHistory();
   const { updatePurchaseOrder, getPurchaseOrderById } = usePurchaseOrders();
 
@@ -84,20 +84,17 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
         if (grn.id === grnId && grn.status === "pending") {
           // Update stock for each item
           grn.items.forEach(item => {
-            // Use the refactored updateProductStock
-            const product = products.find(p => p.id === item.productId);
-            if (product) {
-              updateProductStock(
-                item.productId,
-                product.stock + item.quantityReceived,
-                InventoryHistoryType.GRN,
-                grn.id,
-                `Received ${item.quantityReceived}x ${item.productName} from ${grn.supplierName}`,
-                grn.receivingStoreId,
-                user?.id,
-                item.productName // Pass product name
-              );
-            }
+            const currentStockInStore = getEffectiveProductStock(item.productId, grn.receivingStoreId);
+            updateProductStock(
+              item.productId,
+              currentStockInStore + item.quantityReceived, // New stock is current + received
+              InventoryHistoryType.GRN,
+              grn.id,
+              `Received ${item.quantityReceived}x ${item.productName} from ${grn.supplierName}`,
+              grn.receivingStoreId,
+              user?.id,
+              item.productName
+            );
           });
 
           // If linked to a PO, update PO status (simplified to 'completed')
@@ -121,7 +118,7 @@ export const GRNProvider = ({ children }: { children: ReactNode }) => {
       });
       return updatedGRNs;
     });
-  }, [updateProductStock, user, getPurchaseOrderById, updatePurchaseOrder, products]); // products is now correctly in scope
+  }, [updateProductStock, user, getPurchaseOrderById, updatePurchaseOrder, getEffectiveProductStock]); // products is now correctly in scope
 
   const deleteGRN = useCallback((grnId: string) => {
     setGRNs((prev) => prev.filter((grn) => grn.id !== grnId));

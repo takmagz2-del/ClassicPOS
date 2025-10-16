@@ -22,7 +22,7 @@ const StockAdjustmentContext = createContext<StockAdjustmentContextType | undefi
 export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) => {
   const { stores } = useStores();
   const { user } = useAuth();
-  const { updateProductStock, products } = useProducts(); // Use the refactored updateProductStock
+  const { updateProductStock, products, getEffectiveProductStock } = useProducts(); // Use the refactored updateProductStock and getEffectiveProductStock
   const { addHistoryEntry } = useInventoryHistory();
 
   const [stockAdjustments, setStockAdjustments] = useState<StockAdjustment[]>(() => {
@@ -58,28 +58,27 @@ export const StockAdjustmentProvider = ({ children }: { children: ReactNode }) =
 
     // Apply stock changes immediately upon creation (assuming creation implies approval for now)
     newAdjustment.items.forEach(item => {
-      const product = products.find(p => p.id === item.productId);
-      if (product) {
-        const newStock = item.adjustmentType === AdjustmentType.Increase
-          ? product.stock + item.quantity
-          : product.stock - item.quantity;
+      const currentStockInStore = getEffectiveProductStock(item.productId, newAdjustment.storeId);
+      
+      const newStock = item.adjustmentType === AdjustmentType.Increase
+        ? currentStockInStore + item.quantity
+        : currentStockInStore - item.quantity;
 
-        updateProductStock(
-          item.productId,
-          newStock,
-          item.adjustmentType === AdjustmentType.Increase ? InventoryHistoryType.SA_INCREASE : InventoryHistoryType.SA_DECREASE,
-          newAdjustment.id,
-          `Stock adjusted: ${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} by ${item.quantity} due to: ${item.reason}`,
-          newAdjustment.storeId,
-          user?.id,
-          item.productName // Pass product name
-        );
-      }
+      updateProductStock(
+        item.productId,
+        newStock,
+        item.adjustmentType === AdjustmentType.Increase ? InventoryHistoryType.SA_INCREASE : InventoryHistoryType.SA_DECREASE,
+        newAdjustment.id,
+        `Stock adjusted: ${item.adjustmentType === AdjustmentType.Increase ? "Increased" : "Decreased"} by ${item.quantity} due to: ${item.reason}`,
+        newAdjustment.storeId,
+        user?.id,
+        item.productName
+      );
     });
 
     setStockAdjustments((prev) => [...prev, newAdjustment]);
     toast.success(`Stock Adjustment created and applied.`);
-  }, [stores, user, products, updateProductStock]);
+  }, [stores, user, getEffectiveProductStock, updateProductStock]);
 
   // For simplicity, approveStockAdjustment will just log a message if called,
   // as stock changes are applied on creation in this mock.
