@@ -22,11 +22,12 @@ import { useProducts } from "@/context/ProductContext"; // Import useProducts
 interface ProductSelectorProps {
   products: Product[];
   onAddProductToCart: (product: Product, quantity: number) => void;
+  currentStoreId: string; // New prop
 }
 
 const LOW_STOCK_THRESHOLD = 10;
 
-const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps) => {
+const ProductSelector = ({ products, onAddProductToCart, currentStoreId }: ProductSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
   const [stockStatusFilter, setStockStatusFilter] = useState<string>("all");
@@ -55,7 +56,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
     );
 
     if (matchingProduct) {
-      const effectiveStock = getEffectiveProductStock(matchingProduct.id); // Use effective stock
+      const effectiveStock = getEffectiveProductStock(matchingProduct.id, currentStoreId); // Use effective stock for current store
       if (matchingProduct.trackStock && effectiveStock <= 0) {
         toast.error(`${matchingProduct.name} is out of stock.`);
       } else {
@@ -72,7 +73,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
         return false;
       }
 
-      const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+      const effectiveStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
 
       const matchesSearchTerm =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,7 +98,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
 
       return matchesSearchTerm && matchesCategory && matchesStockStatus && matchesPriceRange;
     });
-  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, priceRange, getEffectiveProductStock]);
+  }, [products, searchTerm, selectedCategoryId, stockStatusFilter, priceRange, getEffectiveProductStock, currentStoreId]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -124,11 +125,12 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
               value={searchTerm}
               onChange={handleSearchChange}
               className="pl-8"
+              disabled={!currentStoreId}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId} disabled={!currentStoreId}>
               <SelectTrigger>
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -142,7 +144,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
               </SelectContent>
             </Select>
 
-            <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
+            <Select value={stockStatusFilter} onValueChange={setStockStatusFilter} disabled={!currentStoreId}>
               <SelectTrigger>
                 <SelectValue placeholder="Stock Status" />
               </SelectTrigger>
@@ -159,6 +161,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
               onClick={resetFilters}
               variant="outline"
               className="w-full"
+              disabled={!currentStoreId}
             >
               Reset Filters
             </Button>
@@ -178,6 +181,7 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
               }}
               minStepsBetweenThumbs={1}
               className="py-2"
+              disabled={!currentStoreId}
             />
           </div>
         </div>
@@ -187,15 +191,20 @@ const ProductSelector = ({ products, onAddProductToCart }: ProductSelectorProps)
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => {
-                const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+                const effectiveStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
                 return (
                 <Card
                   key={product.id}
                   className={cn(
                     "cursor-pointer hover:shadow-lg transition-shadow overflow-hidden",
-                    product.trackStock && effectiveStock <= 0 && "opacity-50 cursor-not-allowed"
+                    product.trackStock && effectiveStock <= 0 && "opacity-50 cursor-not-allowed",
+                    !currentStoreId && "opacity-50 cursor-not-allowed"
                   )}
                   onClick={() => {
+                    if (!currentStoreId) {
+                      toast.error("Please select a store first.");
+                      return;
+                    }
                     if (product.trackStock && effectiveStock <= 0) {
                       toast.error(`${product.name} is out of stock.`);
                     } else {

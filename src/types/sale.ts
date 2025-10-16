@@ -29,4 +29,6 @@ export interface Sale {
   employeeName?: string; // New: Name of the employee who made the sale
   heldByEmployeeId?: string; // New: ID of the employee who put the sale on hold
   heldByEmployeeName?: string; // New: Name of the employee who put the sale on hold
+  storeId?: string; // New: ID of the store where the sale was made
+  storeName?: string; // New: Name of the store where the sale was made
 }

@@ -25,6 +25,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { formatCurrency } from "@/lib/utils";
 import { InventoryHistoryType } from "@/types/inventory";
 import ExportSalesDataButton from "@/components/sales/ExportSalesDataButton"; // New import
+import { useStores } from "@/context/StoreContext"; // New import
 
 const SalesHistory = () => {
   const { salesHistory, refundSale, settleSale } = useSales();
@@ -32,6 +33,7 @@ const SalesHistory = () => {
   const { updateProductStock, products } = useProducts();
   const { currentCurrency } = useCurrency();
   const { users } = useAuth();
+  const { stores } = useStores(); // Get stores for filter
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
@@ -39,6 +41,7 @@ const SalesHistory = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [customerFilter, setCustomerFilter] = useState<string>("all");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
+  const [storeFilter, setStoreFilter] = useState<string>("all"); // New state for store filter
   const [sortKey, setSortKey] = useState<keyof Sale>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -99,6 +102,10 @@ const SalesHistory = () => {
       filteredSales = filteredSales.filter((sale) => sale.employeeId === employeeFilter || sale.heldByEmployeeId === employeeFilter);
     }
 
+    if (storeFilter !== "all") { // Apply store filter
+      filteredSales = filteredSales.filter((sale) => sale.storeId === storeFilter);
+    }
+
     const sortedSales = [...filteredSales].sort((a, b) => {
       let compareValue = 0;
       if (sortKey === "date") {
@@ -110,7 +117,7 @@ const SalesHistory = () => {
     });
 
     return sortedSales;
-  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, customerFilter, employeeFilter, sortKey, sortOrder]);
+  }, [salesHistory, searchTerm, dateRange, statusFilter, typeFilter, customerFilter, employeeFilter, storeFilter, sortKey, sortOrder]);
 
   const handleViewReceipt = (sale: Sale) => {
     setSelectedSaleForReceipt(sale);
@@ -152,6 +159,8 @@ const SalesHistory = () => {
       taxRateApplied: selectedSaleForRefund.taxRateApplied,
       employeeId: selectedSaleForRefund.employeeId,
       employeeName: selectedSaleForRefund.employeeName,
+      storeId: selectedSaleForRefund.storeId, // Include storeId
+      storeName: selectedSaleForRefund.storeName, // Include storeName
     };
 
     refundSale(newRefundTransaction);
@@ -163,7 +172,7 @@ const SalesHistory = () => {
         InventoryHistoryType.REFUND,
         newRefundTransaction.id,
         `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`,
-        undefined,
+        selectedSaleForRefund.storeId, // Pass storeId for refund
         undefined,
         item.name
       );
@@ -290,6 +299,20 @@ const SalesHistory = () => {
                 {users.map((employee) => (
                   <SelectItem key={employee.id} value={employee.id}>
                     {employee.email} ({employee.role})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={storeFilter} onValueChange={setStoreFilter}> {/* New Store Filter */}
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Store" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stores</SelectItem>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={store.id}>
+                    {store.name}
                   </SelectItem>
                 ))}
               </SelectContent>

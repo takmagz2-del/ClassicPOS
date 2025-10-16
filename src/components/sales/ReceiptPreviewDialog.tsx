@@ -94,6 +94,12 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
             <span>Sale ID:</span>
             <span>{sale.id.substring(0, 8)}</span>
           </div>
+          {sale.storeName && (
+            <div className="flex justify-between text-xs mb-1">
+              <span>Store:</span>
+              <span>{sale.storeName}</span>
+            </div>
+          )}
           {employeeWhoMadeSale && (
             <div className="flex justify-between text-xs mb-1">
               <span>Processed By:</span>

@@ -36,6 +36,8 @@ import BarcodeScannerDialog from "@/components/sales/BarcodeScannerDialog"; // C
 import { useAuth } from "@/components/auth/AuthContext";
 import { InventoryHistoryType } from "@/types/inventory";
 import HeldSalesList from "@/components/sales/HeldSalesList";
+import StoreSelector from "@/components/common/StoreSelector"; // New import
+import { useStores } from "@/context/StoreContext"; // New import
 
 const Sales = () => {
   const { salesHistory, addSale, holdSale, resumeSale } = useSales();
@@ -44,6 +46,7 @@ const Sales = () => {
   const { currentCurrency } = useCurrency();
   const { defaultTaxRate } = useTax();
   const { user: currentUser } = useAuth();
+  const { stores } = useStores(); // Get stores for the selector
   const isMobile = useIsMobile();
 
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
@@ -59,8 +62,10 @@ const Sales = () => {
   const [showReprintButton, setShowReprintButton] = useState<boolean>(false);
   const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false);
   const [currentSaleId, setCurrentSaleId] = useState<string>(crypto.randomUUID());
+  const [currentStoreId, setCurrentStoreId] = useState<string>(stores.length > 0 ? stores[0].id : ""); // Default to first store
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+  const currentStore = stores.find(s => s.id === currentStoreId);
 
   const calculateSubtotal = (items: SaleItem[]) => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -73,17 +78,31 @@ const Sales = () => {
   const currentTotalBeforeGiftCard = subtotalAfterDiscount + currentTax;
   const currentFinalTotal = Math.max(0, currentTotalBeforeGiftCard - appliedGiftCardAmount);
 
+  // Handle store selection change
+  const handleSelectStore = (storeId: string) => {
+    setCurrentStoreId(storeId);
+    // Optionally clear cart or warn user if changing store mid-sale
+    if (cartItems.length > 0) {
+      toast.info("Store changed. Cart has been cleared to prevent stock discrepancies.");
+      handleClearCart();
+    }
+  };
 
   const handleAddProductToCart = (product: Product, quantity: number) => {
+    if (!currentStoreId) {
+      toast.error("Please select a store before adding products.");
+      return;
+    }
+
     const existingItemIndex = cartItems.findIndex((item) => item.productId === product.id);
-    const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+    const effectiveStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
 
     if (existingItemIndex > -1) {
       const updatedCart = cartItems.map((item, index) => {
         if (index === existingItemIndex) {
           const newQuantity = item.quantity + quantity;
           if (product.trackStock && newQuantity > effectiveStock) {
-            toast.error(`Cannot add more than available stock for ${product.name}. Available: ${effectiveStock}`);
+            toast.error(`Cannot add more than available stock for ${product.name} in ${currentStore?.name || 'this store'}. Available: ${effectiveStock}`);
             return item;
           }
           return { ...item, quantity: newQuantity };
@@ -93,7 +112,7 @@ const Sales = () => {
       setCartItems(updatedCart);
     } else {
       if (product.trackStock && quantity > effectiveStock) {
-        toast.error(`Cannot add more than available stock for ${product.name}. Available: ${effectiveStock}`);
+        toast.error(`Cannot add more than available stock for ${product.name} in ${currentStore?.name || 'this store'}. Available: ${effectiveStock}`);
         return;
       }
       setCartItems((prev) => [...prev, { productId: product.id, name: product.name, price: product.price, cost: product.cost, quantity }]);
@@ -105,17 +124,21 @@ const Sales = () => {
   };
 
   const handleUpdateCartItemQuantity = (productId: string, newQuantity: number) => {
+    if (!currentStoreId) {
+      toast.error("No store selected.");
+      return;
+    }
     const productInStock = products.find(p => p.id === productId);
     if (!productInStock) return;
 
-    const effectiveStock = getEffectiveProductStock(productInStock.id); // Use effective stock
+    const effectiveStock = getEffectiveProductStock(productInStock.id, currentStoreId); // Use effective stock for current store
 
     if (newQuantity <= 0) {
       handleRemoveCartItem(productId);
       return;
     }
     if (productInStock.trackStock && newQuantity > effectiveStock) {
-      toast.error(`Cannot set quantity higher than available stock for ${productInStock.name}. Available: ${effectiveStock}`);
+      toast.error(`Cannot set quantity higher than available stock for ${productInStock.name} in ${currentStore?.name || 'this store'}. Available: ${effectiveStock}`);
       return;
     }
 
@@ -177,6 +200,10 @@ const Sales = () => {
       toast.error("Cart is empty. Add items before checking out.");
       return;
     }
+    if (!currentStoreId || !currentStore) {
+      toast.error("No store selected for this sale.");
+      return;
+    }
 
     if (currentFinalTotal < 0) {
       toast.error("Gift card amount exceeds total. Please adjust.");
@@ -210,6 +237,8 @@ const Sales = () => {
       employeeName: currentUser?.email,
       heldByEmployeeId: undefined, // Clear held status on finalization
       heldByEmployeeName: undefined,
+      storeId: currentStoreId, // Assign current store ID
+      storeName: currentStore.name, // Assign current store name
     };
 
     addSale(newSale);
@@ -229,14 +258,14 @@ const Sales = () => {
     cartItems.forEach(soldItem => {
       const product = products.find(p => p.id === soldItem.productId);
       if (product && product.trackStock) {
-        const currentStock = getEffectiveProductStock(product.id); // Use effective stock
+        const currentStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
         updateProductStock(
           product.id,
           currentStock - soldItem.quantity,
           InventoryHistoryType.SALE,
           newSale.id,
-          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)}`,
-          undefined, // storeId is not specified for sales terminal, assumes global or default store
+          `Sold ${soldItem.quantity}x ${soldItem.name} in Sale ID: ${newSale.id.substring(0, 8)} at ${currentStore.name}`,
+          currentStoreId, // Pass storeId
           currentUser?.id,
           soldItem.name
         );
@@ -272,15 +301,19 @@ const Sales = () => {
   };
 
   const handleBarcodeScanSuccess = (decodedText: string) => {
+    if (!currentStoreId) {
+      toast.error("Please select a store before scanning products.");
+      return;
+    }
     const product = products.find(p => p.sku === decodedText);
     if (product) {
       if (!product.availableForSale) {
         toast.error(`${product.name} is not available for sale.`);
         return;
       }
-      const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock
+      const effectiveStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
       if (product.trackStock && effectiveStock <= 0) {
-        toast.error(`${product.name} is out of stock.`);
+        toast.error(`${product.name} is out of stock in ${currentStore?.name || 'this store'}.`);
         return;
       }
       handleAddProductToCart(product, 1);
@@ -292,6 +325,10 @@ const Sales = () => {
   const handleHoldSale = () => {
     if (cartItems.length === 0) {
       toast.error("Cannot hold an empty cart.");
+      return;
+    }
+    if (!currentStoreId || !currentStore) {
+      toast.error("No store selected for this sale.");
       return;
     }
 
@@ -317,6 +354,8 @@ const Sales = () => {
       employeeName: currentUser?.email,
       heldByEmployeeId: currentUser?.id,
       heldByEmployeeName: currentUser?.email,
+      storeId: currentStoreId, // Assign current store ID
+      storeName: currentStore.name, // Assign current store name
     };
 
     holdSale(saleToHold);
@@ -329,6 +368,13 @@ const Sales = () => {
 
     // Set current sale ID to the resumed sale's ID
     setCurrentSaleId(sale.id);
+
+    // Restore current store from the resumed sale
+    if (sale.storeId) {
+      setCurrentStoreId(sale.storeId);
+    } else if (stores.length > 0) {
+      setCurrentStoreId(stores[0].id); // Fallback to first store if not recorded
+    }
 
     // Populate cart and other states with resumed sale data
     setCartItems(sale.items);
@@ -345,10 +391,11 @@ const Sales = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">New Sale</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleHoldSale} disabled={cartItems.length === 0}>
+          <StoreSelector currentStoreId={currentStoreId} onSelectStore={handleSelectStore} /> {/* Store Selector */}
+          <Button variant="outline" onClick={handleHoldSale} disabled={cartItems.length === 0 || !currentStoreId}>
             <Hand className="mr-2 h-4 w-4" /> Hold Sale
           </Button>
-          <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
+          <Button variant="outline" onClick={() => setIsScannerOpen(true)} disabled={!currentStoreId}>
             <Scan className="mr-2 h-4 w-4" /> Scan Barcode
           </Button>
           {showReprintButton && lastSale && (
@@ -367,7 +414,7 @@ const Sales = () => {
             selectedCustomerId={selectedCustomerId}
             onSelectCustomer={handleSelectCustomer}
           />
-          <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} />
+          <ProductSelector products={products} onAddProductToCart={handleAddProductToCart} currentStoreId={currentStoreId} />
         </div>
 
         {/* Right Panel (Desktop/Tablet) */}

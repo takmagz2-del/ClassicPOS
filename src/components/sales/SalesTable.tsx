@@ -54,8 +54,9 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
             <TableHead>Items</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead className="text-center">Payment Method</TableHead>
-            <TableHead>Employee</TableHead> {/* New TableHead */}
-            <TableHead>Held By</TableHead> {/* New TableHead */}
+            <TableHead>Store</TableHead> {/* New TableHead */}
+            <TableHead>Employee</TableHead>
+            <TableHead>Held By</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-center">Type</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -76,8 +77,9 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
                 </TableCell>
                 <TableCell className="text-right font-semibold">{formatCurrency(sale.total, currentCurrency)}</TableCell>
                 <TableCell className="text-center capitalize">{sale.paymentMethodId ? getPaymentMethodName(sale.paymentMethodId) : "N/A"}</TableCell>
-                <TableCell>{sale.employeeName || "N/A"}</TableCell> {/* Display employeeName */}
-                <TableCell>{sale.heldByEmployeeName || "N/A"}</TableCell> {/* Display heldByEmployeeName */}
+                <TableCell>{sale.storeName || "N/A"}</TableCell> {/* Display storeName */}
+                <TableCell>{sale.employeeName || "N/A"}</TableCell>
+                <TableCell>{sale.heldByEmployeeName || "N/A"}</TableCell>
                 <TableCell className="text-center capitalize">
                   <Badge variant={getStatusBadgeVariant(sale.status)}>{sale.status}</Badge>
                 </TableCell>
@@ -108,7 +110,7 @@ const SalesTable = ({ sales, onViewReceipt, onRefundSale, onSettleCreditSale }: 
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={10} className="h-24 text-center"> {/* Updated colspan */}
+              <TableCell colSpan={11} className="h-24 text-center"> {/* Updated colspan */}
                 No sales recorded yet.
               </TableCell>
             </TableRow>
