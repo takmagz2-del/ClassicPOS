@@ -12,7 +12,7 @@ export default defineConfig(() => ({
     dyadComponentTagger(),
     react({
       // Explicitly set the JSX runtime for SWC
-      swc: { // jsxRuntime should be nested under 'swc'
+      swc: {
         jsc: {
           transform: {
             react: {
@@ -21,6 +21,8 @@ export default defineConfig(() => ({
           },
         },
       },
+      // Explicitly include .ts and .tsx files for processing
+      include: "**/*.{ts,tsx}",
     }),
   ],
   resolve: {
