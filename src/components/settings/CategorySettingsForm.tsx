@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCategories } from "@/context/CategoryContext";
 import { Category } from "@/types/category";
-import { toast } "sonner";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Edit, PlusCircle } from "lucide-react";
 import {
