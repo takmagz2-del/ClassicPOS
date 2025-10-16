@@ -29,8 +29,8 @@ const formSchema = z.object({
   businessType: z.string().min(1, { message: "Please select a business type." }).optional().or(z.literal("")),
   country: z.string().min(1, { message: "Please select a country." }).optional().or(z.literal("")),
   phone: z.string().optional().or(z.literal("")),
-  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
-  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
+  vatNumber: z.string().optional().or(z.literal("")),
+  tinNumber: z.string().optional().or(z.literal("")),
 }).superRefine((data, ctx) => {
   if (data.newPassword && data.newPassword !== data.confirmNewPassword) {
     ctx.addIssue({
@@ -65,8 +65,8 @@ const UserProfileForm = () => {
       businessType: user?.businessType || undefined,
       country: user?.country || undefined,
       phone: user?.phone || undefined,
-      vatNumber: user?.vatNumber || undefined, // Default for new field
-      tinNumber: user?.tinNumber || undefined, // Default for new field
+      vatNumber: user?.vatNumber || undefined,
+      tinNumber: user?.tinNumber || undefined,
     },
   });
 
@@ -81,8 +81,8 @@ const UserProfileForm = () => {
         businessType: user.businessType || undefined,
         country: user.country || undefined,
         phone: user.phone || undefined,
-        vatNumber: user.vatNumber || undefined, // Reset new field
-        tinNumber: user.tinNumber || undefined, // Reset new field
+        vatNumber: user.vatNumber || undefined,
+        tinNumber: user.tinNumber || undefined,
       });
     }
   }, [user, form]);
@@ -98,8 +98,8 @@ const UserProfileForm = () => {
       businessType: values.businessType || undefined,
       country: values.country || undefined,
       phone: values.phone || undefined,
-      vatNumber: values.vatNumber || undefined, // New field
-      tinNumber: values.tinNumber || undefined, // New field
+      vatNumber: values.vatNumber || undefined,
+      tinNumber: values.tinNumber || undefined,
     };
 
     const success = await updateUser(
@@ -121,8 +121,8 @@ const UserProfileForm = () => {
         businessType: values.businessType || undefined,
         country: values.country || undefined,
         phone: values.phone || undefined,
-        vatNumber: values.vatNumber || undefined, // Reset new field
-        tinNumber: values.tinNumber || undefined, // Reset new field
+        vatNumber: values.vatNumber || undefined,
+        tinNumber: values.tinNumber || undefined,
       });
     } else {
       // Error message is already handled by AuthContext

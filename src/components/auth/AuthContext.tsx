@@ -70,8 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         businessType: storedUser.businessType,
         country: storedUser.country,
         phone: storedUser.phone,
-        vatNumber: storedUser.vatNumber, // New field
-        tinNumber: storedUser.tinNumber, // New field
+        vatNumber: storedUser.vatNumber,
+        tinNumber: storedUser.tinNumber,
       });
     }
   }, [mockUsers]);
@@ -139,8 +139,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           businessType: userData.businessType,
           country: userData.country,
           phone: userData.phone,
-          vatNumber: userData.vatNumber, // New field
-          tinNumber: userData.tinNumber, // New field
+          vatNumber: userData.vatNumber,
+          tinNumber: userData.tinNumber,
         });
         localStorage.setItem("authToken", "mock-jwt-token");
         localStorage.setItem("userEmail", email);
@@ -186,8 +186,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             businessType,
             country,
             phone,
-            vatNumber, // New field
-            tinNumber, // New field
+            vatNumber,
+            tinNumber,
           },
         }));
         toast.success("Account created successfully! Please log in.");
@@ -388,8 +388,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ...updatedUser,
           email: newEmailKey, // Ensure email is updated
           role: updatedUser.role || existingUser.role, // Ensure role is not undefined
-          vatNumber: updatedUser.vatNumber, // New field
-          tinNumber: updatedUser.tinNumber, // New field
+          vatNumber: updatedUser.vatNumber !== undefined ? updatedUser.vatNumber : existingUser.vatNumber,
+          tinNumber: updatedUser.tinNumber !== undefined ? updatedUser.tinNumber : existingUser.tinNumber,
         };
 
         setMockUsers((prev) => {
@@ -415,8 +415,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             businessType: newUserData.businessType,
             country: newUserData.country,
             phone: newUserData.phone,
-            vatNumber: newUserData.vatNumber, // New field
-            tinNumber: newUserData.tinNumber, // New field
+            vatNumber: newUserData.vatNumber,
+            tinNumber: newUserData.tinNumber,
           });
           // Update localStorage if the logged-in user's email changed
           if (user.email !== newUserData.email) {

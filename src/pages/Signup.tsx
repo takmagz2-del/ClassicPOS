@@ -30,8 +30,8 @@ const formSchema = z.object({
   businessType: z.string().min(1, { message: "Please select a business type." }),
   country: z.string().min(1, { message: "Please select a country." }),
   phone: z.string().optional().or(z.literal("")),
-  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
-  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
+  vatNumber: z.string().optional().or(z.literal("")),
+  tinNumber: z.string().optional().or(z.literal("")),
 }).superRefine((data, ctx) => {
   if (data.password !== data.confirmPassword) {
     ctx.addIssue({
@@ -59,8 +59,8 @@ const Signup = () => {
       businessType: "",
       country: "",
       phone: undefined,
-      vatNumber: undefined, // Default for new field
-      tinNumber: undefined, // Default for new field
+      vatNumber: undefined,
+      tinNumber: undefined,
     },
   });
 
@@ -74,8 +74,8 @@ const Signup = () => {
       values.businessType,
       values.country,
       values.phone || undefined,
-      values.vatNumber || undefined, // Pass new field
-      values.tinNumber || undefined // Pass new field
+      values.vatNumber || undefined,
+      values.tinNumber || undefined
     );
     setIsLoading(false);
 
