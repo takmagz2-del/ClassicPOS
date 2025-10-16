@@ -158,8 +158,12 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
   };
 
   const trackStock = form.watch("trackStock");
-  const stockByStoreError = form.formState.errors.stockByStore; // Get the error object
-  const stockByStoreErrorMessage: string = stockByStoreError?.message || ''; // Use optional chaining and nullish coalescing
+  const stockByStoreError = form.formState.errors.stockByStore;
+  let stockByStoreErrorMessage: string = '';
+
+  if (stockByStoreError && typeof stockByStoreError === 'object' && 'message' in stockByStoreError && typeof stockByStoreError.message === 'string') {
+    stockByStoreErrorMessage = stockByStoreError.message;
+  }
 
   return (
     <Form {...form}>
