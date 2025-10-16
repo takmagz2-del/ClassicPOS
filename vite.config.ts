@@ -12,7 +12,15 @@ export default defineConfig(() => ({
     dyadComponentTagger(),
     react({
       // Explicitly set the JSX runtime for SWC
-      jsxRuntime: 'automatic',
+      swc: { // jsxRuntime should be nested under 'swc'
+        jsc: {
+          transform: {
+            react: {
+              jsxRuntime: 'automatic',
+            },
+          },
+        },
+      },
     }),
   ],
   resolve: {
