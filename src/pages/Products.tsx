@@ -62,7 +62,7 @@ const Products = () => {
   };
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products.filter((product) => {
+    const filtered = products.filter((product) => {
       const effectiveStock = getEffectiveProductStock(product.id); // Use effective stock for filtering
 
       const matchesSearchTerm =

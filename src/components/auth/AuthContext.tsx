@@ -357,7 +357,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const [oldEmailKey, existingUser] = userToUpdateEntry;
-        let newEmailKey = updatedUser.email || oldEmailKey;
+        const newEmailKey = updatedUser.email || oldEmailKey;
 
         // Check if the new email already exists for another user
         if (newEmailKey !== oldEmailKey && mockUsers[newEmailKey] && mockUsers[newEmailKey].id !== userId) {

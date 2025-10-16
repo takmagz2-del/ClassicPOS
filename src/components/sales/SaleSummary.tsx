@@ -20,7 +20,7 @@ const SaleSummary = ({ subtotal, taxRate, giftCardAmountUsed, discountPercentage
 
   const subtotalAfterDiscount = subtotal - discountAmount - loyaltyPointsDiscountAmount; // Apply loyalty points discount here
   const tax = subtotalAfterDiscount * taxRate;
-  let totalBeforeGiftCard = subtotalAfterDiscount + tax;
+  const totalBeforeGiftCard = subtotalAfterDiscount + tax;
 
   const finalTotal = Math.max(0, totalBeforeGiftCard - giftCardAmountUsed);
   const giftCardDisplayAmount = Math.min(giftCardAmountUsed, totalBeforeGiftCard);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { FieldValues, Path, UseFormSetValue, UseFormWatch, UseFormGetValues } from "react-hook-form"; // Added UseFormWatch, UseFormGetValues
+import { FieldValues, Path, PathValue, UseFormSetValue, UseFormWatch, UseFormGetValues } from "react-hook-form";
 import { Product } from "@/types/product";
 
 interface UseProductItemNameUpdaterProps<TFormValues extends FieldValues, TItem extends { productId: string; productName?: string }> {
@@ -42,10 +42,10 @@ export function useProductItemNameUpdater<TFormValues extends FieldValues, TItem
 
               if (product && currentProductName !== product.name) {
                 // Assert the path for setValue
-                setValue(`${itemsFieldName}.${index}.productName` as Path<TFormValues>, product.name as any, { shouldValidate: true });
+                setValue(`${itemsFieldName}.${index}.productName` as Path<TFormValues>, product.name as PathValue<TFormValues, Path<TFormValues>>, { shouldValidate: true });
               } else if (!product && currentProductName !== "") {
                 // Assert the path for setValue
-                setValue(`${itemsFieldName}.${index}.productName` as Path<TFormValues>, "" as any, { shouldValidate: true });
+                setValue(`${itemsFieldName}.${index}.productName` as Path<TFormValues>, "" as PathValue<TFormValues, Path<TFormValues>>, { shouldValidate: true });
               }
             }
           }

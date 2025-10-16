@@ -167,7 +167,7 @@ const Reports = () => {
       salesByPaymentMethod,
       totalLoyaltyPointsRedeemed: loyaltyPointsRedeemed, // Return new value
     };
-  }, [salesHistory, dateRange, typeFilter, employeeFilter, products, getCategoryName, getPaymentMethodName, users]);
+  }, [salesHistory, dateRange, typeFilter, employeeFilter, products, getCategoryName, getPaymentMethodName]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -205,7 +205,7 @@ const Reports = () => {
               mode="range"
               defaultMonth={dateRange.from}
               selected={dateRange as { from: Date; to?: Date }}
-              onSelect={setDateRange as any}
+              onSelect={(range) => setDateRange(range as { from: Date | undefined; to?: Date | undefined })}
               numberOfMonths={2}
             />
           </PopoverContent>

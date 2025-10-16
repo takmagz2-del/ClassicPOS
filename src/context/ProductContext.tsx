@@ -59,7 +59,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         if (p.id === productId) {
           let currentStockForHistory = p.stock; // Default to global stock for history
           let quantityChange = 0;
-          let updatedProduct = { ...p };
+          const updatedProduct = { ...p };
 
           if (storeId && updatedProduct.stockByStore) {
             const currentStoreStock = updatedProduct.stockByStore[storeId] || 0;
@@ -96,7 +96,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         return p;
       })
     );
-  }, [addHistoryEntry, authUser, products]); // Added products to dependency array for getEffectiveProductStock
+  }, [addHistoryEntry, authUser]); // getEffectiveProductStock uses products from closure
 
   const addProduct = useCallback((newProduct: Product) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);

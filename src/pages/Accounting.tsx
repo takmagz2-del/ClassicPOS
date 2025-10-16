@@ -97,7 +97,7 @@ const Accounting = () => {
               mode="range"
               defaultMonth={dateRange.from}
               selected={dateRange as { from: Date; to?: Date }}
-              onSelect={setDateRange as any}
+              onSelect={(range) => setDateRange(range as { from: Date | undefined; to?: Date | undefined })}
               numberOfMonths={2}
             />
           </PopoverContent>

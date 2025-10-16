@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,19 +37,7 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
   // Get the tax rate that was applied to the original sale
   const originalTaxRate = sale.taxRateApplied !== undefined ? sale.taxRateApplied : 0;
 
-  useEffect(() => {
-    if (isOpen) {
-      // Initialize refund quantities to 0 for all items in the sale
-      const initialQuantities: { [productId: string]: number } = {};
-      sale.items.forEach(item => {
-        initialQuantities[item.productId] = 0;
-      });
-      setRefundQuantities(initialQuantities);
-      calculateRefundSummary(initialQuantities);
-    }
-  }, [isOpen, sale.items]);
-
-  const calculateRefundSummary = (quantities: { [productId: string]: number }) => {
+  const calculateRefundSummary = useCallback((quantities: { [productId: string]: number }) => {
     let currentSubtotal = 0;
     sale.items.forEach(item => {
       currentSubtotal += item.price * (quantities[item.productId] || 0);
@@ -66,7 +54,19 @@ const RefundDialog = ({ isOpen, onClose, sale, onRefundConfirm }: RefundDialogPr
     setRefundSubtotal(currentSubtotal);
     setRefundTax(currentTax);
     setRefundTotal(currentTotal);
-  };
+  }, [sale.discountPercentage, sale.items, originalTaxRate]);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Initialize refund quantities to 0 for all items in the sale
+      const initialQuantities: { [productId: string]: number } = {};
+      sale.items.forEach(item => {
+        initialQuantities[item.productId] = 0;
+      });
+      setRefundQuantities(initialQuantities);
+      calculateRefundSummary(initialQuantities);
+    }
+  }, [isOpen, sale.items, calculateRefundSummary]);
 
   const handleQuantityChange = (value: string, productId: string) => {
     const quantity = parseInt(value, 10);

@@ -34,7 +34,7 @@ const LoyaltyPointsInput = ({
     } else if (Number(pointsToRedeem) !== appliedPoints) {
       setPointsToRedeem(String(appliedPoints));
     }
-  }, [appliedPoints]);
+  }, [appliedPoints, pointsToRedeem]);
 
   const calculateEquivalentAmount = (points: number) => {
     return points / pointsToCurrencyRate;

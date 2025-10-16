@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Trash2, Mail, Phone, Home, Award, DollarSign, ShoppingCart, BarChart } from "lucide-react";
 import SalesTable from "@/components/sales/SalesTable";
-import { Sale } from "@/types/sale";
+import { Sale, SaleItem } from "@/types/sale";
 import { Customer } from "@/types/customer";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
 import RefundDialog from "@/components/sales/RefundDialog";
@@ -89,7 +89,7 @@ const CustomerDetail = () => {
     setIsRefundDialogOpen(true);
   };
 
-  const handleConfirmRefund = (refundItems: any[], refundTotal: number) => {
+  const handleConfirmRefund = (refundItems: SaleItem[], refundTotal: number) => {
     if (!selectedSaleForRefund) return;
     const originalTaxRate = selectedSaleForRefund.taxRateApplied || 0;
     const calculatedRefundTax = refundTotal * originalTaxRate;
