@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields"; // Import the new component
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
 
 // Define a schema for the items with required fields, including an ID
 const itemSchema = z.object({
@@ -80,6 +81,15 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
     },
   });
 
+  // Use the new hook for productName auto-population
+  useProductItemNameUpdater({
+    watch: form.watch, // Pass form.watch
+    getValues: form.getValues, // Pass form.getValues
+    setValue: form.setValue,
+    products: products,
+    itemsFieldName: "items",
+  });
+
   // Add custom validation for stock quantity
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
@@ -127,26 +137,6 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
         });
       }
     }, [initialTransfer, form]);
-
-  // Effect to automatically populate productName
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name?.startsWith("items.")) {
-        const items = (value.items || []) as TransferOfGoodsItem[]; // Explicitly cast here
-        if (items) {
-          items.forEach((item, index) => {
-            const product = products.find(p => p.id === item.productId);
-            if (product && item.productName !== product.name) {
-              form.setValue(`items.${index}.productName`, product.name, { shouldValidate: true });
-            } else if (!product && item.productName !== "") {
-              form.setValue(`items.${index}.productName`, "", { shouldValidate: true });
-            }
-          });
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, products]);
 
   const onSubmit = (values: TransferOfGoodsFormValues) => {
     // Explicitly cast values.items to TransferOfGoodsItem[]

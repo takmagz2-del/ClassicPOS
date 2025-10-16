@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
 
 // Define item schema with required fields, including an ID
 const grnItemSchema = z.object({
@@ -88,6 +89,15 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
   const isLinkedToPO = !!selectedPurchaseOrderId && selectedPurchaseOrderId !== "none";
   const isFormDisabled = isEditMode && initialGRN?.status === "approved";
 
+  // Use the new hook for productName auto-population
+  useProductItemNameUpdater({
+    watch: form.watch, // Pass form.watch
+    getValues: form.getValues, // Pass form.getValues
+    setValue: form.setValue,
+    products: products,
+    itemsFieldName: "items",
+  });
+
   useEffect(() => {
     if (selectedPurchaseOrderId && selectedPurchaseOrderId !== "none") {
       const po = getPurchaseOrderById(selectedPurchaseOrderId);
@@ -140,32 +150,29 @@ const GRNUpsertForm = ({ initialGRN, onGRNSubmit, onClose }: GRNUpsertFormProps)
     }
   }, [initialGRN, form]);
 
-  // Effect to automatically populate productName and totalCost
+  // Effect to automatically populate totalCost (productName is now handled by hook)
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name?.startsWith("items.")) {
+      if (name?.startsWith("items.") && (name.endsWith(".quantityReceived") || name.endsWith(".unitCost"))) {
         const items = (value.items || []) as GRNItem[]; // Explicitly cast here
         if (items) {
-          items.forEach((item, index) => {
-            const product = products.find(p => p.id === item.productId);
-            // Update productName
-            if (product && item.productName !== product.name) {
-              form.setValue(`items.${index}.productName`, product.name, { shouldValidate: true });
-            } else if (!product && item.productName !== "") {
-              form.setValue(`items.${index}.productName`, "", { shouldValidate: true });
-            }
+          const indexMatch = name.match(/\.(\d+)\.(quantityReceived|unitCost)$/);
+          if (indexMatch) {
+            const index = parseInt(indexMatch[1], 10);
+            const item = items[index];
 
-            // Update totalCost
-            const calculatedTotalCost = (item.quantityReceived || 0) * (item.unitCost || 0);
-            if (item.totalCost !== calculatedTotalCost) {
-              form.setValue(`items.${index}.totalCost`, calculatedTotalCost, { shouldValidate: true });
+            if (item) {
+              const calculatedTotalCost = (item.quantityReceived || 0) * (item.unitCost || 0);
+              if (item.totalCost !== calculatedTotalCost) {
+                form.setValue(`items.${index}.totalCost`, calculatedTotalCost, { shouldValidate: true });
+              }
             }
-          });
+          }
         }
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, products]);
+  }, [form]);
 
   const onSubmit = (values: GRNFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantityReceived * item.unitCost), 0);

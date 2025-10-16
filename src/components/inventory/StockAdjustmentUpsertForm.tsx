@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
 
 // Define item schema with required fields, including an ID
 const stockAdjustmentItemSchema = z.object({
@@ -74,6 +75,15 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
 
   const isFormDisabled = false;
 
+  // Use the new hook for productName auto-population
+  useProductItemNameUpdater({
+    watch: form.watch, // Pass form.watch
+    getValues: form.getValues, // Pass form.getValues
+    setValue: form.setValue,
+    products: products,
+    itemsFieldName: "items",
+  });
+
   useEffect(() => {
     if (initialStockAdjustment) {
       form.reset({
@@ -91,26 +101,6 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
       });
     }
   }, [initialStockAdjustment, form]);
-
-  // Effect to automatically populate productName
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name?.startsWith("items.")) {
-        const items = (value.items || []) as StockAdjustmentItem[]; // Explicitly cast here
-        if (items) {
-          items.forEach((item, index) => {
-            const product = products.find(p => p.id === item.productId);
-            if (product && item.productName !== product.name) {
-              form.setValue(`items.${index}.productName`, product.name, { shouldValidate: true });
-            } else if (!product && item.productName !== "") {
-              form.setValue(`items.${index}.productName`, "", { shouldValidate: true });
-            }
-          });
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, products]);
 
   const onSubmit = (values: StockAdjustmentFormValues) => {
     // Explicitly cast values.items to StockAdjustmentItem[]
