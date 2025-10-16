@@ -24,6 +24,7 @@ import { usePrinterSettings } from "@/context/PrinterSettingsContext";
 import { useCategories } from "@/context/CategoryContext";
 import { toast } from "sonner"; // Import toast
 import { useAuth } from "@/components/auth/AuthContext"; // New import
+import { useLoyaltySettings } from "@/context/LoyaltySettingsContext"; // New import
 
 interface ReceiptPreviewDialogProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   const { products } = useProducts();
   const { getCategoryName } = useCategories();
   const { users } = useAuth(); // Get all users to find employee names
+  const { pointsToCurrencyRate } = useLoyaltySettings(); // Use centralized rate
 
   const handlePrint = async () => {
     await sendPrintJobToBackend(sale, customer, receiptSettings, printerSettings);
@@ -56,8 +58,7 @@ const ReceiptPreviewDialog = ({ isOpen, onClose, sale, customer }: ReceiptPrevie
   };
 
   // Calculate loyalty points discount amount for display on receipt
-  const loyaltyPointsDiscountAmount = sale.loyaltyPointsUsed ? sale.loyaltyPointsUsed / 100 : 0; // Assuming 100 points = 1 unit of currency
-
+  const loyaltyPointsDiscountAmount = sale.loyaltyPointsUsed ? sale.loyaltyPointsUsed / pointsToCurrencyRate : 0;
   const subtotalAfterAllDiscounts = sale.subtotal - (sale.discountAmount || 0) - loyaltyPointsDiscountAmount;
   const pointsEarnedThisSale = Math.floor(subtotalAfterAllDiscounts);
 

@@ -17,16 +17,13 @@ interface LoyaltyPointsInputProps {
   appliedPoints: number;
 }
 
-// Conversion rate: 100 loyalty points = 1 unit of currency
-const POINTS_TO_CURRENCY_RATE = 100;
-
 const LoyaltyPointsInput = ({
   availablePoints,
   onApplyPoints,
   currentSaleTotal,
   appliedPoints,
 }: LoyaltyPointsInputProps) => {
-  const { isLoyaltyEnabled } = useLoyaltySettings(); // Use the new context
+  const { isLoyaltyEnabled, pointsToCurrencyRate } = useLoyaltySettings(); // Use the new context
   const [pointsToRedeem, setPointsToRedeem] = useState<string>(appliedPoints > 0 ? String(appliedPoints) : "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { currentCurrency } = useCurrency();
@@ -40,7 +37,7 @@ const LoyaltyPointsInput = ({
   }, [appliedPoints]);
 
   const calculateEquivalentAmount = (points: number) => {
-    return points / POINTS_TO_CURRENCY_RATE;
+    return points / pointsToCurrencyRate;
   };
 
   const handleApply = async () => {

@@ -159,7 +159,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
 
   const trackStock = form.watch("trackStock");
   // Directly access the message property with a type assertion
-  const stockByStoreErrorMessage: string = (form.formState.errors.stockByStore as FieldError)?.message || '';
+  const stockByStoreErrorMessage: string = (form.formState.errors.stockByStore as unknown as FieldError)?.message || '';
 
   return (
     <Form {...form}>
@@ -219,7 +219,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
           name="cost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cost Price</FormLabel>
+              <FormLabel>Cost Price</Label>
               <FormControl>
                 <Input type="number" step="0.01" placeholder="e.g., 850.00" {...field} />
               </FormControl>

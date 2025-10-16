@@ -5,35 +5,40 @@ import React, { createContext, useContext, useState, ReactNode, useEffect, useCa
 interface LoyaltySettingsContextType {
   isLoyaltyEnabled: boolean;
   toggleLoyaltyEnabled: (enabled: boolean) => void;
+  pointsToCurrencyRate: number; // New: Conversion rate
 }
 
 const defaultLoyaltySettings = {
   isLoyaltyEnabled: true, // Default to enabled
+  pointsToCurrencyRate: 100, // Default conversion: 100 points = 1 unit of currency
 };
 
 const LoyaltySettingsContext = createContext<LoyaltySettingsContextType | undefined>(undefined);
 
 export const LoyaltySettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoyaltyEnabled, setIsLoyaltyEnabled] = useState<boolean>(() => {
+  const [settings, setSettings] = useState<{ isLoyaltyEnabled: boolean; pointsToCurrencyRate: number }>(() => {
     if (typeof window !== "undefined") {
       const storedSettings = localStorage.getItem("loyaltySettings");
-      return storedSettings ? JSON.parse(storedSettings).isLoyaltyEnabled : defaultLoyaltySettings.isLoyaltyEnabled;
+      return storedSettings ? JSON.parse(storedSettings) : defaultLoyaltySettings;
     }
-    return defaultLoyaltySettings.isLoyaltyEnabled;
+    return defaultLoyaltySettings;
   });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("loyaltySettings", JSON.stringify({ isLoyaltyEnabled }));
+      localStorage.setItem("loyaltySettings", JSON.stringify(settings));
     }
-  }, [isLoyaltyEnabled]);
+  }, [settings]);
 
   const toggleLoyaltyEnabled = useCallback((enabled: boolean) => {
-    setIsLoyaltyEnabled(enabled);
+    setSettings(prev => ({ ...prev, isLoyaltyEnabled: enabled }));
   }, []);
 
+  // For now, pointsToCurrencyRate is fixed, but could be made configurable later
+  const pointsToCurrencyRate = settings.pointsToCurrencyRate;
+
   return (
-    <LoyaltySettingsContext.Provider value={{ isLoyaltyEnabled, toggleLoyaltyEnabled }}>
+    <LoyaltySettingsContext.Provider value={{ isLoyaltyEnabled: settings.isLoyaltyEnabled, toggleLoyaltyEnabled, pointsToCurrencyRate }}>
       {children}
     </LoyaltySettingsContext.Provider>
   );
