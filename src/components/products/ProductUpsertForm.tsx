@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm, FieldError } from "react-hook-form"; // Import FieldError
+import { useForm, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -219,7 +219,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
           name="cost"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cost Price</Label>
+              <FormLabel>Cost Price</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" placeholder="e.g., 850.00" {...field} />
               </FormControl>

@@ -43,12 +43,16 @@ const ItemFormList = <TFormValues extends FieldValues, TItem extends BaseInvento
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
             {renderItem(item, index, control, errors, isFormDisabled)}
           </div>
-          {items.length > 0 && (
-            <Button type="button" variant="ghost" size="icon" onClick={() => onRemoveItem(index)} disabled={isRemoveButtonDisabled || isFormDisabled}>
-              <XCircle className="h-5 w-5 text-destructive" />
-              <span className="sr-only">Remove Item</span>
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onRemoveItem(index)}
+            disabled={isRemoveButtonDisabled || isFormDisabled || items.length === 1} // Disable if only one item
+          >
+            <XCircle className="h-5 w-5 text-destructive" />
+            <span className="sr-only">Remove Item</span>
+          </Button>
         </div>
       ))}
       {errors.items && (
