@@ -34,6 +34,7 @@ const FormField = <
     </FormFieldContext.Provider>
   )
 }
+FormField.displayName = "FormField" // Added display name for consistency
 
 type FormItemContextValue = {
   id: string
