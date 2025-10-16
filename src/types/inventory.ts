@@ -15,6 +15,7 @@ export const PURCHASE_ORDER_STATUSES = ["pending", "completed", "cancelled"] as 
 
 export interface PurchaseOrderItem extends BaseInventoryItem {
   productId: string;
+  productName: string; // Added for denormalized display
   quantity: number;
   unitCost: number;
 }

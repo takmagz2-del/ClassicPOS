@@ -29,11 +29,13 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
+  productName: z.string().min(1, { message: "Product name is required." }), // Added productName
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
 });
@@ -70,10 +72,19 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
       expectedDeliveryDate: initialPurchaseOrder?.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
       status: initialPurchaseOrder?.status || "pending",
       items: initialPurchaseOrder?.items?.length
-        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id })) as PurchaseOrderItem[]
-        : [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
+        ? initialPurchaseOrder.items.map(item => ({ ...item, id: item.id, productName: item.productName || products.find(p => p.id === item.productId)?.name || "" })) as PurchaseOrderItem[]
+        : [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
       notes: initialPurchaseOrder?.notes || undefined,
     },
+  });
+
+  // Use the new hook for productName auto-population
+  useProductItemNameUpdater({
+    watch: form.watch,
+    getValues: form.getValues,
+    setValue: form.setValue,
+    products: products,
+    itemsFieldName: "items",
   });
 
   useEffect(() => {
@@ -84,7 +95,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: new Date(initialPurchaseOrder.orderDate),
         expectedDeliveryDate: initialPurchaseOrder.expectedDeliveryDate ? new Date(initialPurchaseOrder.expectedDeliveryDate) : undefined,
         status: initialPurchaseOrder.status,
-        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id })) as PurchaseOrderItem[],
+        items: initialPurchaseOrder.items.map(item => ({ ...item, id: item.id, productName: item.productName || products.find(p => p.id === item.productId)?.name || "" })) as PurchaseOrderItem[],
         notes: initialPurchaseOrder.notes || undefined,
       });
     } else {
@@ -94,11 +105,11 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
         orderDate: startOfDay(new Date()),
         expectedDeliveryDate: undefined,
         status: "pending",
-        items: [{ id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
+        items: [{ id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitCost: 0.01 }] as PurchaseOrderItem[],
         notes: undefined,
       });
     }
-  }, [initialPurchaseOrder, form]);
+  }, [initialPurchaseOrder, form, products]);
 
   const onSubmit = (values: PurchaseOrderFormValues) => {
     const totalValue = values.items.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
@@ -138,7 +149,7 @@ const PurchaseOrderUpsertForm = ({ initialPurchaseOrder, onPurchaseOrderSubmit, 
   const items = (form.watch("items") || []) as PurchaseOrderItem[];
 
   const handleAddItem = () => {
-    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", quantity: 1, unitCost: 0.01 }]);
+    form.setValue("items", [...items, { id: crypto.randomUUID(), productId: "", productName: "", quantity: 1, unitCost: 0.01 }]);
   };
 
   const handleRemoveItem = (index: number) => {
