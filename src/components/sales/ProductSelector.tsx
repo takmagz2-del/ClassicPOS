@@ -193,64 +193,67 @@ const ProductSelector = ({ products, onAddProductToCart, currentStoreId }: Produ
               filteredProducts.map((product) => {
                 const effectiveStock = getEffectiveProductStock(product.id, currentStoreId); // Use effective stock for current store
                 return (
-                <Card
-                  key={product.id}
-                  className={cn(
-                    "cursor-pointer hover:shadow-lg transition-shadow overflow-hidden",
-                    product.trackStock && effectiveStock <= 0 && "opacity-50 cursor-not-allowed",
-                    !currentStoreId && "opacity-50 cursor-not-allowed"
-                  )}
-                  onClick={() => {
-                    if (!currentStoreId) {
-                      toast.error("Please select a store first.");
-                      return;
-                    }
-                    if (product.trackStock && effectiveStock <= 0) {
-                      toast.error(`${product.name} is out of stock.`);
-                    } else {
-                      onAddProductToCart(product, 1);
-                    }
-                  }}
-                >
-                  <CardContent className="p-0 flex flex-col items-center text-center">
-                    <div 
-                      className="w-full h-24 bg-muted flex items-center justify-center cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (product.imageUrl) {
-                          handleImageClick(product.imageUrl, product.name);
-                        }
-                      }}
-                    >
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="p-2 flex-1 w-full">
-                      <p className="text-sm font-medium leading-tight truncate">{product.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatCurrency(product.price, currentCurrency)}</p>
-                      <p className="text-[0.65rem] text-muted-foreground mt-1">SKU: {product.sku}</p>
-                      <p className="text-[0.65rem] text-muted-foreground">
-                        Stock: {" "}
-                        {product.trackStock ? (
-                          effectiveStock === 0 ? (
-                            <Badge variant="destructive">Out of Stock</Badge>
-                          ) : effectiveStock <= LOW_STOCK_THRESHOLD ? (
-                            <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({effectiveStock})</Badge>
-                          ) : (
-                            <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({effectiveStock})</Badge>
-                          )
+                  <Card
+                    key={product.id}
+                    className={cn(
+                      "cursor-pointer hover:shadow-lg transition-shadow overflow-hidden",
+                      product.trackStock && effectiveStock <= 0 && "opacity-50 cursor-not-allowed",
+                      !currentStoreId && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => {
+                      if (!currentStoreId) {
+                        toast.error("Please select a store first.");
+                        return;
+                      }
+                      if (product.trackStock && effectiveStock <= 0) {
+                        toast.error(`${product.name} is out of stock.`);
+                      } else {
+                        onAddProductToCart(product, 1);
+                      }
+                    }}
+                  >
+                    <CardContent className="p-0 flex flex-col items-center text-center">
+                      <div 
+                        className="w-full h-24 bg-muted flex items-center justify-center cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (product.imageUrl) {
+                            handleImageClick(product.imageUrl, product.name);
+                          }
+                        }}
+                      >
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                         ) : (
-                          <Badge variant="secondary">N/A</Badge>
+                          <ImageIcon className="h-10 w-10 text-muted-foreground" />
                         )}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </div>
+                      <div className="p-2 flex-1 w-full">
+                        <p className="text-sm font-medium leading-tight truncate">{product.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatCurrency(product.price, currentCurrency)}</p>
+                        <p className="text-[0.65rem] text-muted-foreground mt-1">SKU: {product.sku}</p>
+                        <p className="text-[0.65rem] text-muted-foreground">
+                          Stock: {" "}
+                          {product.trackStock ? (
+                            effectiveStock === 0 ? (
+                              <Badge variant="destructive">Out of Stock</Badge>
+                            ) : effectiveStock <= LOW_STOCK_THRESHOLD ? (
+                              <Badge className="bg-orange-500 hover:bg-orange-600 text-white">Low Stock ({effectiveStock})</Badge>
+                            ) : (
+                              <Badge className="bg-green-500 hover:bg-green-600 text-white">In Stock ({effectiveStock})</Badge>
+                            )
+                          ) : (
+                            <Badge variant="secondary">N/A</Badge>
+                          )}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <p className="text-center text-muted-foreground">No products found matching your criteria.</p>
+            )}
           </div>
         </ScrollArea>
       </CardContent>
