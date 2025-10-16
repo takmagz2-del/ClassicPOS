@@ -10,34 +10,35 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format, startOfDay, endOfDay, isWithinInterval } from "date-fns"; // Import isWithinInterval
+import { format, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Sale, SaleItem } from "@/types/sale";
 import ReceiptPreviewDialog from "@/components/sales/ReceiptPreviewDialog";
-import RefundDialog from "@/components/sales/RefundDialog"; // Import RefundDialog
-import SettleCreditSaleDialog from "@/components/sales/SettleCreditSaleDialog"; // New import
+import RefundDialog from "@/components/sales/RefundDialog";
+import SettleCreditSaleDialog from "@/components/sales/SettleCreditSaleDialog";
 import { useCustomers } from "@/context/CustomerContext";
 import { Customer } from "@/types/customer";
-import { useProducts } from "@/context/ProductContext"; // Import useProducts
+import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
-import { useCurrency } from "@/context/CurrencyContext"; // Import useCurrency
-import { formatCurrency } from "@/lib/utils"; // Import formatCurrency
-import { InventoryHistoryType } from "@/types/inventory"; // Import InventoryHistoryType
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrency } from "@/lib/utils";
+import { InventoryHistoryType } from "@/types/inventory";
+import ExportSalesDataButton from "@/components/sales/ExportSalesDataButton"; // New import
 
 const SalesHistory = () => {
   const { salesHistory, refundSale, settleSale } = useSales();
   const { customers } = useCustomers();
-  const { updateProductStock, products } = useProducts(); // Destructure products here
-  const { currentCurrency } = useCurrency(); // Destructure currentCurrency from useCurrency
-  const { users } = useAuth(); // Get all users for employee filter
+  const { updateProductStock, products } = useProducts();
+  const { currentCurrency } = useCurrency();
+  const { users } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all"); // New state for type filter
-  const [customerFilter, setCustomerFilter] = useState<string>("all"); // New state for customer filter
-  const [employeeFilter, setEmployeeFilter] = useState<string>("all"); // New state for employee filter
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [customerFilter, setCustomerFilter] = useState<string>("all");
+  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<keyof Sale>("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -48,13 +49,12 @@ const SalesHistory = () => {
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState<boolean>(false);
   const [selectedSaleForRefund, setSelectedSaleForRefund] = useState<Sale | null>(null);
 
-  const [isSettleCreditSaleDialogOpen, setIsSettleCreditSaleDialogOpen] = useState<boolean>(false); // New state
-  const [selectedSaleForSettle, setSelectedSaleForSettle] = useState<Sale | null>(null); // New state
+  const [isSettleCreditSaleDialogOpen, setIsSettleCreditSaleDialogOpen] = useState<boolean>(false);
+  const [selectedSaleForSettle, setSelectedSaleForSettle] = useState<Sale | null>(null);
 
   const filteredAndSortedSales = useMemo(() => {
     let filteredSales = salesHistory;
 
-    // 1. Filter by search term (Sale ID or Customer Name)
     if (searchTerm) {
       filteredSales = filteredSales.filter(
         (sale) =>
@@ -63,7 +63,6 @@ const SalesHistory = () => {
       );
     }
 
-    // 2. Filter by date range
     if (dateRange.from && dateRange.to) {
       filteredSales = filteredSales.filter((sale) => {
         const saleDate = new Date(sale.date);
@@ -84,27 +83,22 @@ const SalesHistory = () => {
       });
     }
 
-    // 3. Filter by status
     if (statusFilter !== "all") {
       filteredSales = filteredSales.filter((sale) => sale.status === statusFilter);
     }
 
-    // 4. Filter by type (Sale/Refund)
     if (typeFilter !== "all") {
       filteredSales = filteredSales.filter((sale) => sale.type === typeFilter);
     }
 
-    // 5. Filter by customer
     if (customerFilter !== "all") {
       filteredSales = filteredSales.filter((sale) => sale.customerId === customerFilter);
     }
 
-    // 6. Filter by employee
     if (employeeFilter !== "all") {
       filteredSales = filteredSales.filter((sale) => sale.employeeId === employeeFilter || sale.heldByEmployeeId === employeeFilter);
     }
 
-    // 7. Sort
     const sortedSales = [...filteredSales].sort((a, b) => {
       let compareValue = 0;
       if (sortKey === "date") {
@@ -156,23 +150,22 @@ const SalesHistory = () => {
       loyaltyPointsUsed: selectedSaleForRefund.loyaltyPointsUsed,
       loyaltyPointsDiscountAmount: selectedSaleForRefund.loyaltyPointsDiscountAmount,
       taxRateApplied: selectedSaleForRefund.taxRateApplied,
-      employeeId: selectedSaleForRefund.employeeId, // Keep original employee ID
-      employeeName: selectedSaleForRefund.employeeName, // Keep original employee name
+      employeeId: selectedSaleForRefund.employeeId,
+      employeeName: selectedSaleForRefund.employeeName,
     };
 
     refundSale(newRefundTransaction);
 
     refundItems.forEach(item => {
-      // Use updateProductStock instead of increaseProductStock
       updateProductStock(
         item.productId,
         (products.find(p => p.id === item.productId)?.stock || 0) + item.quantity,
         InventoryHistoryType.REFUND,
         newRefundTransaction.id,
         `Refunded ${item.quantity}x ${item.name} from Sale ID: ${selectedSaleForRefund.id.substring(0, 8)}`,
-        undefined, // storeId
-        undefined, // userId
-        item.name // Pass product name
+        undefined,
+        undefined,
+        item.name
       );
     });
 
@@ -197,6 +190,7 @@ const SalesHistory = () => {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Sales History</h1>
+        <ExportSalesDataButton sales={filteredAndSortedSales} filename="sales_history" /> {/* New Export Button */}
       </div>
 
       <Card>
@@ -257,7 +251,7 @@ const SalesHistory = () => {
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="on-hold">On Hold</SelectItem> {/* New filter option */}
+                <SelectItem value="on-hold">On Hold</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
