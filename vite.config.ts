@@ -14,4 +14,6 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Add base: './' to ensure relative paths for assets in Capacitor builds
+  base: './',
 }));
