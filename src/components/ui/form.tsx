@@ -11,11 +11,11 @@ import { Controller, FormProvider, useFormContext,
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-// Explicitly defining Form as a functional component rendering FormProvider
-const Form = ({ children, ...props }: React.ComponentProps<typeof FormProvider>) => {
+// Renaming Form to ShadcnForm
+const ShadcnForm = ({ children, ...props }: React.ComponentProps<typeof FormProvider>) => {
   return <FormProvider {...props}>{children}</FormProvider>;
 };
-Form.displayName = "Form"; // Added display name for consistency
+ShadcnForm.displayName = "ShadcnForm";
 
 type FormFieldContextValue = {
   name: string
@@ -170,7 +170,7 @@ function useFormField() {
 
 export {
   useFormField,
-  Form,
+  ShadcnForm as Form, // Export as Form for external usage, but internally it's ShadcnForm
   FormItem,
   FormLabel,
   FormControl,

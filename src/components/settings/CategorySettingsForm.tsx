@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form,
+  Form, // Renamed from ShadcnForm
   FormControl,
   FormField,
   FormItem,
@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCategories } from "@/context/CategoryContext";
 import { Category } from "@/types/category";
-import { toast } from "sonner";
+import { toast } "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Edit, PlusCircle } from "lucide-react";
 import {
