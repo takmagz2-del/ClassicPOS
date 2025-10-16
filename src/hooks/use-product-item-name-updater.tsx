@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { FieldValues, Path, UseFormSetValue, UseFormWatch, UseFormGetValues } from "react-hook-form"; // Added UseFormWatch, UseFormGetValues
 import { Product } from "@/types/product";
 
-interface UseProductItemNameUpdaterProps<TFormValues extends FieldValues, TItem extends { productId: string; productName: string }> {
+interface UseProductItemNameUpdaterProps<TFormValues extends FieldValues, TItem extends { productId: string; productName?: string }> {
   watch: UseFormWatch<TFormValues>; // Changed from control
   getValues: UseFormGetValues<TFormValues>; // Changed from control
   setValue: UseFormSetValue<TFormValues>;
@@ -16,7 +16,7 @@ interface UseProductItemNameUpdaterProps<TFormValues extends FieldValues, TItem 
  * A custom hook to automatically update the 'productName' field of an item
  * in a react-hook-form array whenever its 'productId' changes.
  */
-export function useProductItemNameUpdater<TFormValues extends FieldValues, TItem extends { productId: string; productName: string }>({
+export function useProductItemNameUpdater<TFormValues extends FieldValues, TItem extends { productId: string; productName?: string }>({
   watch, // Destructure watch
   getValues, // Destructure getValues
   setValue,
