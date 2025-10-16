@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCategories } from "@/context/CategoryContext";
 import { cn } from "@/lib/utils";
+import ExportProductsDataButton from "@/components/products/ExportProductsDataButton"; // New import
+import { format } from "date-fns"; // Import format for filename
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -115,6 +117,7 @@ const Products = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Products</h1>
         <div className="flex items-center gap-2">
+          <ExportProductsDataButton products={filteredAndSortedProducts} filename="product_catalog" /> {/* New Export Button */}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
