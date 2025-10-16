@@ -5,6 +5,7 @@ import { Control, FieldErrors, FieldValues, FieldError } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
 import { BaseInventoryItem } from "@/types/inventory"; // Import BaseInventoryItem
+import { Form as ShadcnForm } from "@/components/ui/form"; // Renamed from ShadcnForm
 
 // Constrain TFormValues to ensure it has an 'items' array of BaseInventoryItem
 interface ItemFormListProps<TFormValues extends FieldValues, TItem extends BaseInventoryItem> {

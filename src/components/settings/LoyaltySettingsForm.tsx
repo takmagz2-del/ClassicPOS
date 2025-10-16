@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form, // Renamed from ShadcnForm
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormDescription,
   FormField,
@@ -45,7 +45,7 @@ const LoyaltySettingsForm = () => {
   };
 
   return (
-    <Form {...form}>
+    <ShadcnForm {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
@@ -69,7 +69,7 @@ const LoyaltySettingsForm = () => {
         />
         <Button type="submit" className="w-full">Save Loyalty Settings</Button>
       </form>
-    </Form>
+    </ShadcnForm>
   );
 };
 

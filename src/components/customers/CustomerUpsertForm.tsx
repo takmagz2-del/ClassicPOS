@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form, // Renamed from ShadcnForm
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormField,
   FormItem,
@@ -116,7 +116,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
   };
 
   return (
-    <Form {...form}>
+    <ShadcnForm {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
@@ -213,7 +213,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
           {isEditMode ? "Save Changes" : "Add Customer"}
         </Button>
       </form>
-    </Form>
+    </ShadcnForm>
   );
 };
 

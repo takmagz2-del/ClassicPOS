@@ -3,6 +3,7 @@
 import React from "react";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
 import {
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormField,
   FormItem,

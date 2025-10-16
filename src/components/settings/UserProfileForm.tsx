@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form, // Renamed from ShadcnForm
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormField,
   FormItem,
@@ -130,7 +130,7 @@ const UserProfileForm = () => {
   };
 
   return (
-    <Form {...form}>
+    <ShadcnForm {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
@@ -288,7 +288,7 @@ const UserProfileForm = () => {
           {isLoading ? "Saving..." : "Save Profile Changes"}
         </Button>
       </form>
-    </Form>
+    </ShadcnForm>
   );
 };
 

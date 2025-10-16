@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
-  Form, // Renamed from ShadcnForm
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormField,
   FormItem,
@@ -92,7 +92,7 @@ const Signup = () => {
           <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
+          <ShadcnForm {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
@@ -280,7 +280,7 @@ const Signup = () => {
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
             </form>
-          </Form>
+          </ShadcnForm>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline">

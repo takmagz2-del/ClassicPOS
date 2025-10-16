@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form, // Renamed from ShadcnForm
+  Form as ShadcnForm, // Renamed from ShadcnForm
   FormControl,
   FormDescription,
   FormField,
@@ -163,7 +163,7 @@ const PaymentMethodSettingsForm = () => {
               {editingMethod ? "Modify the details of this payment method." : "Add a new payment method to your system."}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Form {...form}>
+          <ShadcnForm {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
@@ -247,7 +247,7 @@ const PaymentMethodSettingsForm = () => {
                 <Button type="submit">{editingMethod ? "Save Changes" : "Add Payment Method"}</Button>
               </AlertDialogFooter>
             </form>
-          </Form>
+          </ShadcnForm>
         </AlertDialogContent>
       </AlertDialog>
 

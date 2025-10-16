@@ -8,6 +8,7 @@ import PurchaseOrderItemFields from "./PurchaseOrderItemFields";
 import GrnItemFields from "./GrnItemFields";
 import StockAdjustmentItemFields from "./StockAdjustmentItemFields";
 import TransferOfGoodsItemFields from "./TransferOfGoodsItemFields";
+import { Form as ShadcnForm } from "@/components/ui/form"; // Renamed from ShadcnForm
 
 // Define a more flexible TFormValues for ProductItemFields
 interface ProductItemFieldsProps<TFormValues extends FieldValues> {
