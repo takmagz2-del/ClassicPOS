@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -29,13 +29,13 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
-import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater";
 
 // Define item schema with required fields, including an ID
 const stockAdjustmentItemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
-  productName: z.string().optional(), // Made optional
+  productName: z.string().optional(),
   adjustmentType: z.nativeEnum(AdjustmentType, { message: "Adjustment type is required." }),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   reason: z.string().min(3, { message: "Reason for adjustment is required." }),
@@ -85,8 +85,8 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
 
   // Use the new hook for productName auto-population
   useProductItemNameUpdater({
-    watch: form.watch, // Pass form.watch
-    getValues: form.getValues, // Pass form.getValues
+    watch: form.watch,
+    getValues: form.getValues,
     setValue: form.setValue,
     products: products,
     itemsFieldName: "items",
@@ -100,7 +100,7 @@ const StockAdjustmentUpsertForm = ({ initialStockAdjustment, onStockAdjustmentSu
         items: initialStockAdjustment.items.map(item => ({
           ...item,
           id: item.id,
-          productName: item.productName || products.find(p => p.id === item.productId)?.name || "", // Ensure productName is string
+          productName: item.productName || products.find(p => p.id === item.productId)?.name || "",
         })) as StockAdjustmentItem[],
         notes: initialStockAdjustment.notes || undefined,
       });

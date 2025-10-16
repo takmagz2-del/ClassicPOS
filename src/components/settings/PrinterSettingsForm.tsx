@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,

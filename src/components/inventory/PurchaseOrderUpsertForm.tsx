@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -29,13 +29,13 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
 import ProductItemFields from "./ProductItemFields";
-import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater";
 
 // Define item schema with required fields, including an ID
 const purchaseOrderItemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
-  productName: z.string().optional(), // Made optional
+  productName: z.string().optional(),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
   unitCost: z.coerce.number().min(0.01, { message: "Unit cost must be a positive number." }),
 }).superRefine((data, ctx) => {

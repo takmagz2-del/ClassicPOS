@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -62,7 +62,7 @@ const TaxSettingsForm = () => {
     if (editingRate) {
       form.reset({
         name: editingRate.name,
-        rate: editingRate.rate * 100, // Convert to percentage for display
+        rate: editingRate.rate * 100,
         isDefault: editingRate.isDefault,
       });
     } else {
@@ -75,7 +75,7 @@ const TaxSettingsForm = () => {
   }, [editingRate, form, isAddEditDialogOpen]);
 
   const onSubmit = (values: TaxFormValues) => {
-    const rateValue = values.rate / 100; // Convert back to decimal for storage
+    const rateValue = values.rate / 100;
     if (editingRate) {
       updateTaxRate({ ...editingRate, name: values.name, rate: rateValue, isDefault: values.isDefault || false });
     } else {
@@ -226,7 +226,7 @@ const TaxSettingsForm = () => {
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={editingRate?.isDefault && taxRates.length === 1} // Disable if it's the only rate and default
+                        disabled={editingRate?.isDefault && taxRates.length === 1}
                       />
                     </FormControl>
                   </FormItem>

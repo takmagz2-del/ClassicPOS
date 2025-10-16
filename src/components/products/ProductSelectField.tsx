@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormField,
   FormItem,
@@ -44,7 +44,7 @@ const ProductSelectField = <TFormValues extends FieldValues>({
   return (
     <FormField
       control={control}
-      name={`items.${index}.productId` as Path<TFormValues>} // Cast name prop
+      name={`items.${index}.productId` as Path<TFormValues>}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Product</FormLabel>

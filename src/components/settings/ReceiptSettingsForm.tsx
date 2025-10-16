@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -30,7 +30,7 @@ const formSchema = z.object({
   showSku: z.boolean(),
   showCategory: z.boolean(),
   showCustomerInfo: z.boolean(),
-  showVatTin: z.boolean(), // New: Schema for showVatTin
+  showVatTin: z.boolean(),
 });
 
 type ReceiptSettingsFormValues = z.infer<typeof formSchema>;
@@ -115,7 +115,7 @@ const ReceiptSettingsForm = () => {
             <FormItem>
               <FormLabel>Logo URL (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., https://example.com/logo.png" {...field} />
+                <Input placeholder="https://example.com/logo.png" {...field} value={field.value || ""} />
               </FormControl>
               <FormDescription>
                 URL to your store's logo, displayed at the top of the receipt.
@@ -215,7 +215,7 @@ const ReceiptSettingsForm = () => {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    disabled={!form.watch("showCustomerInfo")} // Disable if showCustomerInfo is false
+                    disabled={!form.watch("showCustomerInfo")}
                   />
                 </FormControl>
               </FormItem>

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { usePaymentMethods } from "@/context/PaymentMethodContext";
-import { PaymentMethod } from "@/types/payment"; // Removed defaultPaymentMethods import
+import { PaymentMethod } from "@/types/payment";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Edit, PlusCircle } from "lucide-react";
@@ -240,7 +240,7 @@ const PaymentMethodSettingsForm = () => {
                     </FormItem>
                   )}
                 />
-                <FormMessage /> {/* Display general error for payment types */}
+                <FormMessage />
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setIsAddEditDialogOpen(false)}>Cancel</AlertDialogCancel>

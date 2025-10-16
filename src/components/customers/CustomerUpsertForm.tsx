@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormField,
   FormItem,
@@ -29,8 +29,8 @@ const formSchema = z.object({
   loyaltyPoints: z.coerce.number().int().min(0, {
     message: "Loyalty points must be a non-negative integer.",
   }).default(0),
-  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
-  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
+  vatNumber: z.string().optional().or(z.literal("")),
+  tinNumber: z.string().optional().or(z.literal("")),
 });
 
 type CustomerFormValues = z.infer<typeof formSchema>;
@@ -151,7 +151,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>Phone (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 555-123-4567" {...field} value={field.value || ""} /> {/* Added || "" */}
+                <Input placeholder="e.g., 555-123-4567" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,7 +164,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>Address (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123 Main St, Anytown" {...field} value={field.value || ""} /> {/* Added || "" */}
+                <Input placeholder="e.g., 123 Main St, Anytown" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,7 +177,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>VAT Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., GB123456789" {...field} value={field.value || ""} /> {/* Added || "" */}
+                <Input placeholder="e.g., GB123456789" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -190,7 +190,7 @@ const CustomerUpsertForm = ({ initialCustomer, onCustomerSubmit, onClose }: Cust
             <FormItem>
               <FormLabel>TIN Number (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 123-456-789" {...field} value={field.value || ""} /> {/* Added || "" */}
+                <Input placeholder="e.g., 123-456-789" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -1,21 +1,20 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues, FieldError } from "react-hook-form"; // Import FieldError
+import { Control, FieldErrors, FieldValues, FieldError } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, XCircle } from "lucide-react";
-import { BaseInventoryItem } from "@/types/inventory"; // Import BaseInventoryItem
-import { Form as ShadcnForm } from "@/components/ui/form"; // Renamed from ShadcnForm
+import { BaseInventoryItem } from "@/types/inventory";
+import { Form as ShadcnForm } from "@/components/ui/form";
 
-// Constrain TFormValues to ensure it has an 'items' array of BaseInventoryItem
 interface ItemFormListProps<TFormValues extends FieldValues, TItem extends BaseInventoryItem> {
-  items: TItem[]; // Directly use TItem[]
+  items: TItem[];
   onRemoveItem: (index: number) => void;
   onAddItem: () => void;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   renderItem: (
-    item: TItem, // Changed to TItem
+    item: TItem,
     index: number,
     control: Control<TFormValues>,
     errors: FieldErrors<TFormValues>,
@@ -52,14 +51,14 @@ const ItemFormList = <TFormValues extends FieldValues, TItem extends BaseInvento
             variant="ghost"
             size="icon"
             onClick={() => onRemoveItem(index)}
-            disabled={isRemoveButtonDisabled || isFormDisabled || items.length === 1} // Disable if only one item
+            disabled={isRemoveButtonDisabled || isFormDisabled || items.length === 1}
           >
             <XCircle className="h-5 w-5 text-destructive" />
             <span className="sr-only">Remove Item</span>
           </Button>
         </div>
       ))}
-      {itemsArrayError?.message && ( // Display top-level error for the items array
+      {itemsArrayError?.message && (
         <p className="text-sm font-medium text-destructive">
           {itemsArrayError.message}
         </p>

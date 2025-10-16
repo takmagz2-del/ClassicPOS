@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues, Path } from "react-hook-form"; // Import Path
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormField,
   FormItem,
@@ -18,7 +18,7 @@ interface TransferOfGoodsItemFieldsProps<TFormValues extends FieldValues> {
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
-  transferFromStoreId?: string; // To pass to ProductSelectField for filtering
+  transferFromStoreId?: string;
 }
 
 const TransferOfGoodsItemFields = <TFormValues extends FieldValues>({
@@ -30,16 +30,16 @@ const TransferOfGoodsItemFields = <TFormValues extends FieldValues>({
 }: TransferOfGoodsItemFieldsProps<TFormValues>) => {
   return (
     <>
-      <ProductSelectField<TFormValues> // Pass TFormValues
+      <ProductSelectField<TFormValues>
         index={index}
         control={control}
         errors={errors}
         isFormDisabled={isFormDisabled}
-        filterByStoreId={transferFromStoreId} // Pass store ID for filtering
+        filterByStoreId={transferFromStoreId}
       />
       <FormField
         control={control}
-        name={`items.${index}.quantity` as Path<TFormValues>} // Cast name prop
+        name={`items.${index}.quantity` as Path<TFormValues>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Quantity</FormLabel>

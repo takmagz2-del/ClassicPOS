@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Control, FieldErrors, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import *s z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -28,14 +28,14 @@ import { useProducts } from "@/context/ProductContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ItemFormList from "./ItemFormList";
-import ProductItemFields from "./ProductItemFields"; // Import the new component
-import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater"; // New import
+import ProductItemFields from "./ProductItemFields";
+import { useProductItemNameUpdater } from "@/hooks/use-product-item-name-updater";
 
 // Define a schema for the items with required fields, including an ID
 const itemSchema = z.object({
   id: z.string().uuid(),
   productId: z.string().min(1, { message: "Product is required." }),
-  productName: z.string().optional(), // Made optional
+  productName: z.string().optional(),
   quantity: z.coerce.number().int().min(1, { message: "Quantity must be at least 1." }),
 }).superRefine((data, ctx) => {
   if (data.productId && (!data.productName || data.productName.trim() === "")) {
@@ -74,7 +74,7 @@ interface TransferOfGoodsUpsertFormProps {
 const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose }: TransferOfGoodsUpsertFormProps) => {
   const isEditMode = !!initialTransfer;
   const { stores } = useStores();
-  const { products, getEffectiveProductStock } = useProducts(); // Use getEffectiveProductStock
+  const { products, getEffectiveProductStock } = useProducts();
 
   const form = useForm<TransferOfGoodsFormValues>({
     resolver: zodResolver(formSchema),
@@ -91,8 +91,8 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
 
   // Use the new hook for productName auto-population
   useProductItemNameUpdater({
-    watch: form.watch, // Pass form.watch
-    getValues: form.getValues, // Pass form.getValues
+    watch: form.watch,
+    getValues: form.getValues,
     setValue: form.setValue,
     products: products,
     itemsFieldName: "items",
@@ -102,7 +102,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name?.startsWith("items.") && (name.endsWith(".productId") || name.endsWith(".quantity"))) {
-        const items = (value.items || []) as TransferOfGoodsItem[]; // Explicitly cast here
+        const items = (value.items || []) as TransferOfGoodsItem[];
         const transferFromStoreId = value.transferFromStoreId;
         if (items && transferFromStoreId) {
           items.forEach((item, index) => {
@@ -135,7 +135,7 @@ const TransferOfGoodsUpsertForm = ({ initialTransfer, onTransferSubmit, onClose 
           items: initialTransfer.items.map(item => ({
             ...item,
             id: item.id,
-            productName: item.productName || products.find(p => p.id === item.productId)?.name || "", // Ensure productName is string
+            productName: item.productName || products.find(p => p.id === item.productId)?.name || "",
           })) as TransferOfGoodsItem[],
           notes: initialTransfer.notes || undefined,
         });

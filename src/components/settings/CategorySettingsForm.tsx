@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormField,
   FormItem,
@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useProducts } from "@/context/ProductContext"; // Import useProducts to check for associated products
+import { useProducts } from "@/context/ProductContext";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Category name is required." }),
@@ -39,7 +39,7 @@ type CategoryFormValues = z.infer<typeof formSchema>;
 
 const CategorySettingsForm = () => {
   const { categories, addCategory, updateCategory, deleteCategory, getUncategorizedCategoryId } = useCategories();
-  const { products, reassignProductsToCategory } = useProducts(); // Get products and reassign function
+  const { products, reassignProductsToCategory } = useProducts();
 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
@@ -109,7 +109,7 @@ const CategorySettingsForm = () => {
         toast.info(`${productsInDeletedCategory.length} products reassigned to 'Uncategorized'.`);
       }
 
-      deleteCategory(categoryToDelete.id); // This now returns uncategorizedId, but we already handled reassignment
+      deleteCategory(categoryToDelete.id);
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
     }

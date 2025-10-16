@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormField,
   FormItem,
@@ -24,8 +24,8 @@ const formSchema = z.object({
   phone: z.string().optional().or(z.literal("")),
   address: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
-  vatNumber: z.string().optional().or(z.literal("")), // New: VAT number field
-  tinNumber: z.string().optional().or(z.literal("")), // New: TIN number field
+  vatNumber: z.string().optional().or(z.literal("")),
+  tinNumber: z.string().optional().or(z.literal("")),
 });
 
 type SupplierFormValues = z.infer<typeof formSchema>;
@@ -98,13 +98,13 @@ const SupplierUpsertForm = ({ initialSupplier, onSupplierSubmit, onClose }: Supp
     if (isEditMode) {
       const updatedSupplier: Supplier = {
         ...initialSupplier!,
-        name: values.name, // Ensure name is explicitly set
+        name: values.name,
         ...cleanedValues,
       };
       onSupplierSubmit(updatedSupplier);
     } else {
       const newSupplierData: Omit<Supplier, "id"> = {
-        name: values.name, // Ensure name is explicitly set
+        name: values.name,
         ...cleanedValues,
       };
       onSupplierSubmit(newSupplierData);

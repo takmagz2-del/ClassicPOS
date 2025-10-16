@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Form as ShadcnForm, // Renamed from ShadcnForm
+  Form as ShadcnForm,
   FormControl,
   FormDescription,
   FormField,
@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCategories } from "@/context/CategoryContext";
 import { Switch } from "@/components/ui/switch";
-import { useStores } from "@/context/StoreContext"; // Import useStores
+import { useStores } from "@/context/StoreContext";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -70,7 +70,7 @@ interface ProductUpsertFormProps {
 
 const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: ProductUpsertFormProps) => {
   const { categories } = useCategories();
-  const { stores } = useStores(); // Use stores context
+  const { stores } = useStores();
   const isEditMode = !!initialProduct;
 
   const form = useForm<ProductFormValues>({
@@ -85,7 +85,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
       availableForSale: initialProduct?.availableForSale ?? true,
       sku: initialProduct?.sku || "",
       imageUrl: initialProduct?.imageUrl || "",
-      stockByStore: initialProduct?.stockByStore || {}, // Initialize stockByStore
+      stockByStore: initialProduct?.stockByStore || {},
     },
   });
 
@@ -117,7 +117,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
     // Calculate total stock from stockByStore if tracking is enabled
     const calculatedTotalStock = values.trackStock && values.stockByStore
       ? Object.values(values.stockByStore).reduce((sum, qty) => sum + qty, 0)
-      : 0; // If not tracking, or no stockByStore, total stock is 0 for non-tracked items
+      : 0;
 
     if (isEditMode) {
       productToSubmit = {
@@ -127,8 +127,8 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         price: values.price,
         cost: values.cost,
         wholesalePrice: values.wholesalePrice,
-        stock: calculatedTotalStock, // Use calculated total stock
-        stockByStore: values.trackStock ? values.stockByStore : undefined, // Only include if tracking stock
+        stock: calculatedTotalStock,
+        stockByStore: values.trackStock ? values.stockByStore : undefined,
         trackStock: values.trackStock,
         availableForSale: values.availableForSale,
         sku: values.sku,
@@ -142,8 +142,8 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
         price: values.price,
         cost: values.cost,
         wholesalePrice: values.wholesalePrice,
-        stock: calculatedTotalStock, // Use calculated total stock
-        stockByStore: values.trackStock ? values.stockByStore : undefined, // Only include if tracking stock
+        stock: calculatedTotalStock,
+        stockByStore: values.trackStock ? values.stockByStore : undefined,
         trackStock: values.trackStock,
         availableForSale: values.availableForSale,
         sku: values.sku,
@@ -279,10 +279,10 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
                           min="0"
                           placeholder="0"
                           {...field}
-                          value={field.value ?? ""} // Ensure controlled component
+                          value={field.value ?? ""}
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value === "" ? 0 : parseInt(value, 10)); // Set to 0 if empty
+                            field.onChange(value === "" ? 0 : parseInt(value, 10));
                           }}
                         />
                       </FormControl>
@@ -294,7 +294,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             ) : (
               <p className="text-sm text-muted-foreground">No stores configured. Please add stores in settings to manage per-store stock.</p>
             )}
-            {stockByStoreErrorMessage && ( // Use the extracted message
+            {stockByStoreErrorMessage && (
               <p className="text-sm font-medium text-destructive">
                 {stockByStoreErrorMessage}
               </p>

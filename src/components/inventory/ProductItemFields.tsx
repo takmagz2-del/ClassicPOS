@@ -1,23 +1,21 @@
 "use client";
 
 import React from "react";
-import { Control, FieldErrors, FieldValues } from "react-hook-form"; // Import FieldValues
+import { Control, FieldErrors, FieldValues } from "react-hook-form";
 
-// Import the new specific item field components
 import PurchaseOrderItemFields from "./PurchaseOrderItemFields";
 import GrnItemFields from "./GrnItemFields";
 import StockAdjustmentItemFields from "./StockAdjustmentItemFields";
 import TransferOfGoodsItemFields from "./TransferOfGoodsItemFields";
-import { Form as ShadcnForm } from "@/components/ui/form"; // Renamed from ShadcnForm
+import { Form as ShadcnForm } from "@/components/ui/form";
 
-// Define a more flexible TFormValues for ProductItemFields
 interface ProductItemFieldsProps<TFormValues extends FieldValues> {
   index: number;
   control: Control<TFormValues>;
   errors: FieldErrors<TFormValues>;
   isFormDisabled: boolean;
   itemType: "purchaseOrder" | "grn" | "stockAdjustment" | "transferOfGoods";
-  transferFromStoreId?: string; // Specific for TransferOfGoods
+  transferFromStoreId?: string;
 }
 
 const ProductItemFields = <TFormValues extends FieldValues>({
@@ -31,7 +29,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
   switch (itemType) {
     case "purchaseOrder":
       return (
-        <PurchaseOrderItemFields<TFormValues> // Pass TFormValues
+        <PurchaseOrderItemFields<TFormValues>
           index={index}
           control={control}
           errors={errors}
@@ -40,7 +38,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "grn":
       return (
-        <GrnItemFields<TFormValues> // Pass TFormValues
+        <GrnItemFields<TFormValues>
           index={index}
           control={control}
           errors={errors}
@@ -49,7 +47,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "stockAdjustment":
       return (
-        <StockAdjustmentItemFields<TFormValues> // Pass TFormValues
+        <StockAdjustmentItemFields<TFormValues>
           index={index}
           control={control}
           errors={errors}
@@ -58,7 +56,7 @@ const ProductItemFields = <TFormValues extends FieldValues>({
       );
     case "transferOfGoods":
       return (
-        <TransferOfGoodsItemFields<TFormValues> // Pass TFormValues
+        <TransferOfGoodsItemFields<TFormValues>
           index={index}
           control={control}
           errors={errors}
