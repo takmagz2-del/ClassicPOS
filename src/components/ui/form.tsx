@@ -11,8 +11,11 @@ import { Controller, FormProvider, useFormContext,
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-// Reverting to the standard shadcn/ui pattern for Form
-const Form = FormProvider
+// Explicitly defining Form as a functional component rendering FormProvider
+const Form = ({ children, ...props }: React.ComponentProps<typeof FormProvider>) => {
+  return <FormProvider {...props}>{children}</FormProvider>;
+};
+Form.displayName = "Form"; // Added display name for consistency
 
 type FormFieldContextValue = {
   name: string
@@ -34,7 +37,7 @@ const FormField = <
     </FormFieldContext.Provider>
   )
 }
-FormField.displayName = "FormField" // Added display name for consistency
+FormField.displayName = "FormField"
 
 type FormItemContextValue = {
   id: string
