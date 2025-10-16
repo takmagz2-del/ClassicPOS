@@ -15,7 +15,7 @@ export const PURCHASE_ORDER_STATUSES = ["pending", "completed", "cancelled"] as 
 
 export interface PurchaseOrderItem extends BaseInventoryItem {
   productId: string;
-  productName: string; // Added for denormalized display
+  productName?: string; // Made optional
   quantity: number;
   unitCost: number;
 }
@@ -38,7 +38,7 @@ export type GRNStatus = "pending" | "approved" | "rejected";
 
 export interface GRNItem extends BaseInventoryItem {
   productId: string;
-  productName: string; // Denormalized for easier display
+  productName?: string; // Made optional
   quantityReceived: number;
   unitCost: number;
   totalCost: number;
@@ -70,7 +70,7 @@ export enum AdjustmentType {
 
 export interface StockAdjustmentItem extends BaseInventoryItem {
   productId: string;
-  productName: string; // Denormalized
+  productName?: string; // Made optional
   adjustmentType: AdjustmentType;
   quantity: number; // Absolute quantity to adjust by
   reason: string;
@@ -93,7 +93,7 @@ export type TransferStatus = "pending" | "in-transit" | "received" | "rejected";
 
 export interface TransferOfGoodsItem extends BaseInventoryItem {
   productId: string;
-  productName: string; // Denormalized
+  productName?: string; // Made optional
   quantity: number;
 }
 
