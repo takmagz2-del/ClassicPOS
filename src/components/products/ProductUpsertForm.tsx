@@ -159,6 +159,7 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
 
   const trackStock = form.watch("trackStock");
   const currentStockByStore = form.watch("stockByStore");
+  const stockByStoreErrorMessage = form.formState.errors.stockByStore?.message; // Extract message safely
 
   return (
     <Form {...form}>
@@ -293,9 +294,9 @@ const ProductUpsertForm = ({ initialProduct, onProductSubmit, onClose }: Product
             ) : (
               <p className="text-sm text-muted-foreground">No stores configured. Please add stores in settings to manage per-store stock.</p>
             )}
-            {form.formState.errors.stockByStore && form.formState.errors.stockByStore.message && (
+            {stockByStoreErrorMessage && (
               <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.stockByStore.message}
+                {stockByStoreErrorMessage}
               </p>
             )}
           </div>
